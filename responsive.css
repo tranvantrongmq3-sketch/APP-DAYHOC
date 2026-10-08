@@ -1,0 +1,432 @@
+/* =====================================================================
+   RESPONSIVE.CSS — Tối ưu toàn diện cho Điện thoại & Máy tính bảng
+   Nạp SAU thẻ <style> của mỗi trang (cùng độ ưu tiên → file này thắng).
+   Breakpoints: ≤1366 tablet ngang/laptop · ≤1024 tablet dọc · ≤768 · ≤640 điện thoại · ≤420 máy nhỏ
+   ===================================================================== */
+
+/* ---------- 0. NỀN TẢNG (mọi thiết bị) ---------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-wrap: break-word; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+main { min-width: 0; }
+.panel, .panel-body, .panel-head { min-width: 0; max-width: 100%; }
+button, a, select, label, summary, [role="button"], [role="tab"] { touch-action: manipulation; }
+
+/* Tránh tràn ngang do CSS Grid / Flexbox items giữ min-width: auto */
+.cls-layout, .cls-layout > *,
+.panels-horizontal, .panels-horizontal > *,
+.grid, [class*="layout"], [class*="panels"] {
+  min-width: 0 !important;
+}
+
+input, select, textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+select {
+  text-overflow: ellipsis;
+}
+
+/* Chừa vùng tai thỏ / thanh điều hướng an toàn */
+.top {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Bọc bảng để cuộn ngang (do responsive.js thêm hoặc có sẵn) */
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* Thanh tab cuộn ngang mượt, ẩn thanh cuộn xấu */
+.top nav {
+  scrollbar-width: none;
+}
+.top nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- 1. THIẾT BỊ CẢM ỨNG (Touch-first: ngón tay thao tác dễ dàng) ---------- */
+@media (hover: none) and (pointer: coarse) {
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Vùng chạm tối thiểu 44px chuẩn công thái học */
+  :where(button, .btn, label.btn, select, [role="button"], [role="tab"], nav a) {
+    min-height: 44px;
+  }
+  :where(.btn-sm) {
+    min-height: 40px;
+  }
+  :where(.pts-btn, .cls-del, .tkb-week-pill, .btn-mode) {
+    min-height: 38px;
+    min-width: 38px;
+  }
+
+  /* 16px font-size ngăn iOS Safari tự động zoom trang khi bấm vào input */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select, textarea {
+    font-size: 16px !important;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+  select {
+    min-height: 44px;
+  }
+  input[type="checkbox"], input[type="radio"] {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Bỏ hiệu ứng hover "dính" sau khi chạm trên cảm ứng */
+  .sc:hover, .quick-link:hover, .tkb-compact-slot:hover, .btn-bubble-prep:hover {
+    transform: none;
+  }
+}
+
+/* ---------- 2. MÁY TÍNH BẢNG NGANG & MÀN HÌNH ≤ 1366px ---------- */
+/* 7 tab tiêu đề dài không thể xếp 1 hàng cùng logo và sync-badge trên màn ≤ 1366px */
+@media (max-width: 1366px) {
+  .top-in {
+    padding-left: 14px;
+    padding-right: 14px;
+    min-height: 0;
+    gap: 0 10px;
+  }
+  .header-left {
+    display: contents; /* Biến logo và nav thành flex children trực tiếp của .top-in */
+  }
+  .logo, .brand {
+    order: 1;
+    margin-right: auto;
+    border-right: 0 !important;
+    padding: 10px 0 !important;
+    min-width: 0;
+  }
+  .header-right {
+    order: 2;
+    margin-left: auto;
+    min-width: 0;
+  }
+  .top nav {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -14px;
+    padding: 0 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    scroll-snap-type: x proximity;
+  }
+  .top nav a, .top nav button {
+    flex: none;
+    scroll-snap-align: start;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 0.86rem;
+  }
+
+  .panels-horizontal {
+    grid-template-columns: 1fr 1fr;
+  }
+  .panel-saved {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- 3. MÁY TÍNH BẢNG DỌC (iPad / Android Tablet: 768px - 1024px) ---------- */
+@media (max-width: 1024px) {
+  .cls-layout {
+    grid-template-columns: 1fr;
+  }
+  .stats-in {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- 4. TABLET DỌC / ĐIỆN THOẠI NGANG (≤ 900px) ---------- */
+@media (max-width: 900px) {
+  /* Thời khóa biểu: cuộn ngang mượt, cố định cột Buổi & Tiết */
+  .tkb-grid-wrap {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  table.tkb-table {
+    min-width: 800px;
+  }
+  table.tkb-table th:nth-child(1),
+  table.tkb-table td.session-col {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--panel-head, #172439);
+  }
+  table.tkb-table th:nth-child(2),
+  table.tkb-table td.period-col {
+    position: sticky;
+    left: 70px;
+    z-index: 3;
+    background: var(--bg3, #18233a);
+  }
+  table.tkb-table th:nth-child(1),
+  table.tkb-table th:nth-child(2) {
+    z-index: 4;
+  }
+
+  .tkb-toolbar-row1 {
+    gap: 8px;
+  }
+  .tkb-week-selector {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .tkb-summary-bar .btn {
+    margin-left: 0 !important;
+  }
+
+  .table-scroll > table {
+    min-width: 640px;
+  }
+  .cls-layout {
+    gap: 14px;
+  }
+}
+
+/* Popover chi tiết ô TKB → "Bottom Sheet" thuận tiện trên màn hình cảm ứng */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .tkb-compact-slot .tkb-popover-bubble {
+    position: fixed !important;
+    top: auto !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: 520px;
+    margin: 0 auto;
+    transform: none !important;
+    z-index: 1000;
+    padding: 14px 16px;
+    border-radius: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .tkb-popover-bubble::before {
+    display: none !important;
+  }
+  .tkb-popover-bubble .btn,
+  .tkb-popover-bubble a {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tkb-compact-slot:hover {
+    transform: none;
+    z-index: auto;
+  }
+}
+
+/* ---------- 5. ĐIỆN THOẠI (≤ 768px) ---------- */
+@media (max-width: 768px) {
+  :root { --rs-pad: 12px; }
+  main { padding: 12px !important; }
+  .panel-head { padding: 12px 14px !important; gap: 10px !important; }
+  .panel-head > div, .panel-head .toolbar-actions { flex-wrap: wrap; }
+  .panel-body { padding: 14px !important; }
+  .stats-in { padding: 10px 12px !important; gap: 10px !important; }
+  .sc { padding: 10px 12px; gap: 10px; }
+  .sc-icon { width: 38px; height: 38px; font-size: 1.15rem; }
+  .sc-val { font-size: 1.3rem; }
+  .sc-sub { max-width: none; white-space: normal; }
+  .prep-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .prep-stat-card { padding: 10px 12px; gap: 10px; }
+  .ptitle { font-size: 0.95rem; }
+  .schedule-wrap { max-height: 65vh; }
+  .tkb-top-toolbar { gap: 8px; }
+  .tkb-summary-bar { padding: 8px 10px; }
+  .toolbar-actions { flex-wrap: wrap; }
+
+  /* Bảng phân phối chương trình: Toolbar xếp gọn, tránh tràn ngang */
+  .toolbar-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .toolbar-left, .toolbar-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .toolbar-left > *, .toolbar-right > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  #ppctSearch {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Quản lý lớp học: Toolbar xếp dạng lưới 2 cột */
+  .stu-toolbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .stu-toolbar #stuSearch {
+    grid-column: 1 / -1;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .stu-toolbar select, .stu-toolbar input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  table.score-table {
+    min-width: 760px;
+  }
+
+  /* Hộp thoại Modal → Bottom Sheet vuốt chạm mượt mà */
+  .modal-backdrop { align-items: flex-end; }
+  .modal-card {
+    width: 100%; max-width: none; max-height: 92vh;
+    display: flex; flex-direction: column;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .modal-body { max-height: none; flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .modal-foot { flex-wrap: wrap; }
+  .modal-foot .btn { flex: 1 1 auto; }
+
+  /* Giao diện soạn bài 3 cột chuyển thành 1 cột */
+  .panels-horizontal {
+    grid-template-columns: 1fr !important;
+  }
+  .panel-saved {
+    grid-column: auto !important;
+  }
+}
+
+/* ---------- 6. ĐIỆN THOẠI NHỎ & VỪA (≤ 640px) ---------- */
+@media (max-width: 640px) {
+  /* Header không dính cố định để nhường không gian tối đa cho nội dung */
+  .top { position: static !important; }
+  .logo small { display: none; }
+  .logo-icon { width: 34px !important; height: 34px !important; font-size: 1.1rem !important; border-radius: 9px; }
+  .logo b { font-size: 0.98rem !important; }
+  .logo, .brand { padding: 8px 0 !important; }
+  .brand { font-size: 0.98rem; }
+
+  .sync-badge, .stat-pill { max-width: 58vw; font-size: 0.7rem !important; padding: 5px 10px !important; }
+  #syncText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #btnSaveTkb { padding: 6px 10px; }
+
+  .stats-in { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .sc { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .sc-lbl { font-size: 0.68rem; }
+  .sc-sub { display: none; }
+
+  .prep-stat-num { font-size: 1.3rem; }
+
+  /* Hàng nút môn học / khối lớp / tuần: cuộn ngang vuốt nhẹ */
+  .subject-list, .grade-list, .grade-btns, .tkb-week-pills {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 6px;
+  }
+  .subject-list::-webkit-scrollbar,
+  .grade-list::-webkit-scrollbar,
+  .grade-btns::-webkit-scrollbar,
+  .tkb-week-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .subject-list > *, .grade-list > *, .grade-btns > *, .tkb-week-pills > * {
+    flex: none;
+  }
+
+  table.tkb-table { min-width: 720px; }
+  th, td { padding-left: 8px; padding-right: 8px; }
+}
+
+/* ---------- 7. ĐIỆN THOẠI CỠ NHỎ (≤ 480px) ---------- */
+@media (max-width: 480px) {
+  .row2 { grid-template-columns: minmax(0, 1fr) !important; }
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
+  .rules { grid-template-columns: minmax(0, 1fr) !important; }
+  .toolbar-actions { width: 100%; }
+  .toolbar-actions > * { flex: 1 1 auto; }
+  .panel-head > .btn, .panel-head > div > .btn, .panel-head > div > label.btn { flex: 1 1 auto; }
+  .btn, button { max-width: 100%; }
+  h1 { word-break: normal; }
+  .stu-toolbar { grid-template-columns: 1fr; }
+}
+
+/* ---------- 8. ĐIỆN THOẠI XOAY NGANG (chiều cao thấp) ---------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .top { position: static !important; }
+  .modal-card { max-height: 96vh; }
+  .stats-in { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .sc { flex-direction: row; align-items: center; }
+  .sc-sub { display: none; }
+}
+
+/* ---------- 9. PHÒNG HỌC / LÊN LỚP (classroom.html) ---------- */
+@media (min-width: 768px) {
+  body.rs-classroom { font-size: 20px; }
+  body.rs-classroom header, body.rs-classroom .seg, body.rs-classroom main, body.rs-classroom footer { max-width: 960px; }
+  body.rs-classroom .stu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.rs-classroom .scrim { align-items: center; justify-content: center; padding: 20px; }
+  body.rs-classroom .sheet { max-width: 760px; max-height: 88%; border-radius: 22px; border: 2px solid var(--line); border-top: 4px solid var(--yellow); }
+}
+@media (min-width: 1100px) {
+  body.rs-classroom header, body.rs-classroom .seg, body.rs-classroom main, body.rs-classroom footer { max-width: 1120px; }
+  body.rs-classroom .q { font-size: 2.4rem; }
+  body.rs-classroom .reveal .v { font-size: 1.8rem; }
+  body.rs-classroom .stu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  body.rs-classroom .sheet { max-width: 920px; }
+}
+@media (max-width: 340px) {
+  body.rs-classroom .stu-grid { grid-template-columns: minmax(0, 1fr); }
+  body.rs-classroom .q { font-size: 1.6rem; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  body.rs-classroom { font-size: 16px; }
+  body.rs-classroom header { padding-top: 4px; padding-bottom: 4px; }
+  body.rs-classroom .seg { padding-top: 4px; padding-bottom: 4px; }
+  body.rs-classroom .seg button { min-height: 40px; padding: 6px; }
+  body.rs-classroom footer { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  body.rs-classroom footer .btn, body.rs-classroom .btn { min-height: 46px; }
+  body.rs-classroom .q { font-size: 1.5rem; }
+  body.rs-classroom .sheet { max-height: 96%; }
+}
+
+/* ---------- 10. BẢNG ĐIỀU KHIỂN (dashboard.html) ---------- */
+@media (min-width: 768px) and (max-width: 1100px) {
+  body.rs-dashboard main { padding-left: 20px; padding-right: 20px; }
+}
+@media (max-width: 480px) {
+  body.rs-dashboard .upcoming li { grid-template-columns: 52px 1fr auto; gap: 8px; }
+  body.rs-dashboard .next { grid-template-columns: 1fr; }
+  body.rs-dashboard .next a { text-align: center; }
+}
+
+/* ---------- 11. HỖ TRỢ GIẢM CHUYỂN ĐỘNG ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .tkb-compact-slot.is-urgent, .tkb-chat-bubble.urgent, .status-badge.urgent { animation: none !important; }
+}

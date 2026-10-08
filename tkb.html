@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1120">
   <title>Thời khóa biểu & Lịch soạn bài tự động · Trợ lý lên lớp</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1189,6 +1190,8 @@
       opacity: 1;
     }
   </style>
+  <link rel="stylesheet" href="responsive.css">
+  <script src="responsive.js" defer></script>
 </head>
 
 <body>
@@ -2001,6 +2004,7 @@
               const isOpen = slotEl.classList.contains("is-touch-open");
               tbody.querySelectorAll(".tkb-compact-slot.is-touch-open").forEach(s => s.classList.remove("is-touch-open"));
               if (!isOpen) slotEl.classList.add("is-touch-open");
+              return; // giữ popover, không vẽ lại bảng (renderGrid sẽ xóa trạng thái mở)
             }
           }
 
