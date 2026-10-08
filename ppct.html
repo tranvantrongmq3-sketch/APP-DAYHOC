@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kế hoạch dạy học & Phân phối chương trình môn Toán · Trợ lý lên lớp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- SheetJS để đọc & xuất file Excel PPCT -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- KaTeX để hiển thị công thức toán học nếu có -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --bg2: #111a2d;
+      --bg3: #18233a;
+      --panel: #131d2e;
+      --panel-head: #172439;
+      --border: #1e2f4a;
+      --border2: #283e60;
+      --chalk: #f0f6fc;
+      --dim: #8b9eb8;
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.2);
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --cyan: #06b6d4;
+      --grad: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      --grad-ai: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      --radius: 12px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--chalk);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    a, button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+
+    /* TOP HEADER */
+    .top {
+      background: linear-gradient(180deg, #0e1726, #0b1120);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .top-in {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      min-height: 64px;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 18px 10px 0;
+      border-right: 1px solid var(--border);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .logo b {
+      font-size: 1.05rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .logo small {
+      font-size: 0.72rem;
+      color: var(--dim);
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    nav.tabs a {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--dim);
+      background: transparent;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      padding: 18px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    nav.tabs a:hover {
+      color: var(--chalk);
+    }
+
+    nav.tabs a.active {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #042416;
+    }
+
+    .btn-primary:hover {
+      background: #0ea572;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--chalk);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--chalk);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .btn-ai {
+      background: var(--grad-ai);
+      border-color: transparent;
+      color: #2b0c04;
+      font-weight: 800;
+      box-shadow: 0 3px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-ai:hover {
+      opacity: 0.92;
+      box-shadow: 0 5px 18px rgba(245, 158, 11, 0.45);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--red);
+      color: #ff9999;
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* SUBJECT BAR & STATS */
+    .subject-header {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .subject-selector-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subject-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .subject-chip {
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--dim);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s;
+    }
+
+    .subject-chip:hover {
+      border-color: var(--border2);
+      color: var(--chalk);
+    }
+
+    .subject-chip.active {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .grade-bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .grade-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .grade-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--dim);
+      transition: all 0.15s;
+    }
+
+    .grade-btn:hover {
+      color: var(--chalk);
+      border-color: var(--border2);
+    }
+
+    .grade-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .stat-pill b {
+      color: var(--green);
+    }
+
+    /* TOOLBAR */
+    .toolbar-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], input[type="search"], select {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--chalk);
+      padding: 7px 12px;
+      font-size: 0.84rem;
+      transition: border-color 0.18s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--green);
+      outline: none;
+    }
+
+    /* TABLE */
+    .table-container {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-scroll {
+      max-height: 68vh;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+
+    thead th {
+      background: var(--bg2);
+      padding: 12px 14px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tr.chapter-row td {
+      background: rgba(16, 185, 129, 0.07);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 0.86rem;
+      padding: 10px 14px;
+      border-left: 4px solid var(--green);
+    }
+
+    .tiet-badge {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      border-radius: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      font-weight: 800;
+      color: var(--chalk);
+    }
+
+    .week-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      white-space: nowrap;
+    }
+
+    .lesson-title {
+      font-weight: 700;
+      color: var(--chalk);
+      margin-bottom: 4px;
+      font-size: 0.88rem;
+    }
+
+    .lesson-chapter {
+      font-size: 0.74rem;
+      color: var(--dim);
+    }
+
+    .pill-kind {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .pill-kind.bai { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .pill-kind.ontap { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .pill-kind.kiemtra { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .pill-kind.hoatdong { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+    .req-box {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      line-height: 1.45;
+      max-height: 80px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .digital-box {
+      font-size: 0.78rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 6px;
+      padding: 6px 8px;
+      line-height: 1.4;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .digital-box:empty {
+      display: none;
+    }
+
+    .digital-box b {
+      color: #7dd3fc;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.done {
+      background: rgba(16, 185, 129, 0.18);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .status-badge.pending {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .action-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 130px;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      transform: translateY(20px);
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-head {
+      padding: 14px 18px;
+      background: var(--panel-head);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-head h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--chalk);
+    }
+
+    .modal-body {
+      padding: 18px;
+      max-height: 70vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-foot {
+      padding: 12px 18px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--dim);
+    }
+
+    textarea {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--chalk);
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 9999;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top">
+    <div class="top-in">
+      <div class="header-left">
+        <a href="dashboard.html" class="logo">
+          <div class="logo-icon">📋</div>
+          <div>
+            <b>Trợ lý lên lớp</b>
+            <small>Kế hoạch dạy &amp; Phân phối chương trình môn Toán</small>
+          </div>
+        </a>
+        <nav class="tabs" role="tablist">
+          <a href="dashboard.html">🏠 Dashboard</a>
+          <a href="admin.html">✏️ Soạn bài giảng</a>
+          <a href="tkb.html">📅 Thời khóa biểu &amp; Lịch soạn</a>
+          <a href="ppct.html" class="active">📋 Kế hoạch dạy (PPCT)</a>
+          <a href="lop-hoc.html">👥 Lớp &amp; Học sinh</a>
+          <a href="classroom.html" style="color:var(--green)">🚀 Vào lớp dạy</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <span class="stat-pill" id="syncStatus">
+          🟢 Hệ thống sẵn sàng
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- THANH CHỌN MÔN HỌC & KHỐI LỚP -->
+    <section class="subject-header">
+      <div class="subject-selector-row">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:800;font-size:0.9rem;color:var(--green)">📚 Môn học:</span>
+          <div class="subject-list" id="subjectChips"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="stat-pill">
+            Tổng: <b id="statTotalLessons">0</b> tiết
+          </span>
+          <span class="stat-pill">
+            Đã soạn kịch bản: <b id="statDoneLessons" style="color:#38bdf8">0</b>
+          </span>
+        </div>
+      </div>
+
+      <!-- CHỌN KHỐI LỚP -->
+      <div class="grade-bar-row">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:0.85rem;color:var(--dim)">Khối lớp:</span>
+          <div class="grade-btns" id="gradeChips"></div>
+          <button class="btn btn-ghost btn-sm" id="btnAddGrade" title="Thêm khối lớp cho môn này">+ Thêm khối</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost btn-sm" id="btnDownloadTemplate" title="Tải file Excel mẫu PPCT môn Toán">
+            📥 Tải File Mẫu Excel
+          </button>
+          <label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0" title="Nhập danh sách PPCT từ file Excel">
+            📁 Nhập PPCT từ Excel
+            <input type="file" id="filePpctExcel" accept=".xlsx,.xls,.csv" style="display:none">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- THANH CÔNG CỤ TÌM KIẾM & BỘ LỌC -->
+    <div class="toolbar-panel">
+      <div class="toolbar-left">
+        <input type="search" id="ppctSearch" placeholder="🔍 Tìm kiếm tên bài, chương, yêu cầu cần đạt..." style="min-width:320px">
+        <select id="filterChapter">
+          <option value="">-- Tất cả Chương / Chủ đề --</option>
+        </select>
+        <select id="filterKind">
+          <option value="">-- Tất cả loại bài --</option>
+          <option value="bai">Bài học lý thuyết</option>
+          <option value="ontap">Ôn tập / Luyện tập</option>
+          <option value="kiemtra">Kiểm tra / Đánh giá</option>
+          <option value="hoatdong">Hoạt động trải nghiệm / STEM</option>
+        </select>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn btn-ghost btn-sm" id="btnNewLessonModal">
+          ➕ Thêm tiết học
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnExportPpctExcel">
+          📊 Xuất Excel
+        </button>
+        <button class="btn btn-danger btn-sm" id="btnResetSubjectPpct" title="Khôi phục lại dữ liệu mặc định">
+          🔄 Đặt lại mặc định
+        </button>
+      </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH PPCT -->
+    <div class="table-container">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:55px;text-align:center">Tiết</th>
+              <th style="width:75px;text-align:center">Tuần</th>
+              <th style="width:30%">Tên bài học &amp; Chủ đề</th>
+              <th style="width:28%">Yêu cầu cần đạt (YCCĐ)</th>
+              <th style="width:22%">Tích hợp Năng lực số / STEM</th>
+              <th style="width:100px;text-align:center">Trạng thái</th>
+              <th style="width:140px;text-align:center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="ppctTableBody">
+            <tr>
+              <td colspan="7" style="text-align:center;padding:40px;color:var(--dim)">
+                Đang tải dữ liệu chương trình...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL THÊM / SỬA TIẾT HỌC -->
+  <div class="modal-backdrop" id="lessonModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modalTitle">Thêm / Chỉnh sửa Tiết học</h3>
+        <button class="btn btn-ghost btn-sm" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group">
+            <label for="inpTiet">Tiết thứ (STT)</label>
+            <input type="number" id="inpTiet" min="1" max="200" value="1">
+          </div>
+          <div class="form-group">
+            <label for="inpWeek">Tuần học</label>
+            <input type="number" id="inpWeek" min="1" max="40" value="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inpChapter">Chương / Mạch kiến thức / Chủ đề</label>
+          <input type="text" id="inpChapter" placeholder="VD: Chương I. Số hữu tỉ hoặc Chủ đề 1">
+        </div>
+
+        <div class="form-group">
+          <label for="inpTitle">Tên bài học / Nội dung giảng dạy</label>
+          <input type="text" id="inpTitle" placeholder="VD: Bài 1: Tập hợp các số hữu tỉ (Tiết 1)">
+        </div>
+
+        <div class="form-group">
+          <label for="inpKind">Hình thức / Phân loại bài</label>
+          <select id="inpKind">
+            <option value="bai">Bài học lý thuyết / Luyện tập</option>
+            <option value="ontap">Ôn tập chuyên đề / Giữa kì / Cuối kì</option>
+            <option value="kiemtra">Kiểm tra / Đánh giá</option>
+            <option value="hoatdong">Hoạt động thực hành trải nghiệm / STEM</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="inpRequirement">Yêu cầu cần đạt (YCCĐ - Chuẩn kiến thức, kĩ năng)</label>
+          <textarea id="inpRequirement" rows="3" placeholder="Ghi rõ học sinh biết được gì, làm được gì sau tiết học..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="inpDigital">Nội dung tích hợp (Năng lực số / STEM / Giáo dục tích hợp)</label>
+          <textarea id="inpDigital" rows="2" placeholder="VD: 5.3.TC1a: Sử dụng phần mềm GeoGebra hoặc máy tính cầm tay..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="btnCancelModal">Hủy</button>
+        <button class="btn btn-primary" id="btnSaveLesson">💾 Lưu Tiết Học</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <!-- SCRIPT LOGIC -->
+  <script type="module">
+    import {
+      SUBJECT_PRESETS,
+      getAllPpctData,
+      saveAllPpctData,
+      getActiveSubject,
+      setActiveSubject,
+      getSubjectPpctList,
+      parsePpctExcel
+    } from "./ppct-manager.js";
+
+    // Khởi tạo trạng thái
+    let currentSubject = getActiveSubject() || "toan";
+    let currentGrade = "7";
+    let editingTietIndex = -1; // -1: thêm mới, >= 0: sửa tiết
+    let savedLessonsList = [];
+
+    // Tải danh sách bài đã soạn từ localStorage để đối chiếu trạng thái
+    function loadSavedLessons() {
+      try {
+        const raw = localStorage.getItem("app_recent_lessons");
+        if (raw) savedLessonsList = JSON.parse(raw);
+      } catch (e) {
+        console.warn("Lỗi đọc app_recent_lessons:", e);
+      }
+    }
+
+    // Hiển thị Toast thông báo
+    function showToast(msg, isError = false) {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.style.borderColor = isError ? "var(--red)" : "var(--green)";
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3200);
+    }
+
+    // Render danh sách chip môn học
+    function renderSubjectChips() {
+      const container = document.getElementById("subjectChips");
+      container.innerHTML = "";
+      const allData = getAllPpctData();
+
+      // Hợp nhất preset và các môn tuỳ chỉnh
+      const subjectKeys = Object.keys(allData);
+      const list = [];
+
+      SUBJECT_PRESETS.forEach(p => {
+        if (!list.find(x => x.id === p.id)) list.push(p);
+      });
+
+      subjectKeys.forEach(k => {
+        if (!list.find(x => x.id === k)) {
+          list.push({
+            id: k,
+            name: allData[k].name || k,
+            icon: allData[k].icon || "📘",
+            grades: Object.keys(allData[k].grades || {})
+          });
+        }
+      });
+
+      list.forEach(sub => {
+        const chip = document.createElement("button");
+        chip.className = `subject-chip ${sub.id === currentSubject ? "active" : ""}`;
+        chip.innerHTML = `<span>${sub.icon || "📘"}</span> <span>${sub.name}</span>`;
+        chip.onclick = () => {
+          currentSubject = sub.id;
+          setActiveSubject(sub.id);
+          // Lấy khối lớp đầu tiên của môn
+          const all = getAllPpctData();
+          const subData = all[sub.id];
+          const availableGrades = subData && subData.grades ? Object.keys(subData.grades) : ["7"];
+          if (availableGrades.length > 0 && !availableGrades.includes(currentGrade)) {
+            currentGrade = availableGrades[0];
+          }
+          renderSubjectChips();
+          renderGradeChips();
+          renderTable();
+        };
+        container.appendChild(chip);
+      });
+    }
+
+    // Render danh sách khối lớp của môn hiện tại
+    function renderGradeChips() {
+      const container = document.getElementById("gradeChips");
+      container.innerHTML = "";
+      const allData = getAllPpctData();
+      const subData = allData[currentSubject] || {};
+      const grades = (subData.grades && Object.keys(subData.grades).length)
+        ? Object.keys(subData.grades).sort((a,b) => +a - +b)
+        : ["6", "7", "8", "9"];
+
+      grades.forEach(g => {
+        const btn = document.createElement("button");
+        btn.className = `grade-btn ${String(g) === String(currentGrade) ? "active" : ""}`;
+        btn.textContent = `Lớp ${g}`;
+        btn.onclick = () => {
+          currentGrade = String(g);
+          renderGradeChips();
+          renderTable();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Render danh sách chương trong filter
+    function updateChapterFilter(list) {
+      const select = document.getElementById("filterChapter");
+      const currentVal = select.value;
+      const chapters = [...new Set(list.map(x => x.chapter).filter(Boolean))];
+
+      select.innerHTML = '<option value="">-- Tất cả Chương / Chủ đề --</option>';
+      chapters.forEach(ch => {
+        const opt = document.createElement("option");
+        opt.value = ch;
+        opt.textContent = ch;
+        if (ch === currentVal) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    // Kiểm tra xem tiết học đã có bài soạn chưa
+    function isLessonPrepared(tiet, grade, title) {
+      return savedLessonsList.some(l => {
+        if ((l.subjectId || "toan") !== currentSubject) return false;
+        if (+l.grade === +grade && +l.tiet === +tiet) return true;
+        if (l.ppctKey === `${grade}-${tiet}`) return true;
+        if (title && l.title && l.title.trim().toLowerCase() === title.trim().toLowerCase()) return true;
+        return false;
+      });
+    }
+
+    // Render bảng PPCT
+    function renderTable() {
+      loadSavedLessons();
+      const list = getSubjectPpctList(currentSubject, currentGrade);
+      const tbody = document.getElementById("ppctTableBody");
+
+      // Cập nhật thống kê
+      document.getElementById("statTotalLessons").textContent = list.length;
+      let doneCount = 0;
+      list.forEach(item => {
+        if (isLessonPrepared(item.tiet, currentGrade, item.title)) doneCount++;
+      });
+      document.getElementById("statDoneLessons").textContent = doneCount;
+
+      updateChapterFilter(list);
+
+      // Lọc dữ liệu
+      const searchTxt = (document.getElementById("ppctSearch").value || "").toLowerCase().trim();
+      const chapterVal = document.getElementById("filterChapter").value;
+      const kindVal = document.getElementById("filterKind").value;
+
+      const filtered = list.filter(item => {
+        if (chapterVal && item.chapter !== chapterVal) return false;
+        if (kindVal && item.kind !== kindVal) return false;
+        if (searchTxt) {
+          const matchTitle = (item.title || "").toLowerCase().includes(searchTxt);
+          const matchChap = (item.chapter || "").toLowerCase().includes(searchTxt);
+          const matchReq = (item.requirement || "").toLowerCase().includes(searchTxt);
+          const matchDig = (item.digital || "").toLowerCase().includes(searchTxt);
+          if (!matchTitle && !matchChap && !matchReq && !matchDig) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center;padding:40px;color:var(--dim)">
+              Chưa có dữ liệu cho Môn này (Khối ${currentGrade}). Hãy bấm <b>"📁 Nhập PPCT từ Excel"</b> hoặc <b>"➕ Thêm tiết học"</b>.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = "";
+      let lastChapter = null;
+
+      filtered.forEach((item, idx) => {
+        // Dòng tiêu đề chương nếu chuyển chương mới
+        if (item.chapter && item.chapter !== lastChapter && !searchTxt) {
+          lastChapter = item.chapter;
+          html += `
+            <tr class="chapter-row">
+              <td colspan="7">📖 ${item.chapter}</td>
+            </tr>
+          `;
+        }
+
+        const isDone = isLessonPrepared(item.tiet, currentGrade, item.title);
+        const kindLabel = {
+          bai: "Bài học",
+          ontap: "Ôn tập",
+          kiemtra: "Kiểm tra",
+          hoatdong: "Trải nghiệm / STEM"
+        }[item.kind || "bai"] || "Bài học";
+
+        html += `
+          <tr>
+            <td style="text-align:center">
+              <span class="tiet-badge">${item.tiet}</span>
+            </td>
+            <td style="text-align:center">
+              <span class="week-tag">Tuần ${item.week || Math.ceil(item.tiet / 4)}</span>
+            </td>
+            <td>
+              <div class="lesson-title">${item.title}</div>
+              <div class="lesson-chapter">${item.chapter || ""}</div>
+              <span class="pill-kind ${item.kind || 'bai'}">${kindLabel}</span>
+            </td>
+            <td>
+              <div class="req-box">${item.requirement || '<span style="color:var(--dim);font-style:italic">Chưa nhập yêu cầu cần đạt</span>'}</div>
+            </td>
+            <td>
+              <div class="digital-box">
+                ${item.digital ? `<b>💻 Tích hợp số / STEM:</b> ${item.digital}` : '<span style="color:var(--dim);font-style:italic">Chưa có nội dung tích hợp</span>'}
+              </div>
+            </td>
+            <td style="text-align:center">
+              ${isDone
+                ? '<span class="status-badge done">🟢 Đã soạn</span>'
+                : '<span class="status-badge pending">⚪ Chưa soạn</span>'
+              }
+            </td>
+            <td>
+              <div class="action-cell">
+                <a href="admin.html?subject=${encodeURIComponent(currentSubject)}&grade=${currentGrade}&tiet=${item.tiet}&title=${encodeURIComponent(item.title)}"
+                  class="btn btn-primary btn-sm" style="font-size:0.75rem;padding:4px 8px">
+                  ⚡ Soạn bài ngay
+                </a>
+                <div style="display:flex;gap:4px">
+                  <button class="btn btn-ghost btn-sm" style="flex:1;font-size:0.75rem;padding:3px" onclick="window.editLesson(${item.tiet})">
+                    ✏️ Sửa
+                  </button>
+                  <button class="btn btn-danger btn-sm" style="font-size:0.75rem;padding:3px 6px" onclick="window.deleteLesson(${item.tiet})">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    // Modal Thêm / Sửa tiết
+    window.editLesson = function(tietNum) {
+      const list = getSubjectPpctList(currentSubject, currentGrade);
+      const item = list.find(x => x.tiet === tietNum);
+      if (!item) return;
+
+      editingTietIndex = list.findIndex(x => x.tiet === tietNum);
+      document.getElementById("modalTitle").textContent = `Chỉnh sửa Tiết ${item.tiet} - Khối ${currentGrade}`;
+      document.getElementById("inpTiet").value = item.tiet;
+      document.getElementById("inpWeek").value = item.week || Math.ceil(item.tiet / 4);
+      document.getElementById("inpChapter").value = item.chapter || "";
+      document.getElementById("inpTitle").value = item.title || "";
+      document.getElementById("inpKind").value = item.kind || "bai";
+      document.getElementById("inpRequirement").value = item.requirement || "";
+      document.getElementById("inpDigital").value = item.digital || "";
+
+      document.getElementById("lessonModal").classList.add("open");
+    };
+
+    window.deleteLesson = function(tietNum) {
+      if (!confirm(`Bạn có chắc chắn muốn xóa Tiết ${tietNum} khỏi chương trình?`)) return;
+      const allData = getAllPpctData();
+      if (allData[currentSubject] && allData[currentSubject].grades && allData[currentSubject].grades[currentGrade]) {
+        allData[currentSubject].grades[currentGrade] = allData[currentSubject].grades[currentGrade].filter(x => x.tiet !== tietNum);
+        saveAllPpctData(allData);
+        showToast(`Đã xóa Tiết ${tietNum}!`);
+        renderTable();
+      }
+    };
+
+    // Mở modal thêm mới tiết
+    document.getElementById("btnNewLessonModal").onclick = () => {
+      editingTietIndex = -1;
+      const list = getSubjectPpctList(currentSubject, currentGrade);
+      const nextTiet = list.length ? (Math.max(...list.map(x => x.tiet || 0)) + 1) : 1;
+      const nextWeek = Math.ceil(nextTiet / 4);
+
+      document.getElementById("modalTitle").textContent = `Thêm Tiết Học Mới - Khối ${currentGrade}`;
+      document.getElementById("inpTiet").value = nextTiet;
+      document.getElementById("inpWeek").value = nextWeek;
+      document.getElementById("inpChapter").value = list.length ? (list[list.length - 1].chapter || "") : "";
+      document.getElementById("inpTitle").value = "";
+      document.getElementById("inpKind").value = "bai";
+      document.getElementById("inpRequirement").value = "";
+      document.getElementById("inpDigital").value = "";
+
+      document.getElementById("lessonModal").classList.add("open");
+    };
+
+    function closeModal() {
+      document.getElementById("lessonModal").classList.remove("open");
+    }
+
+    document.getElementById("btnCloseModal").onclick = closeModal;
+    document.getElementById("btnCancelModal").onclick = closeModal;
+
+    // Lưu tiết học từ Modal
+    document.getElementById("btnSaveLesson").onclick = () => {
+      const tiet = parseInt(document.getElementById("inpTiet").value) || 1;
+      const week = parseInt(document.getElementById("inpWeek").value) || 1;
+      const chapter = document.getElementById("inpChapter").value.trim();
+      const title = document.getElementById("inpTitle").value.trim();
+      const kind = document.getElementById("inpKind").value;
+      const requirement = document.getElementById("inpRequirement").value.trim();
+      const digital = document.getElementById("inpDigital").value.trim();
+
+      if (!title) {
+        showToast("Vui lòng nhập tên bài học!", true);
+        return;
+      }
+
+      const allData = getAllPpctData();
+      if (!allData[currentSubject]) allData[currentSubject] = { id: currentSubject, name: currentSubject, grades: {} };
+      if (!allData[currentSubject].grades) allData[currentSubject].grades = {};
+      if (!allData[currentSubject].grades[currentGrade]) allData[currentSubject].grades[currentGrade] = [];
+
+      let list = allData[currentSubject].grades[currentGrade];
+
+      const newLesson = {
+        tiet,
+        week,
+        chapter: chapter || "Chương trình chung",
+        title,
+        kind,
+        requirement,
+        digital
+      };
+
+      if (editingTietIndex >= 0 && editingTietIndex < list.length) {
+        list[editingTietIndex] = newLesson;
+      } else {
+        // Kiểm tra xem đã trùng số tiết chưa
+        const existIdx = list.findIndex(x => x.tiet === tiet);
+        if (existIdx >= 0) {
+          list[existIdx] = newLesson;
+        } else {
+          list.push(newLesson);
+        }
+      }
+
+      list.sort((a,b) => a.tiet - b.tiet);
+      allData[currentSubject].grades[currentGrade] = list;
+      saveAllPpctData(allData);
+
+      closeModal();
+      showToast("Đã lưu tiết học thành công!");
+      renderTable();
+    };
+
+    // Tải File Mẫu Excel
+    document.getElementById("btnDownloadTemplate").onclick = () => {
+      if (typeof XLSX === "undefined") {
+        showToast("Thư viện SheetJS chưa sẵn sàng!", true);
+        return;
+      }
+
+      const sampleData = [
+        ["STT / Tiết", "Tuần", "Tên bài dạy / Bài học", "Chương / Mạch kiến thức", "Yêu cầu cần đạt (YCCĐ)", "Tích hợp Năng lực số / STEM"],
+        [1, 1, "Bài 1: Khởi động và Khám phá (Tiết 1)", "Chương I: Mở đầu", "Học sinh nhận biết và giải thích được các khái niệm cơ bản...", "5.3.TC1a: Sử dụng MTCT hoặc phần mềm để kiểm tra kết quả."],
+        [2, 1, "Bài 1: Khởi động và Khám phá (Tiết 2)", "Chương I: Mở đầu", "Vận dụng kiến thức giải quyết bài toán thực tế...", "1.1.TC1b: Tìm kiếm thông tin mở rộng trên Internet."],
+        [3, 1, "Bài 2: Kiến thức trọng tâm (Tiết 1)", "Chương I: Mở đầu", "Nắm vững quy tắc và phương pháp làm bài...", "2.1.TC1a: Thảo luận nhóm trực tuyến."],
+        [4, 1, "Bài 2: Kiến thức trọng tâm (Tiết 2)", "Chương I: Mở đầu", "Luyện tập củng cố các dạng bài nâng cao...", "6.2.TC1a: Tự học với trợ lý AI giáo dục."]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(sampleData);
+      ws['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 38 }, { wch: 25 }, { wch: 45 }, { wch: 40 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Mau_PPCT");
+      XLSX.writeFile(wb, `Mau_Phan_Phoi_Chuong_Trinh_${currentSubject.toUpperCase()}_K${currentGrade}.xlsx`);
+      showToast("Đã tải xuống file mẫu Excel thành công!");
+    };
+
+    // Nhập file Excel PPCT
+    document.getElementById("filePpctExcel").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const sheetRows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+          const parsedList = parsePpctExcel(sheetRows);
+          if (!parsedList || !parsedList.length) {
+            showToast("Không tìm thấy dữ liệu hợp lệ trong file Excel!", true);
+            return;
+          }
+
+          const allData = getAllPpctData();
+          if (!allData[currentSubject]) {
+            allData[currentSubject] = { id: currentSubject, name: currentSubject, grades: {} };
+          }
+          if (!allData[currentSubject].grades) allData[currentSubject].grades = {};
+          allData[currentSubject].grades[currentGrade] = parsedList;
+
+          saveAllPpctData(allData);
+          showToast(`Nhập thành công ${parsedList.length} tiết cho Lớp ${currentGrade}!`);
+          renderTable();
+        } catch (err) {
+          console.error(err);
+          showToast("Lỗi phân tích file Excel: " + err.message, true);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      e.target.value = "";
+    };
+
+    // Xuất Excel dữ liệu hiện tại
+    document.getElementById("btnExportPpctExcel").onclick = () => {
+      const list = getSubjectPpctList(currentSubject, currentGrade);
+      if (!list.length) {
+        showToast("Không có dữ liệu để xuất!", true);
+        return;
+      }
+
+      const rows = [
+        ["STT / Tiết", "Tuần", "Tên bài học", "Chương / Chủ đề", "Phân loại", "Yêu cầu cần đạt", "Tích hợp số / STEM"]
+      ];
+
+      list.forEach(item => {
+        rows.push([
+          item.tiet,
+          item.week || Math.ceil(item.tiet / 4),
+          item.title,
+          item.chapter || "",
+          item.kind || "bai",
+          item.requirement || "",
+          item.digital || ""
+        ]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{ wch: 10 }, { wch: 8 }, { wch: 35 }, { wch: 25 }, { wch: 12 }, { wch: 45 }, { wch: 40 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `PPCT_K${currentGrade}`);
+      XLSX.writeFile(wb, `PPCT_${currentSubject}_Lop${currentGrade}.xlsx`);
+      showToast("Đã xuất file Excel thành công!");
+    };
+
+    // Đặt lại mặc định
+    document.getElementById("btnResetSubjectPpct").onclick = () => {
+      if (!confirm(`Bạn có chắc chắn muốn đặt lại dữ liệu mặc định cho môn này?`)) return;
+      const allData = getAllPpctData();
+      if (allData[currentSubject] && allData[currentSubject].grades) {
+        delete allData[currentSubject].grades[currentGrade];
+        saveAllPpctData(allData);
+        showToast("Đã đặt lại dữ liệu mặc định!");
+        renderTable();
+      }
+    };
+
+    // Thêm khối lớp cho môn hiện tại
+    document.getElementById("btnAddGrade").onclick = () => {
+      const grade = prompt("Nhập số khối lớp muốn thêm (VD: 6, 7, 8, 9, 10, 11, 12):");
+      if (!grade || !grade.trim()) return;
+      const gNum = String(parseInt(grade.trim()));
+      if (isNaN(gNum) || gNum === "0") {
+        showToast("Số khối lớp không hợp lệ!", true);
+        return;
+      }
+
+      const allData = getAllPpctData();
+      if (!allData[currentSubject]) allData[currentSubject] = { id: currentSubject, name: currentSubject, grades: {} };
+      if (!allData[currentSubject].grades) allData[currentSubject].grades = {};
+      if (!allData[currentSubject].grades[gNum]) {
+        allData[currentSubject].grades[gNum] = [];
+      }
+
+      saveAllPpctData(allData);
+      currentGrade = gNum;
+      renderGradeChips();
+      renderTable();
+      showToast(`Đã thêm Khối ${gNum}!`);
+    };
+
+    // Tìm kiếm & Lọc thời gian thực
+    document.getElementById("ppctSearch").oninput = renderTable;
+    document.getElementById("filterChapter").onchange = renderTable;
+    document.getElementById("filterKind").onchange = renderTable;
+
+    // Khởi chạy khi load trang
+    window.addEventListener("DOMContentLoaded", () => {
+      renderSubjectChips();
+      renderGradeChips();
+      renderTable();
+    });
+  </script>
+
+</body>
+</html>

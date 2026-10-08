@@ -1,0 +1,10 @@
+# File Excel danh sách học sinh và file nén (chứa thông tin cá nhân)
+*.xlsx
+*.zip
+
+# Bản sao dữ liệu học sinh dạng JSON (app dùng default-students.js)
+default-students.json
+
+# Script chạy cục bộ / dump dữ liệu
+read_storage.ps1
+run_dump.ps1

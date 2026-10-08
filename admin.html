@@ -1,0 +1,5037 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trợ lý lên lớp · Quản trị & Soạn bài</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Tích hợp KaTeX để Preview Toán học -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <!-- Tích hợp SheetJS để đọc file Thời Khóa Biểu Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --bg2: #111a2d;
+      --bg3: #18233a;
+      --panel: #131d2e;
+      --panel-head: #172439;
+      --border: #1e2f4a;
+      --border2: #283e60;
+      --chalk: #f0f6fc;
+      --dim: #8b9eb8;
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.2);
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --de: #10b981;
+      --vua: #f59e0b;
+      --kho: #ef4444;
+      --grad: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      --grad-ai: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      --radius: 12px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--chalk);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    a,
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* HEADER */
+    .top {
+      background: linear-gradient(180deg, #0e1726, #0b1120);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
+    }
+
+    .top-in {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      min-height: 64px;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 18px 10px 0;
+      border-right: 1px solid var(--border);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .logo b {
+      font-size: 1.05rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .logo small {
+      font-size: 0.72rem;
+      color: var(--dim);
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    nav.tabs button,
+    nav.tabs a {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--dim);
+      background: transparent;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      padding: 18px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    nav.tabs button:hover,
+    nav.tabs a:hover {
+      color: var(--chalk);
+    }
+
+    nav.tabs button[aria-selected="true"] {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 13px;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sync-badge:hover {
+      background: rgba(16, 185, 129, 0.22);
+    }
+
+    .sync-badge.offline {
+      background: rgba(245, 158, 11, 0.14);
+      color: var(--yellow);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .stats-in {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .stats-in {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 540px) {
+      .stats-in {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sc {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+
+    .sc:hover {
+      border-color: var(--border2);
+      transform: translateY(-1px);
+    }
+
+    .sc-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .i-g {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+    }
+
+    .i-b {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--blue);
+    }
+
+    .i-y {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--yellow);
+    }
+
+    .i-p {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--purple);
+    }
+
+    .sc-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .v-g {
+      color: var(--green);
+    }
+
+    .v-b {
+      color: var(--blue);
+    }
+
+    .v-y {
+      color: var(--yellow);
+    }
+
+    .v-p {
+      color: var(--purple);
+    }
+
+    .sc-lbl {
+      font-size: 0.74rem;
+      color: var(--dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    .sc-sub {
+      font-size: 0.72rem;
+      color: var(--dim);
+      opacity: 0.8;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 190px;
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .panels-horizontal {
+      display: grid;
+      grid-template-columns: 1.15fr 1.15fr 0.9fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .panels-horizontal {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .panel-saved {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .panels-horizontal {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-saved {
+        grid-column: auto;
+      }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+
+    .panel:hover {
+      border-color: var(--border2);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ptitle {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--chalk);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ptitle-icon {
+      font-size: 1.1rem;
+    }
+
+    .panel-body {
+      flex: 1;
+    }
+
+    .lbl {
+      display: block;
+      font-weight: 700;
+      font-size: 0.74rem;
+      color: var(--dim);
+      margin: 10px 0 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .lbl:first-child {
+      margin-top: 0;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      background: var(--bg3);
+      color: var(--chalk);
+      border: 1.5px solid var(--border2);
+      border-radius: 8px;
+      transition: all 0.18s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--green);
+      outline: none;
+      box-shadow: 0 0 0 3px var(--green-glow);
+      background: #1c2b44;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 58px;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hint {
+      color: var(--dim);
+      font-size: 0.76rem;
+      margin-top: 5px;
+    }
+
+    select option {
+      background: var(--bg2);
+      color: var(--chalk);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: #04251a;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #0ea372;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: var(--border2);
+      color: var(--dim);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .btn-ai {
+      background: var(--grad-ai);
+      border-color: transparent;
+      color: #2b0c04;
+      font-weight: 800;
+      box-shadow: 0 3px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-ai:hover {
+      opacity: 0.92;
+      box-shadow: 0 5px 18px rgba(245, 158, 11, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--red);
+      color: #ff9999;
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .ppct-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-left: 4px solid var(--yellow);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      color: var(--yellow);
+    }
+
+    details.settings {
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    details.settings summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--dim);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    details.settings summary:hover {
+      color: var(--chalk);
+    }
+
+    details.settings summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .recent-list {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .recent-list li {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.84rem;
+    }
+
+    .recent-list li:last-child {
+      border-bottom: 0;
+    }
+
+    .recent-list .t {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .recent-list .t strong {
+      display: block;
+      font-size: 0.86rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-list .t small {
+      color: var(--dim);
+      font-size: 0.74rem;
+    }
+
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .editor-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 24px;
+      color: var(--dim);
+      background: var(--panel);
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      grid-column: 1 / -1;
+    }
+
+    .empty-state .ic {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .empty-state h3 {
+      color: var(--chalk);
+      margin-bottom: 6px;
+      font-size: 1.1rem;
+    }
+
+    .empty-state p {
+      font-size: 0.88rem;
+      max-width: 480px;
+      margin: 0 auto 16px;
+    }
+
+    .bb-item,
+    .step {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 13px 15px;
+      margin-bottom: 12px;
+      transition: all 0.18s;
+    }
+
+    .bb-item:hover,
+    .step:hover {
+      border-color: #355079;
+    }
+
+    .bb-head,
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+
+    .step {
+      border-left: 5px solid var(--dim);
+    }
+
+    .step[data-level="de"] {
+      border-left-color: var(--de);
+    }
+
+    .step[data-level="vua"] {
+      border-left-color: var(--vua);
+    }
+
+    .step[data-level="kho"] {
+      border-left-color: var(--kho);
+    }
+
+    .step-head .num {
+      font-weight: 800;
+      color: var(--green);
+      font-size: 0.88rem;
+    }
+
+    .step-head select {
+      width: auto;
+      padding: 3px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 6px;
+    }
+
+    .step-head .tools {
+      margin-left: auto;
+      display: flex;
+      gap: 5px;
+    }
+
+    .ppct-wrap {
+      max-height: 68vh;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead th {
+      background: var(--bg2);
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tr.ch td {
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 8px 12px;
+    }
+
+    td small {
+      display: block;
+      color: var(--dim);
+      font-size: 0.74rem;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .pill.bai {
+      background: rgba(59, 130, 246, 0.16);
+      color: #60a5fa;
+    }
+
+    .pill.ontap {
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+    }
+
+    .pill.kiemtra {
+      background: rgba(239, 68, 68, 0.16);
+      color: #f87171;
+    }
+
+    .pill.hoatdong {
+      background: rgba(245, 158, 11, 0.16);
+      color: #fbbf24;
+    }
+
+    .ok {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .todo {
+      color: var(--dim);
+    }
+
+    .cls-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .cls-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stu-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .stu-toolbar input[type="text"] {
+      max-width: 250px;
+    }
+
+    .stu-toolbar select {
+      width: auto;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .chip-7 {
+      background: rgba(59, 130, 246, 0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.28);
+    }
+
+    .chip-9 {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.28);
+    }
+
+    .chip-cls {
+      background: rgba(139, 92, 246, 0.18);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.28);
+    }
+
+    .chip-yeu {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+    }
+
+    .chip-tb {
+      background: rgba(59, 130, 246, 0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.28);
+    }
+
+    .chip-kha {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.28);
+    }
+
+    .chip-gioi {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+    }
+
+    .pts-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 800;
+      color: var(--yellow);
+    }
+
+    .pts-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--dim);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      line-height: 1;
+    }
+
+    .pts-btn:hover {
+      color: var(--chalk);
+      border-color: var(--yellow);
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 14px);
+      background: #172439;
+      color: var(--chalk);
+      border: 1px solid var(--border2);
+      padding: 11px 22px;
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+      max-width: 90vw;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      font-weight: 600;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: sp 0.6s linear infinite;
+      vertical-align: -2px;
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3b557c;
+    }
+
+    /* STYLES CHO THỜI KHÓA BIỂU & LỊCH SOẠN BÀI */
+    .tkb-grid-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 14px;
+      background: var(--panel);
+    }
+
+    .tkb-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    .tkb-table th,
+    .tkb-table td {
+      border: 1px solid var(--border);
+      padding: 8px 6px;
+    }
+
+    .tkb-table thead th {
+      background: var(--bg2);
+      color: var(--chalk);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .tkb-table .session-col {
+      background: var(--bg3);
+      font-weight: 800;
+      font-size: 0.78rem;
+      width: 60px;
+      color: var(--yellow);
+    }
+
+    .tkb-table .period-col {
+      background: var(--bg2);
+      font-weight: 700;
+      font-size: 0.78rem;
+      width: 45px;
+      color: var(--dim);
+    }
+
+    .tkb-cell {
+      min-width: 110px;
+      height: 50px;
+      vertical-align: middle;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .tkb-cell:hover {
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .tkb-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      width: 92%;
+      margin: 0 auto;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    }
+
+    .tkb-tag.k7 {
+      background: rgba(139, 92, 246, 0.22);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.45);
+    }
+
+    .tkb-tag.k9 {
+      background: rgba(16, 185, 129, 0.22);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+
+    .tkb-tag .cls-del {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.72rem;
+      padding: 0 2px;
+    }
+
+    .tkb-tag .cls-del:hover {
+      opacity: 1;
+      color: #ef4444;
+    }
+
+    .tkb-empty-slot {
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    .tkb-empty-slot:hover {
+      color: var(--green);
+    }
+
+    /* BADGES HẠN SOẠN BÀI */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.urgent {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      animation: pulseUrgent 1.8s infinite;
+    }
+
+    .status-badge.overdue {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+    }
+
+    .status-badge.done {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+
+    .status-badge.future {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    @keyframes pulseUrgent {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+      }
+    }
+
+    .prep-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .prep-stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .prep-stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="top">
+    <div class="top-in">
+      <div class="header-left">
+        <a href="admin.html" class="logo">
+          <div class="logo-icon">📚</div>
+          <div>
+            <b>Trợ lý lên lớp</b>
+            <small>Hỗ trợ giáo viên THCS đa môn</small>
+          </div>
+        </a>
+        <nav class="tabs" role="tablist">
+          <a href="dashboard.html" title="Đến trang Dashboard hôm nay">🏠 Dashboard</a>
+          <button role="tab" id="tab-lesson" aria-selected="true">✏️ Soạn bài giảng</button>
+          <a href="tkb.html" title="Mở trang Thời khóa biểu & Lịch soạn chuyên biệt">📅 Thời khóa biểu &amp; Lịch soạn</a>
+          <a href="ppct.html" title="Mở trang Kế hoạch dạy & PPCT môn Toán">📋 Kế hoạch dạy (PPCT)</a>
+          <a href="lop-hoc.html" title="Mở trang Quản lý Lớp & Học sinh">👥 Lớp &amp; Học sinh</a>
+          <a href="diem-tham-gia.html" title="Tổng kết điểm phát biểu và xuất Excel">⭐ Điểm phát biểu</a>
+          <a href="classroom.html" style="color:var(--green)">🚀 Vào lớp dạy</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="sync-badge" id="syncStatus" title="Trạng thái lưu dữ liệu">
+          <span class="sync-dot"></span>
+          <span id="syncText">Đang khởi tạo...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stats-in">
+      <div class="sc">
+        <div class="sc-icon i-g">👨‍🎓</div>
+        <div>
+          <div class="sc-val v-g" id="statTotalStu">203</div>
+          <div class="sc-lbl">Tổng học sinh</div>
+          <div class="sc-sub" id="statStuSub">K7: 124 | K9: 79</div>
+        </div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon i-b">🏫</div>
+        <div>
+          <div class="sc-val v-b" id="statTotalCls">5</div>
+          <div class="sc-lbl">Số lớp phụ trách</div>
+          <div class="sc-sub" id="statClsSub">7A2, 7A4, 7A7, 9A4, 9A6</div>
+        </div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon i-y">📖</div>
+        <div>
+          <div class="sc-val v-y" id="statLessons">0</div>
+          <div class="sc-lbl">Bài đã soạn</div>
+          <div class="sc-sub">Kịch bản sẵn sàng lên lớp</div>
+        </div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon i-p">⚠️</div>
+        <div>
+          <div class="sc-val v-p" id="statWeak">0</div>
+          <div class="sc-lbl">Học sinh cần kèm</div>
+          <div class="sc-sub" id="statWeakSub">Mức yếu cần theo sát</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <section id="view-lesson">
+
+      <div class="panels-horizontal">
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="ptitle"><span class="ptitle-icon">📋</span> Thông tin bài học</div>
+          </div>
+          <div class="panel-body">
+            <div class="ppct-banner" id="ppctBanner" hidden></div>
+
+            <label class="lbl" for="lessonSubject">Môn học</label>
+            <select id="lessonSubject"></select>
+
+            <label class="lbl" for="title">Tên bài học</label>
+            <input id="title" placeholder="VD: Tên bài học theo phân phối chương trình">
+            <div id="pedagogyBadge"
+              style="display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:0.82rem;line-height:1.45;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14)">
+            </div>
+
+            <div class="row2">
+              <div>
+                <label class="lbl" for="classId">Lớp</label>
+                <select id="classId">
+                  <option value="">— chọn lớp —</option>
+                </select>
+              </div>
+              <div>
+                <label class="lbl" for="grade">Khối</label>
+                <select id="grade">
+                  <option value="7">Khối 7 (7A2, 7A4, 7A7)</option>
+                  <option value="9" selected>Khối 9 (9A4, 9A6)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row2">
+              <div>
+                <label class="lbl" for="date">Ngày dạy</label>
+                <input id="date" type="date">
+              </div>
+              <div>
+                <label class="lbl" for="tiet">Tiết PPCT</label>
+                <input id="tiet" type="number" min="1" max="140" placeholder="VD: 1">
+              </div>
+            </div>
+
+            <div class="row2">
+              <div>
+                <label class="lbl" for="week">Tuần PPCT</label>
+                <input id="week" type="number" min="1" max="40" placeholder="VD: 1">
+              </div>
+              <div>
+                <label class="lbl" for="ppctKeyDisplay">Mã liên kết PPCT</label>
+                <input id="ppctKeyDisplay" readonly style="background:var(--bg2);color:var(--dim);cursor:not-allowed"
+                  placeholder="Tự động (VD: 9-1)">
+              </div>
+            </div>
+
+            <label class="lbl" for="objectives">Mục tiêu bài dạy</label>
+            <textarea id="objectives" rows="2"
+              placeholder="Kiến thức, kỹ năng và năng lực học sinh cần đạt sau bài học."></textarea>
+
+            <label class="lbl" for="requirements">Yêu cầu cần đạt</label>
+            <textarea id="requirements" rows="2"
+              placeholder="Mô tả yêu cầu cần đạt và cách phân hóa theo mức độ học sinh."></textarea>
+
+            <label class="lbl" for="digital">Năng lực số tích hợp</label>
+            <input id="digital" placeholder="Ứng dụng công nghệ, năng lực số hoặc STEM nếu phù hợp.">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="ptitle"><span class="ptitle-icon">✨</span> Tự động tạo Giáo án & Kịch bản bằng AI</div>
+          </div>
+          <div class="panel-body">
+
+            <!-- NÚT CHUYỂN SANG GEMINI WEB (DÙNG KHI API BÁO LỖI HOẶC MIỄN PHÍ) -->
+            <button type="button" class="btn btn-ghost btn-full" id="btnOpenGeminiWeb"
+              style="border: 1.5px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.08); font-weight: 700; font-size: 0.95rem; padding: 11px 16px; border-radius: 9px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px;">
+              <span style="font-size: 1.15rem;">🌐</span> Chuyển sang Gemini Web (Dùng khi API báo lỗi)
+            </button>
+
+            <!-- KHUNG DÁN ĐOẠN MÃ JSON CHUẨN ĐÚNG MẪU TRONG ẢNH -->
+            <div class="gemini-json-card"
+              style="padding: 14px; background: #0c1626; border: 1.5px solid #1e3a5f; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);">
+              <div
+                style="color: #3b82f6; font-weight: 800; font-size: 0.88rem; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                <span>DÁN ĐOẠN MÃ JSON VÀO ĐÂY:</span>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #60a5fa; cursor: pointer;" id="btnClearJson"
+                  title="Xóa trắng nội dung">✕ Xóa</span>
+              </div>
+              <textarea id="notebookLmJson" rows="7"
+                placeholder='[ { "tiet_hoc": "Tiết 1", "bai_toan_sgk": "...", "cac_buoc_dan_dat": [...] } ]'
+                style="width: 100%; box-sizing: border-box; background: #070d18; border: 1.5px solid #2563eb; border-radius: 8px; color: #e2e8f0; font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.88rem; padding: 10px 12px; line-height: 1.5; margin-bottom: 10px; resize: vertical; outline: none;"></textarea>
+              <button type="button" class="btn btn-full" id="btnImportNotebookLM"
+                style="width: 100%; background: #10b981; color: #042f2e; font-weight: 800; font-size: 0.95rem; padding: 12px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);">
+                Xác nhận nạp vào Bảng soạn thảo
+              </button>
+            </div>
+
+            <label class="lbl" for="aiPrompt">Yêu cầu thêm cho AI</label>
+            <textarea id="aiPrompt" rows="2"
+              placeholder="VD: Chú trọng tạo nhiều câu hỏi dễ ở phần Ví dụ 1. Yêu cầu định dạng công thức Toán bằng dấu $ (VD: $x^2 = 4$)."></textarea>
+
+            <label class="lbl" for="teachingMode">Kiểu tổ chức hoạt động</label>
+            <select id="teachingMode">
+              <option value="guided-discovery">🔎 Khám phá có hướng dẫn</option>
+              <option value="model-practice">👣 Giáo viên làm mẫu → cùng làm → tự làm</option>
+              <option value="error-detective">🕵️ Thám tử lỗi sai</option>
+              <option value="quiz-game">🎮 Trò chơi hỏi đáp / thử thách</option>
+              <option value="collaborative">🤝 Hợp tác cặp đôi / nhóm</option>
+              <option value="real-world">🌱 Bài toán tình huống thực tế</option>
+            </select>
+            <p class="hint" style="margin:4px 0 10px">AI sẽ thiết kế các bước phù hợp kiểu hoạt động; Classroom sẽ hiển thị nhiệm vụ, vai trò và thời lượng tương ứng.</p>
+
+            <div class="row2" style="margin-top:6px">
+              <div>
+                <label class="lbl" for="aiCount">Số bước vấn đáp</label>
+                <input id="aiCount" type="number" min="2" max="12" value="6">
+              </div>
+              <div>
+                <label class="lbl" for="aiAudience">Đối tượng trọng tâm</label>
+                <select id="aiAudience">
+                  <option value="yếu" selected>Học sinh yếu</option>
+                  <option value="trung bình">Trung bình</option>
+                  <option value="khá giỏi">Khá &amp; Giỏi</option>
+                  <option value="cả lớp">Cả lớp nhiều trình độ</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:16px">
+              <button class="btn btn-ai btn-full" id="btnGen">⚡ Tạo Kép Tự Động (Bằng API Key)</button>
+            </div>
+
+
+            <details class="settings" id="settings">
+              <summary id="settingsSummary"
+                style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+                <span style="display:flex;align-items:center;gap:6px">🔑 Cài đặt Khóa API & Dự phòng</span>
+                <span id="keyStatusBadge"
+                  style="font-size:0.72rem;padding:2px 8px;border-radius:12px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:600">Chưa
+                  có khóa</span>
+              </summary>
+              <div style="padding-top:12px">
+                <label class="lbl" for="apiKey"
+                  style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+                  <span>Gemini API Key (Chính)</span>
+                  <a href="https://aistudio.google.com/apikey" target="_blank"
+                    style="color:var(--green);font-size:0.75rem;text-decoration:underline">Lấy API Key ↗</a>
+                </label>
+                <div style="position:relative;display:flex;align-items:center">
+                  <input id="apiKey" type="password" autocomplete="off" placeholder="Dán mã AIzaSy... vào đây"
+                    style="padding-right:42px">
+                  <button type="button" id="btnToggleApiKey"
+                    style="position:absolute;right:8px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:1.05rem;padding:4px">👁️</button>
+                </div>
+
+                <label class="lbl" for="modelSelect" style="margin-top:10px">Phiên bản Mô hình AI (Model)</label>
+                <select id="modelSelect">
+                  <option value="gemini-3.6-flash" selected>⚡ Gemini 3.6 Flash (Khuyên dùng)</option>
+                  <option value="gemini-3.8-flash">🚀 Gemini 3.8 Flash</option>
+                  <option value="gemini-2.5-flash">✨ Gemini 2.5 Flash</option>
+                  <option value="gemini-1.5-flash">⚡ Gemini 1.5 Flash (Ổn định nhất)</option>
+                  <option value="gemini-1.5-pro">🧠 Gemini 1.5 Pro</option>
+                  <option value="custom">✏️ Nhập model tùy chỉnh khác...</option>
+                </select>
+
+                <div id="customModelBox" style="display:none;margin-top:8px">
+                  <label class="lbl" for="customModelInput" style="margin-top:0">Tên mô hình tùy chỉnh</label>
+                  <input id="customModelInput" type="text" placeholder="Ví dụ: gemini-1.5-flash">
+                </div>
+                <input type="hidden" id="model" value="gemini-3.6-flash">
+
+                <!-- DEEPSEEK KEY -->
+                <div style="margin-top:12px; padding-top:12px; border-top: 1px dashed var(--border2);">
+                  <label class="lbl" style="display:flex;justify-content:space-between;align-items:center">
+                    <span>🔌 DeepSeek API Key (Dự phòng)</span>
+                    <a href="https://platform.deepseek.com/" target="_blank"
+                      style="color:var(--blue);font-size:0.75rem;text-decoration:underline">Lấy Key DeepSeek ↗</a>
+                  </label>
+                  <div style="position:relative;display:flex;align-items:center">
+                    <input id="dsApiKey" type="password" autocomplete="off" placeholder="Dán mã sk-... vào đây"
+                      style="padding-right:42px">
+                    <button type="button" id="btnToggleDsKey"
+                      style="position:absolute;right:8px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:1.05rem;padding:4px">👁️</button>
+                  </div>
+                  <label
+                    style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.8rem; cursor:pointer;">
+                    <input type="checkbox" id="useDeepSeekFallback" checked style="width:16px; height:16px; margin:0;">
+                    <span>Tự động chuyển sang DeepSeek khi Gemini báo lỗi</span>
+                  </label>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                  <button type="button" class="btn btn-ghost" id="btnTestKey" style="font-size:0.8rem;padding:6px 12px">
+                    🧪 Kiểm tra kết nối
+                  </button>
+                  <span id="apiStatusMsg"
+                    style="font-size:0.78rem;flex:1;min-height:18px;display:flex;align-items:center"></span>
+                </div>
+
+                <p class="hint" style="margin-top:10px;line-height:1.4">
+                  🔒 <b>Bảo mật:</b> Khóa API chỉ lưu trực tiếp trên máy thầy/cô.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="panel panel-saved">
+          <div class="panel-head">
+            <div class="ptitle"><span class="ptitle-icon">📂</span> Bài đã lưu gần đây</div>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn btn-primary" id="btnSave" style="flex:1">💾 Lưu bài</button>
+              <button class="btn btn-ghost" id="btnNew" title="Bắt đầu soạn bài mới">+ Mới</button>
+              <button class="btn btn-ghost" id="btnSample" title="Tải bài mẫu Toán 9 để xem thử">Mẫu</button>
+            </div>
+            <div id="saveStatus" style="font-size:0.75rem;color:var(--dim);margin-bottom:12px;min-height:18px"></div>
+
+            <label class="lbl" style="margin-top:0">Danh sách bài đã lưu:</label>
+            <ul class="recent-list" id="recentList">
+              <li><span style="color:var(--dim);font-size:0.82rem">Đang tải danh sách bài...</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- GIÁO ÁN CHUẨN CÔNG VĂN 5512 -->
+      <div class="panel" id="panel5512" style="margin-bottom:24px" hidden>
+        <div class="panel-head">
+          <div class="ptitle"><span class="ptitle-icon">📄</span> Giáo án chuẩn Công văn 5512 (Hồ sơ sổ sách)</div>
+          <button class="btn btn-ghost btn-sm" id="btnCopy5512">📋 Copy sang Word</button>
+        </div>
+        <div class="hint" style="margin-bottom: 8px;">Bản word hoàn chỉnh để in nộp trường. Thầy có thể chỉnh sửa trực
+          tiếp tại đây trước khi Copy.</div>
+        <textarea id="txt5512" rows="14" placeholder="Giáo án 5512 sẽ được AI tạo và hiển thị ở đây..."></textarea>
+      </div>
+
+      <div class="panel" style="margin-bottom:24px">
+        <div class="panel-head">
+          <div class="ptitle"><span class="ptitle-icon">🎯</span> Kịch bản lên lớp chi tiết (Hiện trên điện thoại)</div>
+          <div style="display:flex;gap:8px;align-items:center" id="editorActions" hidden>
+            <button class="btn btn-ghost btn-sm" id="addBB">+ Thêm ý ghi bảng</button>
+            <button class="btn btn-ghost btn-sm" id="addStep">+ Thêm bước vấn đáp</button>
+            <button class="btn btn-primary btn-sm" id="btnLaunchClassroom"
+              style="background:#10b981;color:#042f2e;border-color:#10b981;box-shadow:0 2px 8px rgba(16,185,129,0.3)"
+              title="Mở kịch bản bài học trong giao diện Lên lớp Classroom">🚀 Lên lớp (Classroom)</button>
+          </div>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <span class="ic">💡</span>
+          <h3>Chưa có kịch bản bài học</h3>
+          <p>Điền thông tin bài học ở trên rồi bấm <b style="color:var(--yellow)">⚡ Tạo Kép</b> hoặc bấm <b
+              style="color:var(--green)">Mẫu</b> để xem thử.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-ai" id="btnQuickAI">⚡ Tạo Kép</button>
+            <button class="btn btn-ghost" id="btnQuickSample">📖 Xem bài mẫu Toán 9</button>
+            <button class="btn btn-ghost" id="btnQuickManual">+ Tự thêm bước thủ công</button>
+          </div>
+        </div>
+
+        <div id="editorWrap" class="editor-container" hidden>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <h3 style="font-size:0.92rem;font-weight:700;color:var(--yellow)">📋 Lược đồ ghi bảng</h3>
+              <button class="btn btn-ghost btn-sm" id="addBB2">+ Thêm ý</button>
+            </div>
+            <div id="bbList"></div>
+          </div>
+
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <h3 style="font-size:0.92rem;font-weight:700;color:var(--green)">💬 Các bước vấn đáp (từ dễ đến khó)</h3>
+              <p class="hint" style="margin:0;">💡 Có thể chèn công thức Toán học bằng cách kẹp vào dấu $ (Ví dụ: $x^2 +
+                1 = 0$)</p>
+              <button class="btn btn-ghost btn-sm" id="addStep2">+ Thêm bước</button>
+            </div>
+            <div id="stepList"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 1.5: THỜI KHÓA BIỂU & LỊCH SOẠN BÀI (QUY TẮC SOẠN TRƯỚC 1 NGÀY) -->
+    <section id="view-tkb" hidden>
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel-head" style="flex-wrap:wrap;gap:12px">
+          <div class="ptitle"><span class="ptitle-icon">📅</span> Quản lý Thời khóa biểu &amp; Lịch soạn bài (Quy tắc
+            soạn trước 1 ngày)</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" id="btnApplyDefaultTkb"
+              style="border-color:var(--yellow);color:var(--yellow)"
+              title="Nạp đúng mẫu TKB Tuần 4-5 của Thầy Trần Văn Trong như trong ảnh">
+              ⚡ Áp dụng TKB Tuần 4-5 (Thầy Trần Văn Trong)
+            </button>
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0"
+              title="Nhập bảng TKB từ file Excel (.xlsx, .xls, .csv)">
+              📁 Nhập từ file Excel
+              <input type="file" id="fileTkbExcel" accept=".xlsx,.xls,.csv" style="display:none">
+            </label>
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0" title="Tải ảnh chụp Thời khóa biểu lên">
+              🖼️ Tải ảnh chụp TKB
+              <input type="file" id="fileTkbImg" accept="image/*" style="display:none">
+            </label>
+            <button class="btn btn-ghost btn-sm" id="btnDownloadTkbTemplate" title="Tải file Excel mẫu Thời khóa biểu">
+              📥 File mẫu Excel
+            </button>
+            <button class="btn btn-primary btn-sm" id="btnSaveTkb">
+              💾 Lưu TKB
+            </button>
+          </div>
+        </div>
+
+        <!-- Thông tin tổng quan TKB -->
+        <div class="panel-body">
+          <div
+            style="display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));gap:12px;margin-bottom:14px;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <div>
+              <label class="lbl" style="margin-bottom:2px" for="tkbTeacher">👨‍🏫 Giáo viên phụ trách</label>
+              <input id="tkbTeacher" value="Trần Văn Trong" placeholder="Họ và tên giáo viên">
+            </div>
+            <div>
+              <label class="lbl" style="margin-bottom:2px" for="tkbYear">🏫 Năm học</label>
+              <input id="tkbYear" value="2026-2027" placeholder="VD: 2026-2027">
+            </div>
+            <div>
+              <label class="lbl" style="margin-bottom:2px" for="tkbWeeks">🗓️ Tuần áp dụng</label>
+              <input id="tkbWeeks" value="Tuần 4, 5" placeholder="VD: Tuần 4, 5">
+            </div>
+            <div>
+              <label class="lbl" style="margin-bottom:2px" for="tkbApplyDate">📅 Ngày Thứ Hai đầu tuần</label>
+              <input type="date" id="tkbApplyDate" value="2026-09-28">
+            </div>
+          </div>
+
+          <!-- Khung xem trước ảnh chụp TKB (nếu có) -->
+          <div id="tkbImgPreviewWrap"
+            style="display:none;margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px dashed var(--yellow)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <b style="color:var(--yellow);font-size:0.88rem">🖼️ Ảnh chụp Thời khóa biểu đã tải lên:</b>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary btn-sm" id="btnOcrTkbAi"
+                  style="background:var(--grad-ai);font-size:0.8rem">
+                  🤖 AI phân tích ảnh &amp; tự động điền TKB
+                </button>
+                <button class="btn btn-ghost btn-sm" id="btnCloseTkbImg" style="font-size:0.8rem">✕ Đóng ảnh</button>
+              </div>
+            </div>
+            <div style="text-align:center;max-height:260px;overflow:auto">
+              <img id="tkbImgElem" src="" alt="Ảnh Thời khóa biểu"
+                style="max-width:100%;max-height:240px;border-radius:6px;border:1px solid var(--border)">
+            </div>
+          </div>
+
+          <!-- BẢNG LƯỚI THỜI KHÓA BIỂU TUẦN -->
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+            <div>
+              <h3
+                style="font-size:0.95rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:6px">
+                📋 Lưới Thời Khóa Biểu trong tuần
+              </h3>
+              <span style="font-size:0.78rem;color:var(--dim);margin-left:8px">(Bấm vào ô để chọn lớp hoặc xóa
+                tiết)</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:0.75rem;color:var(--dim)">Chọn nhanh lớp:</span>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbQuickFill('7A2')">7A2</button>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbQuickFill('7A4')">7A4</button>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbQuickFill('7A7')">7A7</button>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbQuickFill('9A4')">9A4</button>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbQuickFill('9A6')">9A6</button>
+            </div>
+          </div>
+
+          <div class="tkb-grid-wrap">
+            <table class="tkb-table" id="tkbGridTable">
+              <thead>
+                <tr>
+                  <th style="width:70px">Buổi</th>
+                  <th style="width:50px">Tiết</th>
+                  <th>Thứ 2</th>
+                  <th>Thứ 3</th>
+                  <th>Thứ 4</th>
+                  <th>Thứ 5</th>
+                  <th>Thứ 6</th>
+                  <th>Thứ 7</th>
+                </tr>
+              </thead>
+              <tbody id="tkbGridBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHẦN LỊCH SOẠN BÀI & DẠY HỌC (QUY TẮC SOẠN TRƯỚC 1 NGÀY) -->
+      <div class="panel">
+        <div class="panel-head" style="flex-wrap:wrap;gap:12px">
+          <div class="ptitle">
+            <span class="ptitle-icon">⏰</span> Kế hoạch Dạy học &amp; Lịch Soạn bài tự động (Soạn trước ngày dạy 1 ngày)
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">
+              <span style="font-size:0.78rem;color:var(--dim)">Tuần xem:</span>
+              <div style="display:flex;gap:4px" id="adminWeekBtns"></div>
+            </div>
+            <div style="display:flex;gap:4px" id="prepFilterBtns">
+              <button class="btn btn-primary btn-sm" data-filter="all">Tất cả tiết (<span
+                  id="cntAllPrep">0</span>)</button>
+              <button class="btn btn-ghost btn-sm" data-filter="urgent" style="color:var(--yellow)">⚠️ Cần soạn hôm nay
+                (<span id="cntUrgentPrep">0</span>)</button>
+              <button class="btn btn-ghost btn-sm" data-filter="overdue" style="color:var(--red)">🚨 Quá hạn (<span
+                  id="cntOverduePrep">0</span>)</button>
+              <button class="btn btn-ghost btn-sm" data-filter="done" style="color:var(--green)">🟢 Đã soạn (<span
+                  id="cntDonePrep">0</span>)</button>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnAutoBatchGen" style="background:var(--grad-ai)"
+              title="AI tự động soạn kịch bản cho các tiết chưa soạn trong tuần">
+              🤖 Tự động soạn bài bằng AI
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <!-- 4 Thẻ thống kê lịch soạn -->
+          <div class="prep-stat-grid">
+            <div class="prep-stat-card">
+              <div style="font-size:1.8rem">📚</div>
+              <div>
+                <div class="prep-stat-num" id="statTkbTotalPeriods">0</div>
+                <div style="font-size:0.75rem;color:var(--dim)">Tổng số tiết trong tuần</div>
+              </div>
+            </div>
+            <div class="prep-stat-card" style="border-left:4px solid var(--yellow)">
+              <div style="font-size:1.8rem">⚠️</div>
+              <div>
+                <div class="prep-stat-num" style="color:var(--yellow)" id="statTkbUrgent">0</div>
+                <div style="font-size:0.75rem;color:var(--dim)">Cần soạn hôm nay (cho ngày mai)</div>
+              </div>
+            </div>
+            <div class="prep-stat-card" style="border-left:4px solid var(--red)">
+              <div style="font-size:1.8rem">🚨</div>
+              <div>
+                <div class="prep-stat-num" style="color:var(--red)" id="statTkbOverdue">0</div>
+                <div style="font-size:0.75rem;color:var(--dim)">Quá hạn chưa có bài</div>
+              </div>
+            </div>
+            <div class="prep-stat-card" style="border-left:4px solid var(--green)">
+              <div style="font-size:1.8rem">✅</div>
+              <div>
+                <div class="prep-stat-num" style="color:var(--green)" id="statTkbDone">0</div>
+                <div style="font-size:0.75rem;color:var(--dim)">Đã soạn sẵn sàng lên lớp</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bảng danh sách các tiết dạy và hạn soạn bài -->
+          <p class="hint" style="margin-bottom:10px">
+            💡 <b>Quy tắc sư phạm:</b> Mỗi tiết dạy đều có <b>Hạn soạn bài trước ngày lên lớp 1 ngày</b>. Bấm nút <b>"⚡
+              Soạn bài ngay"</b> ở tiết bất kỳ, hệ thống sẽ tự động điền Tên bài theo PPCT, Khối, Lớp, Tiết học và tạo
+            sẵn Prompt chuẩn bị đẩy sang Gemini/NotebookLM!
+          </p>
+
+          <div class="ppct-wrap" style="max-height:55vh">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:130px">Ngày dạy</th>
+                  <th style="width:90px">Buổi &amp; Tiết</th>
+                  <th style="width:110px">Lớp dạy</th>
+                  <th>Tiết PPCT &amp; Tên bài học</th>
+                  <th style="width:170px">Hạn soạn bài (Trước 1 ngày)</th>
+                  <th style="width:150px;text-align:center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="tkbScheduleBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: KẾ HOẠCH DẠY (PPCT) -->
+    <section id="view-ppct" hidden>
+      <div class="panel">
+        <div class="panel-head" style="flex-wrap:wrap;gap:12px">
+          <div class="ptitle"><span class="ptitle-icon">📋</span> Kế hoạch dạy học theo Phân phối chương trình</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="ppctSubject" aria-label="Môn học trong PPCT" style="max-width:240px;padding:6px 12px;font-size:0.82rem"></select>
+            <div style="display:flex;gap:4px" id="gradeBtns">
+            </div>
+            <input id="ppctSearch" placeholder="🔍 Tìm tên bài hoặc chương..."
+              style="max-width:240px;padding:6px 12px;font-size:0.82rem">
+            <span id="ppctCount" style="font-size:0.8rem;color:var(--dim);margin-left:8px"></span>
+          </div>
+        </div>
+        <p class="hint" style="margin-bottom:12px">Bấm nút "Soạn" ở tiết bất kỳ để hệ thống tự động điền thông tin vào
+          bảng soạn bài.</p>
+        <div class="ppct-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:60px">Tiết</th>
+                <th style="width:70px">Tuần</th>
+                <th>Tên bài học &amp; Chương</th>
+                <th style="width:110px">Phân loại</th>
+                <th style="width:130px">Trạng thái</th>
+                <th style="width:100px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ppctBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: LỚP & HỌC SINH -->
+    <section id="view-class" hidden>
+      <div class="cls-layout">
+
+        <div>
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel-head">
+              <div class="ptitle"><span class="ptitle-icon">🏫</span> Thêm lớp học mới</div>
+            </div>
+            <div class="panel-body">
+              <label class="lbl" for="clsName">Tên lớp</label>
+              <input id="clsName" placeholder="VD: 7A2, 7A4, 7A7, 9A4, 9A6">
+              <label class="lbl" for="clsGrade">Khối lớp</label>
+              <select id="clsGrade">
+                <option value="7">Lớp 7 (7A2, 7A4, 7A7)</option>
+                <option value="9" selected>Lớp 9 (9A4, 9A6)</option>
+              </select>
+              <label class="lbl">Lịch dạy trong tuần</label>
+              <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px" id="clsDays"></div>
+              <div class="hint" id="daysSum" style="margin-top:6px"></div>
+              <div style="margin-top:14px">
+                <button class="btn btn-primary btn-full" id="btnAddClass">+ Thêm lớp</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="ptitle"><span class="ptitle-icon">👤</span> Thêm học sinh</div>
+            </div>
+            <div class="panel-body">
+              <label class="lbl" for="stuClass">Chọn lớp</label>
+              <select id="stuClass"></select>
+              <label class="lbl" for="stuName">Họ và tên học sinh</label>
+              <input id="stuName" placeholder="VD: Nguyễn Văn An">
+              <label class="lbl" for="stuLevel">Mức độ học lực</label>
+              <select id="stuLevel">
+                <option value="yeu">Yếu</option>
+                <option value="tb" selected>Trung bình</option>
+                <option value="kha">Khá</option>
+                <option value="gioi">Giỏi</option>
+              </select>
+              <div style="margin-top:14px">
+                <button class="btn btn-primary btn-full" id="btnAddStudent">+ Thêm học sinh</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel-head">
+              <div class="ptitle"><span class="ptitle-icon">👥</span> Danh sách học sinh (<span
+                  id="stuHeaderCount">203</span> em)</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" id="btnExportStudents"
+                  title="Xuất dữ liệu học sinh ra file JSON">📥 Sao lưu</button>
+              </div>
+            </div>
+            <div class="stu-toolbar">
+              <input type="text" id="stuSearch" placeholder="🔍 Tìm theo họ tên học sinh...">
+              <select id="filterClass">
+                <option value="">Tất cả lớp</option>
+              </select>
+              <select id="filterLevel">
+                <option value="">Tất cả học lực</option>
+                <option value="yeu">Yếu</option>
+                <option value="tb">Trung bình</option>
+                <option value="kha">Khá</option>
+                <option value="gioi">Giỏi</option>
+              </select>
+              <span style="margin-left:auto;font-size:0.8rem;color:var(--dim)" id="stuFilteredCount"></span>
+            </div>
+            <div style="overflow-x:auto;max-height:460px;border:1px solid var(--border);border-radius:8px">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:50px">STT</th>
+                    <th>Họ và tên</th>
+                    <th style="width:70px">Khối</th>
+                    <th style="width:80px">Lớp</th>
+                    <th style="width:120px">Học lực</th>
+                    <th style="width:130px">Điểm ⭐</th>
+                    <th style="width:70px">Xóa</th>
+                  </tr>
+                </thead>
+                <tbody id="stuBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="ptitle"><span class="ptitle-icon">🏫</span> Tiến độ các lớp</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên lớp</th>
+                    <th>Môn học</th>
+                    <th>Lịch dạy trong tuần</th>
+                    <th>Đã dạy đến tiết</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="classBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" role="status"></div>
+
+  <script type="module">
+    import { db, esc, renderMath, fixLatexEscapes, todayStr, LEVEL_LABEL, STEP_LEVEL_LABEL, requireTeacher, toast } from "./firebase-config.js";
+    import {
+      collection, addDoc, setDoc, updateDoc, doc, getDoc, getDocs, deleteDoc,
+      query, where, limit, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { KIND_LABEL, getTiet } from "./ppct-data.js";
+    import {
+      SUBJECT_PRESETS,
+      getAllPpctData,
+      getActiveSubject,
+      setActiveSubject,
+      getLessonPpct,
+      getSubjectPpctList
+    } from "./ppct-manager.js";
+    import { DEFAULT_CLASSES, DEFAULT_STUDENTS } from "./default-students.js";
+    import {
+      computeTkbSchedule as computeTkbScheduleModule,
+      getAvailableWeeks,
+      getActiveWeek,
+      getStoredTimetable,
+      DEFAULT_TIMETABLE,
+      DEFAULT_TKB_SLOTS
+    } from "./tkb-schedule.js";
+
+    const $ = id => document.getElementById(id);
+
+    /* ─── STATE MANAGEMENT ─── */
+    const state = {
+      id: null,
+      ppctKey: null,
+      giaoAn5512: "",
+      blackboard: [],
+      steps: [],
+      teachingMode: "guided-discovery"
+    };
+    const TEACHING_MODES = {
+      "guided-discovery": {
+        label: "Khám phá có hướng dẫn",
+        guidance: "Dẫn dắt từ kiến thức quen thuộc hoặc tình huống trực quan đến kiến thức mới; cho học sinh dự đoán, quan sát, nhận xét rồi tự phát biểu kết luận. Mỗi câu hỏi chỉ tập trung một ý."
+      },
+      "model-practice": {
+        label: "Giáo viên làm mẫu → cùng làm → tự làm",
+        guidance: "Tổ chức rõ ba chặng: giáo viên làm mẫu và nói thành lời cách nghĩ; giáo viên cùng học sinh làm một ví dụ tương tự; học sinh tự làm một câu cơ bản. Không bỏ qua bước trung gian."
+      },
+      "error-detective": {
+        label: "Thám tử lỗi sai",
+        guidance: "Đưa ra một lời giải có lỗi phù hợp bài học; yêu cầu học sinh tìm vị trí sai, giải thích vì sao, sửa lại và tự kiểm tra. Không tiết lộ lỗi/đáp án trước khi học sinh thử."
+      },
+      "quiz-game": {
+        label: "Trò chơi hỏi đáp / thử thách",
+        guidance: "Chia nội dung thành các vòng hỏi đáp ngắn, luật chơi đơn giản, nhiệm vụ vừa sức và có phản hồi sau mỗi lượt. Điểm số chỉ khuyến khích; không phạt hoặc làm học sinh yếu xấu hổ."
+      },
+      collaborative: {
+        label: "Hợp tác cặp đôi / nhóm",
+        guidance: "Giao nhiệm vụ ngắn có vai trò rõ ràng cho từng thành viên, gồm cách chia sẻ và sản phẩm cần hoàn thành. Có câu gợi mở để nhóm yếu bắt đầu và phần báo cáo ngắn."
+      },
+      "real-world": {
+        label: "Bài toán tình huống thực tế",
+        guidance: "Bắt đầu từ tình huống gần gũi, nêu dữ kiện và điều cần tìm rõ ràng; hướng dẫn học sinh liên hệ kiến thức, thực hiện từng bước, rồi kiểm tra xem kết quả có hợp lý trong thực tế không."
+      }
+    };
+
+    let classes = [];
+    let students = [];
+    let recentLessons = [];
+    let ppctGrade = "9";
+    let currentSubject = getActiveSubject() || "toan";
+    let lessonByKey = {};
+    let isFirebaseOnline = false;
+    let currentUser = { uid: "local-teacher", email: "Giáo viên" };
+
+    function subjectOptionsHtml() {
+      const allData = getAllPpctData();
+      const subjects = [...SUBJECT_PRESETS];
+      Object.entries(allData).forEach(([id, subject]) => {
+        if (!subjects.some(item => item.id === id)) {
+          subjects.push({ id, name: subject.name || id });
+        }
+      });
+      return subjects.map(subject => `<option value="${esc(subject.id)}">${esc(subject.name)}</option>`).join("");
+    }
+
+    function getSubjectName(subjectId = currentSubject) {
+      const allData = getAllPpctData();
+      const subject = allData[subjectId] || SUBJECT_PRESETS.find(item => item.id === subjectId);
+      return subject?.name || subjectId;
+    }
+
+    function populateSubjectSelects() {
+      const options = subjectOptionsHtml();
+      $("lessonSubject").innerHTML = options;
+      $("ppctSubject").innerHTML = options;
+      $("lessonSubject").value = currentSubject;
+      $("ppctSubject").value = currentSubject;
+    }
+
+    function selectSubject(subjectId, refresh = true) {
+      currentSubject = subjectId === "toan" ? subjectId : "toan";
+      setActiveSubject(currentSubject);
+      $("lessonSubject").value = currentSubject;
+      $("ppctSubject").value = currentSubject;
+      const grades = Object.keys(getAllPpctData()[currentSubject]?.grades || {}).sort((a, b) => +a - +b);
+      if (grades.length && !grades.includes(String(ppctGrade))) ppctGrade = grades[grades.length - 1];
+      if (refresh) {
+        renderPpct();
+        updateBanner();
+        updatePedagogyNotice();
+      }
+    }
+
+    /* ─── SAMPLE LESSON FOR INSTANT PREVIEW ─── */
+    const SAMPLE_LESSON = {
+      title: "Bài 1: Phương trình quy về phương trình bậc nhất một ẩn (Tiết 1)",
+      grade: 9,
+      classId: "9A4",
+      className: "9A4",
+      date: todayStr(),
+      week: 1,
+      objectives: "Giải được phương trình tích dạng $(ax + b)(cx + d) = 0$ và phương trình chứa ẩn ở mẫu cơ bản.",
+      requirements: "HS yếu nắm vững quy tắc $A(x).B(x) = 0 \\Leftrightarrow A(x) = 0$ hoặc $B(x) = 0$; giải được phương trình tích hai nhị thức bậc nhất.",
+      digital: "5.3.TC1a: Sử dụng MTCT để bấm nghiệm kiểm tra kết quả.",
+      ppctKey: "9-1",
+      giaoAn5512: "I. MỤC TIÊU BÀI HỌC\n1. Kiến thức: Nắm được cách giải phương trình tích.\n\nII. THIẾT BỊ DẠY HỌC\n- Máy chiếu, phấn màu.\n\nIII. TIẾN TRÌNH DẠY HỌC\n1. Hoạt động Khởi động...\n2. Hoạt động Hình thành kiến thức...\n3. Hoạt động Luyện tập...\n4. Hoạt động Vận dụng...",
+      blackboard: [
+        { title: "1. Phương trình tích", content: "Dạng tổng quát: $A(x).B(x) = 0$\nCách giải: $A(x) = 0$ hoặc $B(x) = 0$\nKết luận: Tập nghiệm $S = \\{x_1; x_2\\}$" }
+      ],
+      steps: [
+        {
+          level: "de",
+          question: "Một tích bằng 0 khi nào? Nếu $a \\cdot b = 0$ thì $a$ bằng mấy hoặc $b$ bằng mấy?",
+          hint: "Hãy nhớ lại phép nhân: số nào nhân với 0 cũng bằng 0.",
+          answer: "Tích bằng 0 khi ít nhất một thừa số bằng 0 ($a = 0$ hoặc $b = 0$).",
+          explanation: "Quy tắc cơ bản để đưa phương trình phức tạp về phương trình bậc nhất.",
+          mistake: "Học sinh hay nhầm thành $a = 0$ VÀ $b = 0$ cùng lúc.",
+          imageUrl: ""
+        }
+      ]
+    };
+
+    /* ─── LOCAL STORAGE PERSISTENCE ─── */
+    const ALLOWED_CLASS_NAMES = ["7A2", "7A4", "7A7", "9A4", "9A6"];
+
+    function loadLocalData() {
+      try {
+        const rawCls = localStorage.getItem("app_classes");
+        const parsedC = rawCls ? JSON.parse(rawCls) : [];
+        const filteredC = Array.isArray(parsedC) ? parsedC.filter(c => c && c.name && ALLOWED_CLASS_NAMES.includes(c.name.toUpperCase())) : [];
+        const classMap = new Map();
+        DEFAULT_CLASSES.forEach(c => classMap.set(c.name.toUpperCase(), { id: c.name, ...c }));
+        filteredC.forEach(c => {
+          const key = c.name.toUpperCase();
+          if (classMap.has(key)) {
+            classMap.set(key, { ...classMap.get(key), ...c, id: c.name, name: c.name });
+          }
+        });
+        classes = ALLOWED_CLASS_NAMES.map(name => classMap.get(name)).filter(Boolean);
+
+        const rawStu = localStorage.getItem("app_students");
+        const parsedS = rawStu ? JSON.parse(rawStu) : [];
+        const filteredS = Array.isArray(parsedS) ? parsedS.filter(s => {
+          const cls = (s.className || s.classId || "").toUpperCase();
+          return ALLOWED_CLASS_NAMES.includes(cls);
+        }) : [];
+
+        if (filteredS.length === 0) {
+          students = [...DEFAULT_STUDENTS];
+        } else {
+          const existingClasses = new Set(filteredS.map(s => (s.className || s.classId || "").toUpperCase()));
+          let combined = [...filteredS];
+          DEFAULT_CLASSES.forEach(c => {
+            if (!existingClasses.has(c.name.toUpperCase())) {
+              const defStu = DEFAULT_STUDENTS.filter(s => (s.className || s.classId || "").toUpperCase() === c.name.toUpperCase());
+              combined.push(...defStu);
+            }
+          });
+          students = combined;
+        }
+
+        // Đồng bộ và làm sạch triệt để localStorage
+        try {
+          localStorage.setItem("app_classes", JSON.stringify(classes));
+          localStorage.setItem("app_students", JSON.stringify(students));
+        } catch (err) {}
+
+        const rawLes = localStorage.getItem("app_recent_lessons");
+        recentLessons = rawLes ? JSON.parse(rawLes) : [];
+      } catch (e) {
+        classes = DEFAULT_CLASSES;
+        students = DEFAULT_STUDENTS;
+        recentLessons = [];
+      }
+    }
+
+    function saveLocalData() {
+      try {
+        localStorage.setItem("app_classes", JSON.stringify(classes));
+        localStorage.setItem("app_students", JSON.stringify(students));
+        localStorage.setItem("app_recent_lessons", JSON.stringify(recentLessons));
+      } catch (e) {
+        console.warn("Lỗi lưu LocalStorage:", e);
+      }
+    }
+
+    /* ─── STATS CALCULATION ─── */
+    function updateStats() {
+      $("statTotalStu").textContent = students.length;
+      $("statTotalCls").textContent = classes.length;
+      const weakCount = students.filter(s => s.level === "yeu").length;
+      $("statWeak").textContent = weakCount;
+      $("statWeakSub").textContent = `${weakCount} học sinh mức yếu`;
+      $("statLessons").textContent = recentLessons.length;
+
+      const gc = {};
+      students.forEach(s => {
+        const g = (s.className || "").replace(/\D/g, "")[0] || (s.grade ? String(s.grade) : "?");
+        gc[g] = (gc[g] || 0) + 1;
+      });
+      $("statStuSub").textContent = Object.entries(gc).sort().map(([g, n]) => `K${g}: ${n}`).join(" | ") || "K7: 124 | K9: 79";
+      $("statClsSub").textContent = classes.map(c => c.name).join(", ") || "Chưa có lớp";
+      $("stuHeaderCount").textContent = students.length;
+    }
+
+    /* ─── POPULATE SELECTS & TABLES ─── */
+    function populateClassSelects() {
+      const opts = classes.map(c => `<option value="${c.id || c.name}">${esc(c.name)} (K${c.grade || 9})</option>`).join("");
+      const curClassId = $("classId").value;
+      $("classId").innerHTML = '<option value="">— chọn lớp —</option>' + opts;
+      if (curClassId) $("classId").value = curClassId;
+      $("stuClass").innerHTML = opts || '<option value="">(chưa có lớp)</option>';
+      $("filterClass").innerHTML = '<option value="">Tất cả lớp (' + classes.length + ')</option>' + opts;
+    }
+
+    function renderClassTable() {
+      const DAY_NAMES = { 1: "T2", 2: "T3", 3: "T4", 4: "T5", 5: "T6", 6: "T7" };
+      const formatDays = days => {
+        if (!days) return "Chưa đặt";
+        const entries = Object.entries(days).filter(([_, v]) => v > 0);
+        return entries.length ? entries.map(([k, v]) => `${DAY_NAMES[k] || k}: ${v}t`).join(", ") : "Chưa đặt";
+      };
+
+      $("classBody").innerHTML = classes.map(c => `
+    <tr>
+      <td><b>${esc(c.name)}</b></td>
+      <td><span class="chip chip-${c.grade || 9}">Lớp ${esc(c.grade || 9)}</span></td>
+      <td style="font-size:0.82rem;color:var(--dim)">${esc(formatDays(c.days))}</td>
+      <td>
+        <span style="display:inline-flex;align-items:center;gap:6px">
+          <input type="number" min="0" max="140" value="${c.taught || 0}" data-taught-input="${c.id || c.name}" style="width:68px;padding:4px 8px;font-size:0.84rem">
+          <button class="btn btn-ghost btn-sm" data-savetaught="${c.id || c.name}">Lưu</button>
+        </span>
+      </td>
+      <td><button class="btn btn-danger btn-sm" data-delclass="${c.id || c.name}">Xóa</button></td>
+    </tr>
+  `).join("") || '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--dim)">Chưa có lớp nào.</td></tr>';
+    }
+
+    function renderStudentTable() {
+      const fc = $("filterClass").value;
+      const fl = $("filterLevel").value;
+      const fq = ($("stuSearch").value || "").trim().toLowerCase();
+      const order = { yeu: 0, tb: 1, kha: 2, gioi: 3 };
+
+      const list = students.filter(s =>
+        (!fc || s.classId === fc || s.className === fc) &&
+        (!fl || s.level === fl) &&
+        (!fq || s.name.toLowerCase().includes(fq))
+      ).sort((a, b) => (order[a.level] - order[b.level]) || a.name.localeCompare(b.name, "vi"));
+
+      $("stuFilteredCount").textContent = `Hiển thị ${list.length} / ${students.length} học sinh`;
+
+      const gradeOf = s => (s.className || "").replace(/\D/g, "")[0] || (s.grade ? String(s.grade) : "9");
+
+      $("stuBody").innerHTML = list.map((s, idx) => `
+    <tr>
+      <td style="color:var(--dim);font-size:0.8rem">${idx + 1}</td>
+      <td><b>${esc(s.name)}</b></td>
+      <td><span class="chip chip-${gradeOf(s)}">Khối ${gradeOf(s)}</span></td>
+      <td><span class="chip chip-cls">${esc(s.className || "—")}</span></td>
+      <td>
+        <select data-stulevel="${s.id}" style="width:auto;padding:3px 7px;font-size:0.78rem;font-weight:700">
+          <option value="yeu"${s.level === "yeu" ? " selected" : ""}>Yếu</option>
+          <option value="tb"${s.level === "tb" ? " selected" : ""}>Trung bình</option>
+          <option value="kha"${s.level === "kha" ? " selected" : ""}>Khá</option>
+          <option value="gioi"${s.level === "gioi" ? " selected" : ""}>Giỏi</option>
+        </select>
+      </td>
+      <td>
+        <div class="pts-box">
+          <button class="pts-btn" data-pointadd="${s.id}" data-val="-1">−</button>
+          <span>${s.points || 0} ⭐</span>
+          <button class="pts-btn" data-pointadd="${s.id}" data-val="1">+</button>
+        </div>
+      </td>
+      <td><button class="btn btn-danger btn-sm" data-delstu="${s.id}" title="Xóa học sinh">🗑</button></td>
+    </tr>
+  `).join("") || '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim)">Không tìm thấy học sinh nào phù hợp.</td></tr>';
+    }
+
+    function renderRecentLessons() {
+      if (!recentLessons.length) {
+        $("recentList").innerHTML = '<li><span style="color:var(--dim);font-size:0.82rem">Chưa có bài soạn nào trong bộ nhớ.</span></li>';
+        return;
+      }
+      $("recentList").innerHTML = recentLessons.slice(0, 8).map((l, i) => `
+    <li>
+      <div class="t">
+        <strong title="${esc(l.title)}">${esc(l.title)}</strong>
+        <small>${esc(l.className || "")} · ${esc(l.date || "Hôm nay")} · ${l.steps ? l.steps.length : 0} bước</small>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-openlesson="${i}">Sửa</button>
+      <button class="btn btn-danger btn-sm" data-delles="${i}" title="Xóa bài này">✕</button>
+    </li>
+  `).join("");
+    }
+
+    function updateBanner() {
+      const b = $("ppctBanner");
+      if (!state.ppctKey) {
+        b.hidden = true;
+        return;
+      }
+      const parts = state.ppctKey.split("-");
+      const g = parts[0];
+      const t = parts[1];
+      const r = getLessonPpct(g, +t, currentSubject);
+
+      b.hidden = false;
+      b.innerHTML = r ? `<b>${esc(getSubjectName())} ${g} · Tiết ${t} (Tuần ${r.week})</b>: ${esc(r.chapter)}` : `<b>${esc(state.ppctKey)}</b>`;
+    }
+
+    /* ─── PHÂN TÍCH SƯ PHẠM CHỐNG TRÙNG LẶP NỘI DUNG GIỮA CÁC TIẾT ─── */
+    function analyzeLessonPedagogy(title = "", tiet = 1, grade = "9", rawRequirement = "") {
+      title = (title || "").trim();
+      tiet = parseInt(tiet, 10) || 1;
+      grade = String(grade || "9");
+
+      // 1. Nhận diện số thứ tự tiết trong tiêu đề
+      let currentPart = 1;
+      let totalParts = 1;
+      const matchPart = title.match(/tiết\s*(\d+)/i);
+      if (matchPart) {
+        currentPart = parseInt(matchPart[1], 10);
+      }
+
+      // 2. Tìm tên bài gốc (loại bỏ "(Tiết X)")
+      const baseTitle = title.replace(/[\(\[\-–—]?\s*tiết\s*\d+\s*[\)\]]?/gi, "").trim();
+
+      // 3. Tra cứu trong PPCT để biết bài này tổng cộng bao nhiêu tiết
+      const ppctList = getSubjectPpctList(currentSubject, grade);
+      if (ppctList.length) {
+        const siblings = ppctList.filter(item => {
+          const itemBase = (item.title || "").replace(/[\(\[\-–—]?\s*tiết\s*\d+\s*[\)\]]?/gi, "").trim();
+          return itemBase === baseTitle;
+        });
+        if (siblings.length > 1) {
+          totalParts = siblings.length;
+          const idx = siblings.findIndex(item => item.tiet === tiet);
+          if (idx >= 0) currentPart = idx + 1;
+        }
+      }
+
+      if (currentPart > totalParts) totalParts = currentPart;
+      const isMultiPart = totalParts > 1 || matchPart !== null;
+      const isLuyenTap = /luyện tập/i.test(title);
+
+      if (currentSubject !== "toan") {
+        const subjectName = getSubjectName();
+        return {
+          isMultiPart,
+          currentPart,
+          totalParts,
+          baseTitle,
+          guidancePrompt: `Soạn đúng đặc thù môn ${subjectName}; bám sát yêu cầu cần đạt và nội dung giáo viên cung cấp. Phân bổ hoạt động phù hợp với tiết ${currentPart}/${totalParts}, tránh lặp lại nội dung đã học.`,
+          badgeHtml: `<span style="color:#4ade80;font-weight:700">${esc(subjectName)} · Khối ${esc(grade)}</span>: Soạn theo yêu cầu cần đạt của môn học.`,
+          autoObjective: `Đạt yêu cầu cần đạt của bài học ${baseTitle} trong môn ${subjectName}.`,
+          autoRequirement: rawRequirement || `Học sinh vận dụng được kiến thức, kỹ năng của bài học ${baseTitle}.`
+        };
+      }
+
+      let guidancePrompt = "";
+      let badgeHtml = "";
+      let autoObjective = "";
+      let autoRequirement = rawRequirement || "";
+
+      if (isMultiPart) {
+        if (currentPart === 1) {
+          badgeHtml = `<span style="color:#38bdf8;font-weight:700">📘 Bài ${totalParts} tiết · Đang soạn TIẾT 1:</span> Tập trung Khởi động - Khám phá khái niệm, định nghĩa &amp; ví dụ nhận biết ban đầu (chống trùng với Tiết 2).`;
+
+          guidancePrompt = `
+=== NGUYÊN TẮC PHÂN BỔ SƯ PHẠM BẮT BUỘC CHO TIẾT 1/${totalParts} (CHỐNG TRÙNG LẶP NỘI DUNG) ===
+- Bài dạy này là bài học nhiều tiết (${totalParts} tiết). ĐÂY LÀ TIẾT ĐẦU TIÊN (TIẾT 1).
+- NHIỆM VỤ TRỌNG TÂM CỦA TIẾT 1:
+  1. Hoạt động Khởi động: Tình huống thực tế hoặc câu hỏi gợi mở để dẫn dắt học sinh vào bài mới.
+  2. Khám phá - Hình thành kiến thức nền tảng: Hướng dẫn học sinh từng bước hình thành Khái niệm, Định nghĩa, Ký hiệu và Tính chất cơ bản ở phần đầu của bài học.
+  3. Luyện tập nhận biết: Cho các ví dụ đơn giản ở mức độ DỄ (nhận biết, thông hiểu) để học sinh nắm chắc lý thuyết ban đầu.
+  4. Lược đồ ghi bảng: Chỉ ghi Mục 1 và Mục 2 (các định nghĩa, tính chất nền tảng ban đầu).
+- ĐIỀU CẤM KỴ: TUYỆT ĐỐI KHÔNG đưa vào bài tập biến đổi phức tạp, bài toán thực tế nâng cao hay các công thức nâng cao thuộc về Tiết ${currentPart + 1}.`;
+
+          autoObjective = `Trọng tâm Tiết 1/${totalParts}: Hình thành khái niệm, định nghĩa, nhận biết các tính chất mở đầu của ${baseTitle} và làm tốt các ví dụ nhận biết cơ bản.`;
+        } else if (currentPart === 2) {
+          badgeHtml = `<span style="color:#fb923c;font-weight:700">📙 Bài ${totalParts} tiết · Đang soạn TIẾT 2:</span> Tập trung Luyện phương pháp giải, bài tập biến đổi &amp; sửa lỗi sai (TUYỆT ĐỐI KHÔNG lặp lại định nghĩa Tiết 1).`;
+
+          guidancePrompt = `
+=== CẢNH BÁO SƯ PHẠM BẮT BUỘC CHO TIẾT 2/${totalParts} (TUYỆT ĐỐI KHÔNG TRÙNG NỘI DUNG VỚI TIẾT 1) ===
+- Bài dạy này gồm ${totalParts} tiết. ĐÂY LÀ TIẾT THỨ HAI (TIẾT 2) - NỐI TIẾP TIẾT 1.
+- NGUYÊN TẮC BẮT BUỘC CHỐNG TRÙNG LẶP:
+  1. TUYỆT ĐỐI KHÔNG LẶP LẠI việc dạy lại khái niệm / định nghĩa mở đầu hoặc bài toán khởi động của Tiết 1!
+  2. Tiết 1 học sinh đã học khái niệm rồi. Tiết 2 này BẮT BUỘC:
+     - Khởi động nhanh (3-5 phút): Đặt 1 câu hỏi chớp nhoáng nhắc lại nhanh công thức/tính chất của Tiết 1.
+     - ${isLuyenTap
+              ? 'Luyện tập chuyên sâu các dạng toán biến đổi linh hoạt, tìm ẩn số, bài toán thực tiễn và sửa các lỗi sai điển hình.'
+              : 'Hình thành kiến thức phần tiếp theo (tính chất 2, quy tắc biến đổi, công thức tiếp theo) VÀ Luyện tập các dạng bài tập thực hành trọng tâm.'}
+     - Rèn kỹ năng tính toán, phân tích các bẫy đề thi và lỗi sai học sinh hay mắc phải.
+  3. Lược đồ ghi bảng: Ghi tóm tắt Phương pháp giải các dạng toán, các bước giải mẫu và lưu ý quan trọng của Tiết 2 (không ghi lại lý thuyết Tiết 1).`;
+
+          autoObjective = `Trọng tâm Tiết 2/${totalParts}: Rèn luyện thành thạo kỹ năng giải các dạng toán thực hành của ${baseTitle}, nhận diện và khắc phục lỗi sai thường gặp (Không nhắc lại lý thuyết mở đầu của Tiết 1).`;
+        } else if (currentPart >= 3) {
+          badgeHtml = `<span style="color:#f472b6;font-weight:700">📕 Bài ${totalParts} tiết · Đang soạn TIẾT ${currentPart}:</span> Vận dụng thực tế, bài toán tổng hợp liên môn &amp; hệ thống hóa chủ đề.`;
+
+          guidancePrompt = `
+=== CHỈ THỊ SƯ PHẠM CHO TIẾT ${currentPart}/${totalParts} (TIẾT TỔNG KẾT & VẬN DỤNG CAO) ===
+- ĐÂY LÀ TIẾT THỨ ${currentPart}/${totalParts} CỦA CHỦ ĐỀ "${baseTitle}".
+- NGUYÊN TẮC: TUYỆT ĐỐI KHÔNG dạy lại lý thuyết mở đầu của Tiết 1 và Tiết 2.
+- NHIỆM VỤ TRỌNG TÂM:
+  1. Kết nối toàn bộ kiến thức của cả chủ đề.
+  2. Vận dụng giải các bài toán thực tiễn đời sống và bài toán liên môn.
+  3. Rèn luyện bài toán tổng hợp, phân hóa nâng cao cho học sinh khá giỏi.
+  4. Lược đồ ghi bảng: Sơ đồ tư duy hệ thống hóa toàn bộ chủ đề và các kỹ thuật giải toán nâng cao.`;
+
+          autoObjective = `Trọng tâm Tiết ${currentPart}/${totalParts}: Vận dụng tổng hợp kiến thức ${baseTitle} vào bài toán thực tiễn; rèn kỹ năng giải bài toán phân hóa và hệ thống hóa toàn bộ chủ đề.`;
+        }
+      } else {
+        badgeHtml = `<span style="color:#4ade80;font-weight:700">📗 Bài 1 tiết trọn vẹn:</span> Phân bổ đầy đủ các bước Khởi động (5') ➔ Hình thành kiến thức (15') ➔ Luyện tập (20') ➔ Vận dụng (5').`;
+
+        guidancePrompt = `
+=== QUY TẮC SƯ PHẠM CHO BÀI HỌC 1 TIẾT TRỌN VẸN ===
+- Soạn bài hoàn chỉnh gói gọn trong 45 phút, cân đối thời gian giữa lý thuyết và bài tập thực hành.`;
+
+        autoObjective = `Nắm vững kiến thức trọng tâm và vận dụng giải thành thạo bài tập cơ bản của ${baseTitle}.`;
+      }
+
+      return {
+        isMultiPart,
+        currentPart,
+        totalParts,
+        baseTitle,
+        badgeHtml,
+        guidancePrompt,
+        autoObjective,
+        autoRequirement
+      };
+    }
+
+    function updatePedagogyNotice() {
+      const badgeEl = $("pedagogyBadge");
+      if (!badgeEl) return;
+      const title = $("title").value.trim();
+      const tiet = ($("tiet").value || "").trim();
+      const grade = $("grade").value || "9";
+
+      if (!title) {
+        badgeEl.style.display = "none";
+        badgeEl.innerHTML = "";
+        return;
+      }
+
+      const ped = analyzeLessonPedagogy(title, tiet, grade, $("requirements").value);
+      if (ped.badgeHtml) {
+        badgeEl.style.display = "block";
+        badgeEl.innerHTML = ped.badgeHtml;
+      } else {
+        badgeEl.style.display = "none";
+      }
+    }
+
+    function updatePpctDisplay() {
+      const g = $("grade").value;
+      const t = ($("tiet").value || "").trim();
+
+      if (t) {
+        state.ppctKey = `${g}-${t}`;
+        if ($("ppctKeyDisplay")) $("ppctKeyDisplay").value = state.ppctKey;
+        const r = getLessonPpct(g, +t, currentSubject);
+        if (r && !$("week").value) $("week").value = r.week;
+      } else {
+        if ($("ppctKeyDisplay")) $("ppctKeyDisplay").value = state.ppctKey || "";
+      }
+      updateBanner();
+      updatePedagogyNotice();
+    }
+
+    $("classId").addEventListener("change", () => {
+      const cid = $("classId").value;
+      const cls = classes.find(c => (c.id || c.name) === cid);
+      if (cls) {
+        if (cls.grade) $("grade").value = cls.grade;
+        if (!$("tiet").value) $("tiet").value = (cls.taught || 0) + 1;
+        updatePpctDisplay();
+      }
+    });
+
+    $("grade").addEventListener("change", () => {
+      updatePpctDisplay();
+      const g = $("grade").value;
+      const cid = $("classId").value;
+      const curCls = classes.find(c => (c.id || c.name) === cid);
+      if (!curCls || String(curCls.grade) !== String(g)) {
+        const firstCls = classes.find(c => String(c.grade) === String(g) || (c.name || "").startsWith(String(g)));
+        if (firstCls) $("classId").value = firstCls.id || firstCls.name;
+      }
+    });
+    $("tiet").addEventListener("input", updatePpctDisplay);
+    $("title").addEventListener("input", updatePedagogyNotice);
+    $("teachingMode").addEventListener("change", () => {
+      state.teachingMode = $("teachingMode").value;
+    });
+
+    function renderEditor() {
+      updateBanner();
+      const hasContent = state.blackboard.length > 0 || state.steps.length > 0 || state.giaoAn5512;
+
+      $("emptyState").hidden = hasContent;
+      $("editorWrap").hidden = !hasContent;
+      $("editorActions").hidden = !hasContent;
+      $("panel5512").hidden = !hasContent;
+
+      $("txt5512").value = state.giaoAn5512 || "";
+
+      $("bbList").innerHTML = state.blackboard.map((b, i) => `
+    <div class="bb-item" data-list="blackboard" data-i="${i}">
+      <div class="bb-head">
+        <input data-k="title" value="${esc(b.title)}" placeholder="Tiêu đề ý ghi bảng (VD: 1. Định nghĩa)">
+        <button class="btn btn-danger btn-sm" data-act="del">Xóa</button>
+      </div>
+      <textarea data-k="content" rows="2" placeholder="Nội dung tóm tắt ghi bảng...">${esc(b.content)}</textarea>
+    </div>
+  `).join("") || '<p class="hint">Chưa có ý ghi bảng nào. Bấm "+ Thêm ý ghi bảng" ở trên.</p>';
+
+      $("stepList").innerHTML = state.steps.map((s, i) => `
+    <div class="step" data-list="steps" data-i="${i}" data-level="${s.level || 'vua'}">
+      <div class="step-head">
+        <span class="num">Bước ${i + 1}</span>
+        <select data-k="level">
+          ${Object.entries(STEP_LEVEL_LABEL).map(([k, v]) => `<option value="${k}"${k === s.level ? " selected" : ""}>Mức: ${v}</option>`).join("")}
+        </select>
+        <span class="tools">
+          <button class="btn btn-ghost btn-sm" data-act="up"${i === 0 ? " disabled" : ""}>↑</button>
+          <button class="btn btn-ghost btn-sm" data-act="down"${i === state.steps.length - 1 ? " disabled" : ""}>↓</button>
+          <button class="btn btn-danger btn-sm" data-act="del">✕</button>
+        </span>
+      </div>
+
+      <label class="lbl">Chặng / tên hoạt động</label>
+      <input data-k="phase" value="${esc(s.phase || "")}" placeholder="VD: Ôn kiến thức nền, Làm mẫu, Thử thách nhóm...">
+      
+      <label class="lbl">Câu hỏi vấn đáp giáo viên đặt ra</label>
+      <textarea data-k="question" rows="2" placeholder="Nội dung câu hỏi ngắn gọn...">${esc(s.question)}</textarea>
+
+      <div class="row2">
+        <div>
+          <label class="lbl">Việc giáo viên làm</label>
+          <textarea data-k="teacherAction" rows="2" placeholder="Gợi mở, làm mẫu, giao nhiệm vụ...">${esc(s.teacherAction || "")}</textarea>
+        </div>
+        <div>
+          <label class="lbl">Nhiệm vụ của học sinh</label>
+          <textarea data-k="studentTask" rows="2" placeholder="Học sinh suy nghĩ, trao đổi hoặc thực hiện...">${esc(s.studentTask || "")}</textarea>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label class="lbl">Gợi ý (khi học sinh bí)</label>
+          <textarea data-k="hint" rows="2">${esc(s.hint)}</textarea>
+        </div>
+        <div>
+          <label class="lbl">Đáp án mong đợi</label>
+          <textarea data-k="answer" rows="2">${esc(s.answer)}</textarea>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label class="lbl">Sản phẩm / câu trả lời cần đạt</label>
+          <textarea data-k="expectedProduct" rows="2" placeholder="Kết quả hoặc sản phẩm học sinh cần hoàn thành...">${esc(s.expectedProduct || "")}</textarea>
+        </div>
+        <div>
+          <label class="lbl">Cách tổ chức · thời lượng (phút)</label>
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:8px">
+            <input data-k="grouping" value="${esc(s.grouping || "")}" placeholder="Cá nhân / cặp đôi / nhóm">
+            <input data-k="durationMinutes" type="number" min="0" max="60" value="${esc(s.durationMinutes || "")}" placeholder="Phút">
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label class="lbl">Giải thích cho cả lớp</label>
+          <textarea data-k="explanation" rows="2">${esc(s.explanation)}</textarea>
+        </div>
+        <div>
+          <label class="lbl">Lỗi học sinh hay mắc</label>
+          <textarea data-k="mistake" rows="2">${esc(s.mistake)}</textarea>
+        </div>
+      </div>
+      
+      <div class="step-image-box" style="margin-top: 12px; background: rgba(0,0,0,0.18); padding: 10px 12px; border-radius: 8px; border: 1px dashed var(--line);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+          <label class="lbl" style="margin:0; font-weight:700; color:var(--chalk);">🖼️ Hình ảnh minh họa cho bước này</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0; padding:4px 10px; font-size:0.75rem; border:1px solid var(--line); display:inline-flex; align-items:center; gap:4px;" title="Chọn file ảnh từ máy tính (JPG, PNG, WebP...)">
+              <span>📁 Tải ảnh từ máy</span>
+              <input type="file" accept="image/*" class="file-img-upload" data-i="${i}" style="display:none;">
+            </label>
+            ${s.imageUrl ? `<button type="button" class="btn btn-danger btn-sm btn-clear-img" data-i="${i}" style="padding:4px 8px; font-size:0.75rem;">✕ Xóa ảnh</button>` : ""}
+          </div>
+        </div>
+
+        <input data-k="imageUrl" class="input-img-url" data-i="${i}" placeholder="Dán link ảnh (VD: https://.../hinh.png) hoặc bấm 'Tải ảnh từ máy' ở trên..." value="${esc(s.imageUrl || '')}" style="width:100%; box-sizing:border-box;">
+
+        <!-- KHUNG XEM TRƯỚC (LIVE PREVIEW) HÌNH ẢNH TRỰC TIẾP -->
+        <div class="img-preview-wrap" id="imgPrev_${i}" style="margin-top:8px; ${s.imageUrl ? 'display:block;' : 'display:none;'}">
+          <div style="font-size:0.75rem; color:var(--green); margin-bottom:4px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+            <span>✓ Hình ảnh xem trước:</span>
+            <span style="font-size:0.72rem; color:var(--dim); font-weight:normal;">(Click vào ảnh để mở tab mới xem ảnh gốc)</span>
+          </div>
+          <div style="text-align:center; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; border:1px solid rgba(255,255,255,0.08); position:relative;">
+            <img src="${esc(s.imageUrl || '')}" 
+                 alt="Hình minh họa bước ${i + 1}" 
+                 referrerpolicy="no-referrer"
+                 loading="lazy"
+                 id="imgElem_${i}"
+                 style="max-width:100%; max-height:220px; object-fit:contain; border-radius:6px; display:inline-block; vertical-align:middle; cursor:pointer;"
+                 onclick="window.open(this.src, '_blank')"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; padding:12px; color:#f87171; font-size:0.8rem; background:rgba(239,68,68,0.1); border-radius:6px;">
+              ⚠️ Không tải được ảnh từ link này. Thầy/cô vui lòng kiểm tra lại link hoặc bấm nút <b>📁 Tải ảnh từ máy</b> để chọn ảnh trực tiếp!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join("") || '<p class="hint">Chưa có bước vấn đáp nào. Bấm "+ Thêm bước" hoặc Tạo bằng AI.</p>';
+    }
+
+    function showTab(tabName) {
+      const tabs = ["lesson", "tkb", "ppct", "class"];
+      tabs.forEach(name => {
+        const viewEl = $("view-" + name);
+        const tabEl = $("tab-" + name);
+        if (viewEl) viewEl.hidden = name !== tabName;
+        if (tabEl) tabEl.setAttribute("aria-selected", name === tabName);
+      });
+      if (tabName === "tkb") renderTkb();
+      if (tabName === "ppct") renderPpct();
+    }
+
+    if ($("tab-lesson")) $("tab-lesson").addEventListener("click", () => showTab("lesson"));
+    if ($("tab-tkb")) $("tab-tkb").addEventListener("click", () => showTab("tkb"));
+    if ($("tab-ppct")) $("tab-ppct").addEventListener("click", () => showTab("ppct"));
+    if ($("tab-class")) $("tab-class").addEventListener("click", () => showTab("class"));
+
+    $("btnCopy5512").addEventListener("click", () => {
+      const text = $("txt5512").value;
+      if (!text) {
+        toast("Chưa có nội dung giáo án để copy.");
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        toast("✅ Đã copy giáo án! Thầy mở Word và dán vào nhé.");
+      }).catch(err => {
+        toast("Lỗi copy: " + err);
+      });
+    });
+
+    $("txt5512").addEventListener("input", e => {
+      state.giaoAn5512 = e.target.value;
+    });
+
+    // ========================================================
+    // BỘ GIẢI MÃ VÀ SỬA LỖI JSON SIÊU CẤP (CHỐNG LỖI JACKSON / NOTEBOOKLM)
+    // ========================================================
+    function rescueExtractLessonData(raw) {
+      const result = {
+        teachingMode: "",
+        tiet_hoc: "",
+        bai_toan_sgk: "",
+        giao_an_5512: "",
+        cac_buoc_dan_dat: []
+      };
+
+      if (!raw || typeof raw !== "string") return [result];
+
+      const mMode = raw.match(/"(?:teachingMode|teaching_mode|activityType)"\s*:\s*"([^"]+)"/i);
+      if (mMode) result.teachingMode = mMode[1].trim();
+
+      // 1. Trích xuất tiet_hoc
+      const mTitle = raw.match(/"tiet_hoc"\s*:\s*"((?:\\.|[^"\\])*)"/i);
+      if (mTitle) {
+        result.tiet_hoc = mTitle[1].replace(/\\n/g, " ").replace(/\\"/g, '"').trim();
+      }
+
+      // 2. Trích xuất bai_toan_sgk
+      const mSgk = raw.match(/"bai_toan_sgk"\s*:\s*"((?:\\.|[^"\\])*)"/i);
+      if (mSgk) {
+        result.bai_toan_sgk = mSgk[1].replace(/\\n/g, "\n").replace(/\\"/g, '"').trim();
+      }
+
+      // 3. Trích xuất giao_an_5512
+      const m5512 = raw.match(/"giao_an_5512"\s*:\s*"((?:\\.|[^"\\])*)"/i);
+      if (m5512) {
+        result.giao_an_5512 = m5512[1].replace(/\\n/g, "\n").replace(/\\"/g, '"').trim();
+      }
+
+      // 4. Trích xuất TẤT CẢ các bước trong cac_buoc_dan_dat bằng STACK BRACE SCANNER
+      // Quét từng khối {} độc lập không phân biệt phân cấp mảng - ĐẢM BẢO LẤY ĐỦ TOÀN BỘ CÁC BƯỚC (8 BƯỚC...)
+      const stepBlocks = [];
+      let inStr = false;
+      const stack = [];
+
+      for (let i = 0; i < raw.length; i++) {
+        const c = raw[i];
+        if (c === '"') {
+          let bs = 0, j = i - 1;
+          while (j >= 0 && raw[j] === '\\') { bs++; j--; }
+          if (bs % 2 === 0) inStr = !inStr;
+        } else if (!inStr) {
+          if (c === '{') {
+            stack.push(i);
+          } else if (c === '}') {
+            if (stack.length > 0) {
+              const start = stack.pop();
+              const blockStr = raw.substring(start, i + 1);
+              // Chỉ nhận các block là Bước học (chứa câu hỏi/đáp án/ghi bảng) và không chứa mảng bước con
+              const hasStepKeys = /cau_hoi|question|studentTask|teacherAction|noi_dung|van_dap|de_bai/i.test(blockStr) ||
+                (/dap_an|answer|ket_qua/i.test(blockStr) && /ghi_bang|blackboard|hint|goi_y|bang/i.test(blockStr));
+              const isParentContainer = /"(?:cac_buoc_dan_dat|steps|activities|cac_buoc)"\s*:\s*\[/i.test(blockStr);
+
+              if (hasStepKeys && !isParentContainer) {
+                stepBlocks.push(blockStr);
+              }
+            }
+          }
+        }
+      }
+
+      // Hàm trích xuất an toàn giá trị một trường từ block string
+      const extractField = (block, keys) => {
+        for (const k of keys) {
+          const r = new RegExp(`"${k}"\\s*:\\s*"`, "i");
+          const m = r.exec(block);
+          if (m) {
+            const start = m.index + m[0].length;
+            let end = start;
+            let bs = 0;
+            while (end < block.length) {
+              const ch = block[end];
+              if (ch === '"' && bs % 2 === 0) {
+                // Kiểm tra xem đây có phải là dấu đóng nháy kép thật sự không (theo sau bởi , hoặc } hoặc xuống dòng)
+                const after = block.substring(end + 1).trim();
+                if (after.startsWith(",") || after.startsWith("}") || after.length === 0 || /^\r?\n/.test(block.substring(end + 1))) {
+                  break;
+                }
+              }
+              if (ch === '\\') bs++; else bs = 0;
+              end++;
+            }
+            return fixLatexEscapes(block.substring(start, end).replace(/\\n/g, "\n").replace(/\\"/g, '"').trim());
+          }
+        }
+        return "";
+      };
+
+      stepBlocks.forEach((block, idx) => {
+        const q = extractField(block, ["cau_hoi_gv", "cau_hoi", "cau_hoi_giao_vien", "question", "noi_dung_cau_hoi", "noi_dung", "van_dap", "de_bai", "yeu_cau", "prompt", "q"]);
+        const a = extractField(block, ["dap_an_hs", "dap_an", "cau_tra_loi", "answer", "dap_an_dung", "ket_qua", "a"]);
+        const h = extractField(block, ["goi_y_khi_sai", "goi_y", "hint", "huong_dan", "huong_dan_giai", "tro_giup", "h"]);
+        const exp = extractField(block, ["giai_thich", "explanation", "giai_thich_chi_tiet", "phan_tich", "ly_do"]);
+        const mis = extractField(block, ["loi_hay_gap", "loi_sai", "mistake", "sai_lam_thuong_gap", "chu_y", "luu_y"]);
+        const gb = extractField(block, ["ghi_bang", "noi_dung_ghi_bang", "bang", "blackboard", "board"]);
+        const img = extractField(block, ["hinh_anh", "imageUrl", "image", "hinh"]);
+        const phase = extractField(block, ["phase", "chang", "hoat_dong_name"]);
+        const teacherAction = extractField(block, ["teacherAction", "viec_giao_vien_lam", "hanh_dong_gv"]);
+        const studentTask = extractField(block, ["studentTask", "nhiem_vu_hoc_sinh", "hanh_dong_hs"]);
+        const expectedProduct = extractField(block, ["expectedProduct", "san_pham_mong_doi", "ket_qua_mong_doi"]);
+        const grouping = extractField(block, ["grouping", "hinh_thuc_to_chuc", "to_chuc"]);
+        const durationMatch = /"(?:durationMinutes|thoi_luong_phut)"\s*:\s*(\d+)/i.exec(block);
+
+        if (q || a || h || gb || teacherAction || studentTask || expectedProduct) {
+          result.cac_buoc_dan_dat.push({
+            cau_hoi_gv: q || (gb ? `Tìm hiểu: ${gb}` : `Bước ${idx + 1}`),
+            phase,
+            teacherAction,
+            studentTask,
+            expectedProduct,
+            grouping,
+            durationMinutes: durationMatch ? Number(durationMatch[1]) : "",
+            dap_an_hs: a,
+            goi_y_khi_sai: h,
+            giai_thich: exp,
+            loi_hay_gap: mis,
+            ghi_bang: gb,
+            hinh_anh: img
+          });
+        }
+      });
+
+      return [result];
+    }
+
+    function cleanAndParseNotebookLMJson(raw) {
+      if (!raw || typeof raw !== "string" || !raw.trim()) {
+        throw new Error("Vui lòng dán nội dung mã JSON vào ô trước khi nạp.");
+      }
+
+      let s = raw.trim();
+
+      // 1. Lấy nội dung từ markdown code block nếu có
+      const codeBlockMatch = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (codeBlockMatch) {
+        s = codeBlockMatch[1].trim();
+      }
+
+      // 2. Tìm khối JSON bao quanh: từ dấu '[' hoặc '{' đầu tiên đến ']' hoặc '}' cuối cùng
+      const firstBracket = s.search(/[\[\{]/);
+      if (firstBracket === -1) {
+        throw new Error("Không tìm thấy cấu trúc JSON (thiếu dấu [ hoặc {). Thầy/cô vui lòng kiểm tra lại kết quả copy từ Gemini/NotebookLM.");
+      }
+      const lastBracket = Math.max(s.lastIndexOf("]"), s.lastIndexOf("}"));
+      if (lastBracket > firstBracket) {
+        s = s.substring(firstBracket, lastBracket + 1);
+      }
+
+      // 3. Chuẩn hóa dấu nháy kép Unicode cong (thường bị chuyển đổi khi paste qua Word/NotebookLM)
+      s = s.replace(/[\u201C\u201D\u201E\u00AB\u00BB]/g, '"')
+        .replace(/[\u2018\u2019\u201A]/g, "'");
+
+      // 4. Loại bỏ các ghi chú / comment JS kiểu // ... hoặc /* ... */ (ngoài url)
+      s = s.replace(/(^|[^:])\/\/[^\r\n]*/g, "$1");
+      s = s.replace(/\/\*[\s\S]*?\*\//g, "");
+
+      // 5. Thử parse lần 1: Nếu chuỗi đã chuẩn JSON hợp lệ
+      try {
+        return JSON.parse(s);
+      } catch (e1) {
+        console.warn("JSON.parse lần 1 có cảnh báo, tự động áp dụng bộ lọc bảo vệ công thức Toán:", e1.message);
+      }
+
+      // 6. Loại bỏ dấu phẩy thừa (trailing commas): ,] hoặc ,}
+      s = s.replace(/,\s*([\]\}])/g, "$1");
+
+      // 7. BỘ QUÉT TỪNG KÝ TỰ BẢO VỆ CHUỖI VÀ TỰ ĐỘNG ESCAPE TOÀN BỘ LỆNH LATEX TRONG STRING
+      let inString = false;
+      let out = [];
+      let i = 0;
+      const len = s.length;
+
+      while (i < len) {
+        const ch = s[i];
+        if (!inString) {
+          if (ch === '"') {
+            inString = true;
+          }
+          out.push(ch);
+          i++;
+        } else {
+          if (ch === '"') {
+            inString = false;
+            out.push(ch);
+            i++;
+          } else if (ch === '\\') {
+            const next = s[i + 1];
+            if (next === '"' || next === '\\' || next === '/') {
+              out.push(ch, next);
+              i += 2;
+            } else if (next === 'u') {
+              const hex = s.substring(i + 2, i + 6);
+              if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+                out.push(ch, next, hex);
+                i += 6;
+              } else {
+                out.push('\\', ch, next);
+                i += 2;
+              }
+            } else if (next === 'n') {
+              const rest = s.substring(i + 2, i + 10);
+              if (/^(?:eq|abla|u|eg|atural|ot|ewline|ode)(?![a-zA-Z])/i.test(rest)) {
+                out.push('\\', ch, next);
+                i += 2;
+              } else {
+                out.push(ch, next);
+                i += 2;
+              }
+            } else if (next === 't') {
+              out.push('\\', ch, next);
+              i += 2;
+            } else if (next === 'r') {
+              if (s[i + 2] === '\\' && s[i + 3] === 'n') {
+                out.push(ch, next);
+                i += 2;
+              } else {
+                out.push('\\', ch, next);
+                i += 2;
+              }
+            } else if (next === 'b' || next === 'f') {
+              out.push('\\', ch, next);
+              i += 2;
+            } else {
+              out.push('\\', ch);
+              i++;
+            }
+          } else if (ch === '\n' || ch === '\r') {
+            if (ch === '\r' && s[i + 1] === '\n') i++;
+            out.push('\\n');
+            i++;
+          } else if (ch === '\t') {
+            out.push('  ');
+            i++;
+          } else {
+            out.push(ch);
+            i++;
+          }
+        }
+      }
+
+      const cleaned = out.join("");
+
+      // Thử parse lần 2 sau khi đã làm sạch toàn bộ công thức Toán và ngắt dòng
+      try {
+        return JSON.parse(cleaned);
+      } catch (e2) {
+        console.warn("JSON.parse lần 2 tiếp tục thử qua bộ cứu hộ Stack Rescue Extractor:", e2.message);
+      }
+
+      // 8. BỘ CỨU TRỢ DỮ LIỆU THÔNG MINH (STACK RESCUE EXTRACTOR)
+      const rescued = rescueExtractLessonData(raw);
+      if (rescued && rescued[0] && (rescued[0].cac_buoc_dan_dat.length || rescued[0].bai_toan_sgk || rescued[0].giao_an_5512)) {
+        return rescued;
+      }
+
+      throw new Error("Dữ liệu JSON bị mất phần lớn cấu trúc. Thầy/cô vui lòng copy lại toàn bộ câu trả lời từ Gemini Web.");
+    }
+
+    // XÁC NHẬN NẠP VÀO BẢNG SOẠN THẢO VÀ TỰ ĐỘNG LƯU ĐỒNG BỘ CLASSROOM
+    $("btnImportNotebookLM").addEventListener("click", async () => {
+      const jsonStr = $("notebookLmJson").value.trim();
+      if (!jsonStr) {
+        toast("⚠️ Vui lòng dán đoạn mã JSON từ Gemini Web hoặc NotebookLM vào ô trước nhé!");
+        $("notebookLmJson").focus();
+        return;
+      }
+
+      try {
+        const parsedData = cleanAndParseNotebookLMJson(jsonStr);
+        if (!parsedData) {
+          throw new Error("Không thể phân tích dữ liệu JSON. Vui lòng kiểm tra lại nội dung copy.");
+        }
+
+        // Làm mới dữ liệu blackboard và steps hiện tại để nạp kịch bản mới
+        state.blackboard = [];
+        state.steps = [];
+
+        // Thu thập tất cả các bước (steps) và các mục ghi bảng từ mọi cấu trúc JSON có thể có
+        let allRawSteps = [];
+        let allBlackboard = [];
+        let mainLesson = {};
+
+        if (Array.isArray(parsedData)) {
+          // Kiểm tra xem parsedData có phải trực tiếp là mảng các bước (array of steps) không
+          const isDirectStepsArray = parsedData.length > 0 && parsedData.every(item =>
+            item && typeof item === "object" && !item.cac_buoc_dan_dat && !item.steps && (
+              item.cau_hoi_gv || item.cau_hoi || item.question || item.noi_dung || item.van_dap ||
+                item.dap_an_hs || item.dap_an || item.answer || item.ghi_bang || item.bang ||
+                item.teacherAction || item.studentTask || item.expectedProduct
+            )
+          );
+
+          if (isDirectStepsArray) {
+            allRawSteps = parsedData;
+            mainLesson = parsedData[0] || {};
+          } else {
+            // Mảng các phần/tiết/hoạt động (multi-part, activities, or single lesson wrapped in array)
+            mainLesson = parsedData[0] || {};
+            parsedData.forEach(item => {
+              if (!item || typeof item !== "object") return;
+              if (item.bai_toan_sgk && !mainLesson.bai_toan_sgk) mainLesson.bai_toan_sgk = item.bai_toan_sgk;
+              if (item.giao_an_5512 && !mainLesson.giao_an_5512) mainLesson.giao_an_5512 = item.giao_an_5512;
+              if (item.tiet_hoc && !mainLesson.tiet_hoc) mainLesson.tiet_hoc = item.tiet_hoc;
+
+              if (Array.isArray(item.blackboard)) {
+                allBlackboard.push(...item.blackboard);
+              }
+
+              const st = item.cac_buoc_dan_dat || item.steps || item.cac_buoc || item.buoc_dan_dat ||
+                item.hoat_dong || item.kich_ban || item.kich_ban_van_dap || item.danh_sach_buoc ||
+                item.questions || item.micro_steps || item.data || item.list;
+              if (Array.isArray(st)) {
+                allRawSteps.push(...st);
+              } else if (item.cau_hoi_gv || item.cau_hoi || item.question || item.dap_an_hs || item.ghi_bang || item.teacherAction || item.studentTask) {
+                allRawSteps.push(item);
+              }
+            });
+          }
+        } else if (parsedData && typeof parsedData === "object") {
+          mainLesson = parsedData;
+          if (Array.isArray(parsedData.blackboard)) {
+            allBlackboard.push(...parsedData.blackboard);
+          }
+          const st = parsedData.cac_buoc_dan_dat || parsedData.steps || parsedData.cac_buoc ||
+            parsedData.buoc_dan_dat || parsedData.hoat_dong || parsedData.kich_ban ||
+            parsedData.kich_ban_van_dap || parsedData.danh_sach_buoc || parsedData.questions ||
+            parsedData.micro_steps || parsedData.data || parsedData.list;
+          if (Array.isArray(st)) {
+            allRawSteps = st;
+          }
+        }
+
+        const importedMode = mainLesson.teachingMode || mainLesson.teaching_mode || mainLesson.activityType;
+        state.teachingMode = TEACHING_MODES[importedMode] ? importedMode : $("teachingMode").value;
+        $("teachingMode").value = state.teachingMode;
+
+        // 1. Nạp Lược đồ ghi bảng
+        if (mainLesson.bai_toan_sgk) {
+          state.blackboard.push({
+            title: "Tình huống SGK / Mở đầu",
+            content: mainLesson.bai_toan_sgk
+          });
+        }
+
+        allBlackboard.forEach(b => {
+          if (b && (b.title || b.content)) {
+            state.blackboard.push({ title: b.title || "", content: b.content || "" });
+          }
+        });
+
+        // 2. Nạp TẤT CẢ các bước dẫn dắt vấn đáp (bảo đảm đủ 100% số lượng bước, không bị mất)
+        allRawSteps.forEach((step, index) => {
+          if (!step || typeof step !== "object") return;
+
+          const gb = step.ghi_bang || step.noi_dung_ghi_bang || step.bang || step.blackboard || step.board || "";
+          if (gb) {
+            state.blackboard.push({
+              title: `Nội dung bước ${index + 1}`,
+              content: gb
+            });
+          }
+
+          let lvl = "vua";
+          if (step.level) {
+            lvl = ["de", "vua", "kho"].includes(step.level) ? step.level : "vua";
+          } else {
+            if (index === 0 || index === 1) lvl = "de";
+            else if (index >= allRawSteps.length - 2 && allRawSteps.length >= 5) lvl = "kho";
+            else lvl = "vua";
+          }
+
+          const q = step.cau_hoi_gv || step.cau_hoi || step.question || step.noi_dung || step.cau_hoi_giao_vien || step.van_dap || step.prompt || step.q || step.de_bai || step.yeu_cau || "";
+          const a = step.dap_an_hs || step.dap_an || step.answer || step.cau_tra_loi || step.dap_an_dung || step.ket_qua || step.a || "";
+          const h = step.goi_y_khi_sai || step.goi_y || step.hint || step.huong_dan || step.huong_dan_giai || step.tro_giup || step.h || "";
+          const exp = step.giai_thich || step.explanation || step.giai_thich_chi_tiet || step.phan_tich || step.ly_do || "";
+          const mis = step.loi_hay_gap || step.loi_sai || step.mistake || step.sai_lam_thuong_gap || step.chu_y || step.luu_y || "";
+          const img = step.hinh_anh || step.imageUrl || step.image || step.hinh || "";
+
+          // Nếu bước có bất kỳ nội dung nào (câu hỏi, đáp án, gợi ý hoặc ghi bảng) thì nạp đầy đủ
+          if (q || a || h || gb) {
+            state.steps.push({
+              level: lvl,
+              phase: step.phase || step.chang || step.hoat_dong_name || "",
+              teacherAction: step.teacherAction || step.viec_giao_vien_lam || step.hanh_dong_gv || "",
+              studentTask: step.studentTask || step.nhiem_vu_hoc_sinh || step.hanh_dong_hs || "",
+              expectedProduct: step.expectedProduct || step.san_pham_mong_doi || step.ket_qua_mong_doi || "",
+              grouping: step.grouping || step.hinh_thuc_to_chuc || step.to_chuc || "",
+              durationMinutes: Number(step.durationMinutes || step.thoi_luong_phut) || "",
+              question: fixLatexEscapes(q || (gb ? `Tìm hiểu: ${gb}` : `Bước ${index + 1}`)),
+              hint: fixLatexEscapes(h),
+              answer: fixLatexEscapes(a),
+              explanation: fixLatexEscapes(exp),
+              mistake: fixLatexEscapes(mis),
+              imageUrl: img
+            });
+          } else if (step.teacherAction || step.studentTask || step.expectedProduct) {
+            state.steps.push({
+              level: lvl,
+              phase: step.phase || "",
+              teacherAction: step.teacherAction || "",
+              studentTask: step.studentTask || "",
+              expectedProduct: step.expectedProduct || "",
+              grouping: step.grouping || "",
+              durationMinutes: Number(step.durationMinutes) || "",
+              question: "",
+              hint: "",
+              answer: "",
+              explanation: "",
+              mistake: "",
+              imageUrl: ""
+            });
+          }
+        });
+
+        // 3. Cập nhật tên bài nếu tên bài hiện tại chưa có hoặc trùng khớp
+        if (mainLesson.tiet_hoc) {
+          const currentTitle = $("title").value.trim();
+          if (!currentTitle || currentTitle.includes("Chưa nhập")) {
+            $("title").value = mainLesson.tiet_hoc.replace(/^Tiết\s*\d+\s*:\s*/i, "").trim() || mainLesson.tiet_hoc;
+          }
+        }
+
+        // 4. Nạp Giáo án 5512
+        if (mainLesson.giao_an_5512) {
+          state.giaoAn5512 = mainLesson.giao_an_5512;
+        } else {
+          const bTitle = $("title").value.trim() || (mainLesson.tiet_hoc || "Bài học");
+          const bObjectives = $("objectives").value.trim() || "Nắm vững kiến thức trọng tâm và kỹ năng cơ bản.";
+          const bReqs = $("requirements").value.trim() || "Thực hiện thành thạo các bước giải toán.";
+          state.giaoAn5512 = `KẾ HOẠCH BÀI DẠY (CHUẨN CÔNG VĂN 5512)\nTÊN BÀI DẠY: ${bTitle.toUpperCase()}\n\nI. MỤC TIÊU:\n1. Về kiến thức: ${bObjectives}\n2. Về năng lực: ${bReqs}\n3. Về phẩm chất: Chăm chỉ, cẩn thận, yêu thích môn Toán.\n\nII. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU:\n- Giáo viên: Kế hoạch bài dạy, thước kẻ, máy tính, ứng dụng Lên lớp.\n- Học sinh: Vở ghi, SGK, dụng cụ học tập.\n\nIII. TIẾN TRÌNH DẠY HỌC:\n${state.blackboard.map((b, i) => `${i + 1}. Hoạt động: ${b.title}\n- Nội dung ghi bảng: ${b.content}`).join("\n\n")}\n\n- Hệ thống câu hỏi vấn đáp vi mô: Gồm ${state.steps.length} bước scaffold từ dễ đến khó đã được nạp vào ứng dụng.`;
+        }
+
+        // Hiển thị kịch bản lên bảng soạn thảo
+        renderEditor();
+
+        // 5. TỰ ĐỘNG LƯU BÀI HOÀN CHỈNH VÀO CSDL ĐỂ SẴN SÀNG LÊN LỚP CLASSROOM
+        let saved = null;
+        try {
+          saved = await saveLesson();
+        } catch (saveErr) {
+          console.warn("Auto save lesson warning:", saveErr);
+        }
+
+        const lessonIdToUse = (saved && saved.id) || state.id || "les_" + Date.now();
+        const classIdToUse = $("classId").value || "";
+        const classroomUrl = `classroom.html?lesson=${encodeURIComponent(lessonIdToUse)}${classIdToUse ? `&class=${encodeURIComponent(classIdToUse)}` : ""}`;
+
+        // Thông báo thành công rực rỡ và cung cấp đường link mở trực tiếp Classroom
+        toast(`
+      <div style="text-align:left;line-height:1.5;max-width:380px">
+        <b style="color:var(--green);font-size:0.95rem">🎉 Nạp kịch bản & Lưu bài thành công!</b><br>
+        <span>Đã nạp đầy đủ <b>${state.steps.length} bước vấn đáp</b> và <b>${state.blackboard.length} mục ghi bảng</b>.</span><br>
+        <a href="${classroomUrl}" target="_blank" style="display:inline-block;margin-top:8px;padding:7px 16px;background:#10b981;color:#042f2e;font-weight:800;border-radius:6px;text-decoration:none;box-shadow:0 2px 8px rgba(16,185,129,0.35)">
+          🚀 Mở bài trong Classroom ngay ↗
+        </a>
+      </div>
+    `, 12000);
+
+      } catch (error) {
+        toast("❌ Lỗi nạp JSON: " + error.message, 6000);
+        console.error("Parse Error:", error);
+      }
+    });
+
+    // Nút xóa nhanh ô dán JSON
+    if ($("btnClearJson")) {
+      $("btnClearJson").addEventListener("click", () => {
+        $("notebookLmJson").value = "";
+        $("notebookLmJson").focus();
+        toast("Đã xóa trắng ô dán JSON.");
+      });
+    }
+
+    // Nút mở nhanh Classroom từ header của bảng kịch bản
+    if ($("btnLaunchClassroom")) {
+      $("btnLaunchClassroom").addEventListener("click", async () => {
+        let lessonIdToUse = state.id;
+        if (!lessonIdToUse) {
+          const saved = await saveLesson();
+          if (saved) lessonIdToUse = saved.id;
+        }
+        if (!lessonIdToUse) {
+          toast("Vui lòng lưu bài trước khi mở Classroom.");
+          return;
+        }
+        const classIdToUse = $("classId").value || "";
+        const classroomUrl = `classroom.html?lesson=${encodeURIComponent(lessonIdToUse)}${classIdToUse ? `&class=${encodeURIComponent(classIdToUse)}` : ""}`;
+        window.open(classroomUrl, "_blank");
+      });
+    }
+
+    // ========================================================
+    // TẠO PROMPT TỪ KHUNG BÊN TRÁI & CHUYỂN SANG GEMINI WEB
+    // ========================================================
+    $("btnOpenGeminiWeb").addEventListener("click", async () => {
+      // 1. Đọc tên bài học từ khung bên trái (ưu tiên ô title)
+      let title = $("title").value.trim();
+      const grade = $("grade").value || "9";
+      const tiet = ($("tiet").value || "").trim();
+      const week = ($("week").value || "").trim();
+
+      // Tự động tìm tên bài từ PPCT nếu ô title đang để trống
+      if (!title) {
+        if (tiet) {
+          const r = getLessonPpct(grade, +tiet, currentSubject);
+          if (r && r.chapter) {
+            title = r.chapter;
+            $("title").value = title;
+            updateBanner();
+          }
+        } else if (state.ppctKey) {
+          const parts = state.ppctKey.split("-");
+          const r = getLessonPpct(parts[0], +parts[1], currentSubject);
+          if (r && r.chapter) {
+            title = r.chapter;
+            $("title").value = title;
+            updateBanner();
+          }
+        }
+      }
+
+      // Nếu vẫn chưa có tên bài: nhắc nhở giáo viên điền
+      if (!title) {
+        toast("⚠️ Thầy/cô vui lòng nhập <b>Tên bài học</b> ở khung bên trái trước nhé!", 4000);
+        $("title").focus();
+        return;
+      }
+
+      // Lấy các thông tin sư phạm từ khung bên trái
+      const clsName = $("classId").options[$("classId").selectedIndex]?.text.replace("— chọn lớp —", "").trim() || "";
+      const objectives = $("objectives").value.trim();
+      const requirements = $("requirements").value.trim();
+      const digital = $("digital").value.trim();
+      const audience = $("aiAudience").value || "học sinh yếu";
+      const count = Math.max(2, Math.min(12, +$("aiCount").value || 6));
+      const extra = $("aiPrompt").value.trim();
+      const subjectName = getSubjectName($("lessonSubject").value);
+
+      // PHÂN TÍCH SƯ PHẠM ĐỂ CHỐNG TRÙNG LẶP NỘI DUNG GIỮA CÁC TIẾT
+      const pedagogy = analyzeLessonPedagogy(title, tiet, grade, requirements);
+
+      const teachingMode = $("teachingMode").value;
+      const modeInfo = TEACHING_MODES[teachingMode] || TEACHING_MODES["guided-discovery"];
+      const promptText = `Bạn là một chuyên gia sư phạm THCS môn ${subjectName} tại Việt Nam (bám sát chương trình GDPT mới).
+Hãy soạn GIÁO ÁN CHUẨN 5512, lược đồ ghi bảng và kịch bản hoạt động lên lớp theo đúng kiểu giáo viên chọn.
+
+--- THÔNG TIN BÀI DẠY (LẤY TỪ GIÁO VIÊN) ---
+- Tên bài: ${title}
+- Môn: ${subjectName} - Khối ${grade} ${clsName ? `(Lớp: ${clsName})` : ''}
+- Tiết PPCT: ${tiet || '1'} | Tuần PPCT: ${week || '1'}
+- Mục tiêu bài dạy: ${objectives || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức trọng tâm môn ${subjectName}`}
+- Yêu cầu cần đạt: ${requirements || pedagogy.autoRequirement || 'Học sinh yếu làm được các bài tập cơ bản, học sinh khá giỏi giải thích được từng bước'}
+- Năng lực số: ${digital || 'Tích hợp khi phù hợp với yêu cầu bài học'}
+- Đối tượng học sinh trọng tâm: Học sinh ${audience}
+- Kiểu hoạt động (teachingMode): ${teachingMode} — ${modeInfo.label}
+- SỐ BƯỚC: ĐÚNG CHÍNH XÁC ${count} phần tử trong mảng "steps", mỗi bước là một nhiệm vụ nhỏ, vừa sức, tiến triển từ dễ đến khó.
+${extra ? '- Yêu cầu bổ sung của giáo viên: ' + extra : ''}
+${pedagogy.guidancePrompt}
+
+--- CHỈ DẪN SƯ PHẠM ---
+1. Kiểu hoạt động đã chọn: ${modeInfo.guidance}
+2. Hỗ trợ học sinh ${audience}: kiểm tra kiến thức nền, chia nhỏ chỉ dẫn, dùng câu ngắn; nếu học sinh bí/sai thì đưa gợi ý theo nấc trước khi lộ đáp án.
+3. Với mỗi bước điền phase (chặng), teacherAction (việc GV làm), studentTask (nhiệm vụ HS), expectedProduct (sản phẩm mong đợi), grouping (cá nhân/cặp đôi/nhóm), durationMinutes (số phút), question, hint, answer, explanation, mistake, imageUrl.
+4. Có thực hành được hỗ trợ, lượt học sinh tự thử, kiểm tra hiểu và củng cố; phân bổ thời lượng hợp lý. Không bịa nội dung SGK; ghi rõ điều cần giáo viên kiểm chứng nếu thiếu tài liệu.
+5. MẢNG "blackboard" BẮT BUỘC có 3-6 mục, không được rỗng. Mỗi mục gồm title và content chứa kiến thức ghi bảng cụ thể, hoàn chỉnh, có thể chép trực tiếp lên bảng/vở; sắp xếp theo tiến trình lên lớp. Ghi đúng trọng tâm bài này (khái niệm/kết luận/quy tắc, cách thực hiện, ví dụ mẫu hoặc lưu ý phù hợp với môn học); content phải khớp với các bước, không viết lời giữ chỗ như "Nội dung ngắn gọn", không chỉ ghi mô tả chung, không bịa hoặc đưa kiến thức chưa dạy.
+
+--- QUY TẮC ĐẦU RA ---
+Chỉ trả về một JSON object hợp lệ thuần túy, không lời dẫn, không Markdown. Dùng dấu $ cho công thức Toán khi phù hợp; escape dấu gạch chéo ngược hợp lệ.
+
+{
+  "teachingMode": "${teachingMode}",
+  "tiet_hoc": "Tiết ${tiet || '1'}: ${title}",
+  "giao_an_5512": "Giáo án theo Công văn 5512, có mục tiêu, thiết bị, tiến trình và thời lượng...",
+  "blackboard": [
+    {"title":"1. [Tiêu đề kiến thức trọng tâm]","content":"[Nội dung kiến thức cụ thể, đúng bài học]"},
+    {"title":"2. [Ví dụ hoặc cách thực hiện]","content":"[Các bước/ví dụ mẫu và kết quả phù hợp môn học]"},
+    {"title":"3. [Ghi nhớ]","content":"[Kết luận hoặc lưu ý học sinh cần ghi nhớ]"}
+  ],
+  "steps": [
+    {
+      "level": "de",
+      "phase": "Tên chặng hoạt động",
+      "teacherAction": "Việc giáo viên làm",
+      "studentTask": "Nhiệm vụ học sinh",
+      "expectedProduct": "Sản phẩm hoặc câu trả lời mong đợi",
+      "grouping": "Cá nhân / cặp đôi / nhóm",
+      "durationMinutes": 5,
+      "question": "Câu hỏi hoặc nhiệm vụ ngắn, chỉ tập trung một ý",
+      "hint": "Gợi ý từng nấc nếu học sinh bí",
+      "answer": "Đáp án mong đợi",
+      "explanation": "Giải thích ngắn gọn, dễ hiểu",
+      "mistake": "Lỗi có thể gặp và cách sửa",
+      "imageUrl": ""
+    }
+  ]
+}
+Tạo đủ đúng ${count} object trong steps. Các trường chuỗi không được chứa xuống dòng thô; dùng \\n nếu cần.`;
+
+      // 1. Tự động sao chép prompt vào Clipboard của giáo viên
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(promptText);
+        copied = true;
+      } catch (err) {
+        // Fallback cho các trình duyệt chặn clipboard API
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = promptText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          copied = true;
+        } catch (e) { }
+      }
+
+      // 2. Mở tab mới sang Gemini Web
+      window.open("https://gemini.google.com/app", "_blank");
+
+      // 3. Đưa con trỏ sẵn sàng vào ô dán JSON
+      const jsonArea = $("notebookLmJson");
+      if (jsonArea) jsonArea.focus();
+
+      // 4. Hiển thị thông báo hướng dẫn từng bước trực quan
+      const partHint = pedagogy.isMultiPart
+        ? `<span style="color:#f59e0b;font-weight:700">🎯 Đã nạp chỉ dẫn Tiết ${pedagogy.currentPart}/${pedagogy.totalParts} chống trùng nội dung!</span><br>`
+        : "";
+
+      toast(`
+    <div style="text-align:left;line-height:1.5;max-width:380px">
+      <b style="color:var(--green);font-size:0.92rem">📋 Đã sao chép Prompt: "${esc(title)}"!</b><br>
+      ${partHint}
+      <span>🌐 <b>Gemini Web</b> đã mở trên tab mới. Thầy/cô làm 3 bước:</span><br>
+      <span style="display:block;margin-top:4px"><b>1.</b> Sang tab Gemini: Nhấn <b>Ctrl + V</b> và bấm <b>Enter</b>.</span>
+      <span><b>2.</b> Đợi Gemini trả lời: Bấm biểu tượng <b>Sao chép</b> (Copy).</span><br>
+      <span><b>3.</b> Quay lại đây: Dán vào ô <b>"DÁN ĐOẠN MÃ JSON VÀO ĐÂY"</b> rồi bấm <b>Xác nhận</b>.</span>
+    </div>
+  `, 10000);
+    });
+
+
+    /* ─── GEMINI & DEEPSEEK INTEGRATION ─── */
+    const apiKeyInput = $("apiKey");
+    const dsApiKeyInput = $("dsApiKey");
+    const modelHidden = $("model");
+    const modelSelect = $("modelSelect");
+    const customModelBox = $("customModelBox");
+    const customModelInput = $("customModelInput");
+    const keyStatusBadge = $("keyStatusBadge");
+    const apiStatusMsg = $("apiStatusMsg");
+    const useDeepSeekFallback = $("useDeepSeekFallback");
+
+    function updateKeyBadge() {
+      const k = apiKeyInput.value.trim();
+      const m = modelHidden.value.trim();
+      if (k) {
+        keyStatusBadge.style.background = "rgba(16, 185, 129, 0.15)";
+        keyStatusBadge.style.color = "var(--green)";
+        keyStatusBadge.textContent = `🟢 Sẵn sàng (${m})`;
+      } else {
+        keyStatusBadge.style.background = "rgba(239, 68, 68, 0.15)";
+        keyStatusBadge.style.color = "#ef4444";
+        keyStatusBadge.textContent = "🔴 Chưa có khóa";
+      }
+    }
+
+    apiKeyInput.value = localStorage.getItem("gemini_key") || "";
+    dsApiKeyInput.value = localStorage.getItem("deepseek_key") || "";
+    useDeepSeekFallback.checked = localStorage.getItem("use_ds_fallback") !== "false";
+
+    let savedModel = localStorage.getItem("gemini_model") || "gemini-1.5-flash";
+    let modelFound = Array.from(modelSelect.options).some(opt => opt.value === savedModel);
+
+    if (modelFound) {
+      modelSelect.value = savedModel;
+    } else {
+      modelSelect.value = "custom";
+      customModelBox.style.display = "block";
+      customModelInput.value = savedModel;
+    }
+
+    modelHidden.value = savedModel;
+    updateKeyBadge();
+
+    apiKeyInput.addEventListener("input", () => {
+      localStorage.setItem("gemini_key", apiKeyInput.value.trim());
+      updateKeyBadge();
+    });
+
+    dsApiKeyInput.addEventListener("input", () => {
+      localStorage.setItem("deepseek_key", dsApiKeyInput.value.trim());
+    });
+
+    useDeepSeekFallback.addEventListener("change", () => {
+      localStorage.setItem("use_ds_fallback", useDeepSeekFallback.checked);
+    });
+
+    modelSelect.addEventListener("change", () => {
+      if (modelSelect.value === "custom") {
+        customModelBox.style.display = "block";
+        customModelInput.focus();
+        modelHidden.value = customModelInput.value.trim() || "gemini-1.5-flash";
+      } else {
+        customModelBox.style.display = "none";
+        modelHidden.value = modelSelect.value;
+      }
+      localStorage.setItem("gemini_model", modelHidden.value);
+      updateKeyBadge();
+    });
+
+    customModelInput.addEventListener("input", () => {
+      modelHidden.value = customModelInput.value.trim() || "gemini-1.5-flash";
+      localStorage.setItem("gemini_model", modelHidden.value);
+      updateKeyBadge();
+    });
+
+    $("btnToggleApiKey").addEventListener("click", () => {
+      const isPass = apiKeyInput.type === "password";
+      apiKeyInput.type = isPass ? "text" : "password";
+      $("btnToggleApiKey").textContent = isPass ? "👁️" : "🙈";
+    });
+
+    $("btnToggleDsKey").addEventListener("click", () => {
+      const isPass = dsApiKeyInput.type === "password";
+      dsApiKeyInput.type = isPass ? "text" : "password";
+      $("btnToggleDsKey").textContent = isPass ? "👁️" : "🙈";
+    });
+
+    $("btnTestKey").addEventListener("click", async () => {
+      const key = apiKeyInput.value.trim();
+      const model = modelHidden.value.trim();
+
+      if (!key) {
+        apiStatusMsg.innerHTML = '<span style="color:#ef4444">⚠️ Vui lòng nhập khóa API Gemini!</span>';
+        $("settings").open = true;
+        return;
+      }
+
+      const testBtn = $("btnTestKey");
+      testBtn.disabled = true;
+      testBtn.innerHTML = '<span class="spin"></span> Đang thử...';
+      apiStatusMsg.innerHTML = `<span style="color:var(--yellow)">Đang gọi kiểm tra <b>${model}</b>...</span>`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: "Hi" }] }],
+            generationConfig: { maxOutputTokens: 5 }
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          let errMsg = data?.error?.message || res.status;
+          if (errMsg.length > 75) errMsg = errMsg.slice(0, 75) + "...";
+          apiStatusMsg.innerHTML = `<span style="color:#ef4444" title="${data?.error?.message}">❌ Lỗi: ${errMsg}</span>`;
+          return;
+        }
+
+        apiStatusMsg.innerHTML = `<span style="color:var(--green)">✅ Kết nối Gemini tốt! Model <b>${model}</b> sẵn sàng.</span>`;
+        updateKeyBadge();
+        toast(`✅ Kết nối Gemini API (${model}) thành công!`);
+
+      } catch (err) {
+        apiStatusMsg.innerHTML = `<span style="color:#ef4444">❌ Lỗi mạng: ${err.message}</span>`;
+      } finally {
+        testBtn.disabled = false;
+        testBtn.innerHTML = "🧪 Kiểm tra kết nối";
+      }
+    });
+
+    $("date").value = todayStr();
+
+    /* ========================================================
+       NHÂN CÁCH MỚI TẠO KÉP VÀ DỰ PHÒNG DEEPSEEK (ĐÃ CHỐNG LỖI JSON TỐI ĐA)
+       ======================================================== */
+    const SYSTEM_INSTRUCTION = `Bạn là chuyên gia sư phạm trung học cơ sở tại Việt Nam, có chuyên môn phù hợp với môn học giáo viên chọn.
+Nhiệm vụ: Soạn Giáo án chuẩn Công văn 5512 và kịch bản hoạt động học tập linh hoạt, có câu hỏi hỗ trợ vi mô.
+Quy tắc TỐI THƯỢNG:
+  1. Soạn đúng đặc thù môn, yêu cầu cần đạt, lứa tuổi và tài liệu giáo viên cung cấp; không tự chuyển nội dung sang môn Toán.
+  2. Thiết kế phù hợp đối tượng học sinh: kiểm tra kiến thức nền, chia nhiệm vụ nhỏ, câu ngắn từ dễ đến khó; sau phần trọng tâm có câu kiểm tra hiểu.
+  3. Nếu học sinh sai/bí, đưa gợi ý từng nấc trước khi tiết lộ đáp án; dự đoán lỗi phổ biến và chỉ cách sửa.
+  4. Nếu thiếu tài liệu, chỉ sử dụng kiến thức phổ thông đáng tin cậy và nêu rõ phần cần giáo viên kiểm tra; không bịa nội dung/trang SGK.
+  5. Phần 'giao_an_5512': Viết giáo án hoàn chỉnh bằng Markdown, dùng ký tự \\n để xuống dòng trong JSON.
+  6. 'blackboard' là bắt buộc, không được để mảng rỗng: tạo 3-6 mục ghi bảng theo đúng tiến trình bài học; mỗi mục có title và content cụ thể, hoàn chỉnh, đúng kiến thức môn học và có thể chép trực tiếp lên bảng/vở. Ghi các ý cốt lõi của bài như khái niệm/kết luận/quy tắc, quy trình hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải khớp với mục tiêu, yêu cầu cần đạt và các bước dạy học. Không dùng nội dung giữ chỗ như 'Nội dung ngắn gọn', không chỉ mô tả rằng giáo viên sẽ ghi bảng, không bịa kiến thức hoặc lặp lại phần không dạy trong tiết này.
+  7. Mỗi bước gồm phase, teacherAction, studentTask, expectedProduct, grouping, durationMinutes, question, hint, answer, explanation, mistake, imageUrl; nội dung phải cụ thể để giáo viên dùng ngay.
+  8. Với công thức Toán học, kẹp công thức trong cặp dấu $ và escape dấu gạch chéo ngược khi cần.
+  9. Trả về đúng định dạng JSON object thuần túy, không bọc trong markdown code block.`;
+
+    function buildPrompt() {
+      const cls = classes.find(c => (c.id || c.name) === $("classId").value);
+      const n = Math.max(2, Math.min(12, +$("aiCount").value || 6));
+      const title = $("title").value.trim() || "Tên bài học";
+      const tiet = ($("tiet").value || "").trim() || (state.ppctKey ? state.ppctKey.split("-")[1] : "1");
+      const grade = $("grade").value;
+      const req = $("requirements").value.trim();
+      const subjectName = getSubjectName($("lessonSubject").value);
+      const teachingMode = $("teachingMode").value;
+      const modeInfo = TEACHING_MODES[teachingMode] || TEACHING_MODES["guided-discovery"];
+
+      // Phân tích sư phạm chống trùng lặp giữa các tiết
+      const pedagogy = analyzeLessonPedagogy(title, tiet, grade, req);
+
+      const promptArr = [
+        `Môn: ${subjectName}`,
+        `Tên bài: ${title}`,
+        `Khối: ${grade}${cls ? ", Lớp " + cls.name : ""}`,
+        `Tiết PPCT: ${tiet}`,
+        `Mục tiêu: ${$("objectives").value.trim() || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức cơ bản của môn ${subjectName}`}`,
+        `Yêu cầu cần đạt: ${req || pedagogy.autoRequirement || "Học sinh đạt yêu cầu cần đạt của bài học"}`,
+        `Đối tượng học sinh: ${$("aiAudience").value}`,
+        `Kiểu tổ chức hoạt động (teachingMode): ${teachingMode} - ${modeInfo.label}`,
+        `Nguyên tắc riêng của kiểu hoạt động: ${modeInfo.guidance}`,
+        `Tạo đúng ${n} bước trong mảng steps; mỗi bước là một nhiệm vụ nhỏ, vừa sức và tiến triển từ dễ đến khó.`,
+        `Trong mọi bước, điền đầy đủ phase (tên chặng), teacherAction (việc giáo viên làm), studentTask (nhiệm vụ học sinh), expectedProduct (sản phẩm/câu trả lời cần đạt), grouping (cá nhân/cặp đôi/nhóm), durationMinutes (số phút), question, hint (gợi ý theo nấc), answer, explanation, mistake.`,
+        `BẮT BUỘC tạo mảng blackboard có 3-6 mục, không để trống. Mỗi mục có title là tiêu đề theo trình tự dạy học và content là nội dung ghi bảng cụ thể, hoàn chỉnh, đúng bài ${title}, có thể chép trực tiếp lên bảng/vở (không ghi câu giữ chỗ hoặc lời mô tả chung). Chọn các ý cốt lõi phù hợp môn học như kiến thức/kết luận/quy tắc, cách thực hiện hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải thống nhất với mục tiêu, yêu cầu cần đạt và các bước, không bịa hoặc đưa kiến thức chưa dạy trong tiết này.`
+      ];
+
+      if (state.ppctKey) {
+        const parts = state.ppctKey.split("-");
+        const r = getLessonPpct(parts[0], +parts[1], currentSubject);
+        if (r) promptArr.push(`Vị trí PPCT: ${r.chapter}, Tiết ${parts[1]}, Tuần ${r.week}`);
+      }
+
+      if (pedagogy.guidancePrompt) {
+        promptArr.push(pedagogy.guidancePrompt);
+      }
+
+      promptArr.push(`Yêu cầu bổ sung: ${$("aiPrompt").value.trim() || `Chú trọng chia nhỏ nhiệm vụ, hỗ trợ học sinh ${$("aiAudience").value} tiếp thu và tự làm được yêu cầu cốt lõi.`}`);
+      promptArr.push("Phần dạy học phải có nhịp: kiểm tra kiến thức nền → giáo viên gợi mở/làm mẫu phù hợp kiểu hoạt động → học sinh thực hành có hỗ trợ → học sinh tự thử → kiểm tra hiểu và củng cố. Phân bổ thời lượng hợp lý, không để giáo viên nói liên tục.");
+
+      const sgk = $("sgkSource") ? $("sgkSource").value.trim() : "";
+      if (sgk) promptArr.push(`=== NỘI DUNG SÁCH GIÁO KHOA / ĐỊNH HƯỚNG ===\n${sgk}`);
+
+      return promptArr.join("\n");
+    }
+
+    async function callGemini(promptText) {
+      const key = apiKeyInput.value.trim();
+      const model = modelHidden.value.trim();
+
+      if (!key) throw new Error("Vui lòng nhập khóa Gemini API Key vào mục cài đặt.");
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          contents: [{ role: "user", parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+            // Ép kiểu Schema để tránh 99% lỗi parse JSON của Gemini
+            responseSchema: {
+              type: "OBJECT",
+              required: ["teachingMode", "giao_an_5512", "blackboard", "steps"],
+              properties: {
+                teachingMode: { type: "STRING" },
+                giao_an_5512: { type: "STRING" },
+                blackboard: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    required: ["title", "content"],
+                    properties: {
+                      title: { type: "STRING" },
+                      content: { type: "STRING" }
+                    }
+                  }
+                },
+                steps: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      level: { type: "STRING" },
+                      phase: { type: "STRING" },
+                      teacherAction: { type: "STRING" },
+                      studentTask: { type: "STRING" },
+                      expectedProduct: { type: "STRING" },
+                      grouping: { type: "STRING" },
+                      durationMinutes: { type: "NUMBER" },
+                      question: { type: "STRING" },
+                      hint: { type: "STRING" },
+                      answer: { type: "STRING" },
+                      explanation: { type: "STRING" },
+                      mistake: { type: "STRING" },
+                      imageUrl: { type: "STRING" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error?.message || `Lỗi API Gemini (${res.status})`);
+
+      const text = (data?.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
+      if (!text) throw new Error("Gemini không trả về nội dung.");
+
+      // Trích xuất JSON bằng Regex để đảm bảo độ chính xác
+      let jsonStr = text;
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        jsonStr = match[0];
+      }
+
+      try {
+        return JSON.parse(jsonStr);
+      } catch (parseError) {
+        console.error("Chuỗi JSON bị lỗi:", jsonStr);
+        throw new Error("AI trả về dữ liệu không đúng chuẩn JSON. Vui lòng thử lại.");
+      }
+    }
+
+    async function callDeepSeek(promptText) {
+      const key = dsApiKeyInput.value.trim();
+      if (!key) throw new Error("Chưa nhập DeepSeek API Key dự phòng.");
+
+      const res = await fetch("https://api.deepseek.com/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [
+            { role: "system", content: SYSTEM_INSTRUCTION },
+            { role: "user", content: promptText }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.7
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error?.message || `Lỗi API DeepSeek (${res.status})`);
+
+      const text = data.choices?.[0]?.message?.content || "";
+      if (!text) throw new Error("DeepSeek không trả về nội dung.");
+
+      let jsonStr = text;
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        jsonStr = match[0];
+      }
+
+      try {
+        return JSON.parse(jsonStr);
+      } catch (parseError) {
+        console.error("Chuỗi JSON bị lỗi (DeepSeek):", jsonStr);
+        throw new Error("DeepSeek trả về dữ liệu không đúng chuẩn JSON. Vui lòng thử lại.");
+      }
+    }
+
+    async function generateScript() {
+      const btn = $("btnGen");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Đang đúc Giáo Án...';
+
+      try {
+        const pText = buildPrompt();
+        let result = null;
+
+        try {
+          result = await callGemini(pText);
+        } catch (gErr) {
+          console.warn("Lỗi Gemini:", gErr.message);
+
+          // Nếu bật DeepSeek và có Key -> Chuyển hướng
+          if (useDeepSeekFallback.checked && dsApiKeyInput.value.trim()) {
+            toast("Gemini bận/quá tải! Tự động chuyển sang máy chủ DeepSeek...", 3000);
+            btn.innerHTML = '<span class="spin"></span> DeepSeek đang xử lý...';
+
+            try {
+              result = await callDeepSeek(pText);
+            } catch (dsErr) {
+              throw new Error("Cả Gemini và DeepSeek đều lỗi: " + dsErr.message);
+            }
+          } else {
+            throw gErr; // Văng lỗi Gemini nếu không bật dự phòng
+          }
+        }
+
+        const validLevel = (v, def) => ["de", "vua", "kho"].includes(v) ? v : def;
+
+        const generatedBlackboard = Array.isArray(result.blackboard)
+          ? result.blackboard
+            .filter(b => b && typeof b.title === "string" && typeof b.content === "string")
+            .map(b => ({ title: b.title.trim(), content: b.content.trim() }))
+            .filter(b => b.title && b.content)
+          : [];
+        if (!generatedBlackboard.length) {
+          throw new Error("AI chưa tạo nội dung ghi bảng. Vui lòng bấm tạo lại để sinh đầy đủ lược đồ ghi bảng.");
+        }
+
+        state.teachingMode = TEACHING_MODES[result.teachingMode] ? result.teachingMode : $("teachingMode").value;
+        state.giaoAn5512 = result.giao_an_5512 || "";
+
+        state.blackboard = generatedBlackboard;
+
+        state.steps = (result.steps || []).map(s => ({
+          level: validLevel(s.level, "vua"),
+          phase: s.phase || "",
+          teacherAction: s.teacherAction || "",
+          studentTask: s.studentTask || "",
+          expectedProduct: s.expectedProduct || "",
+          grouping: s.grouping || "",
+          durationMinutes: Number(s.durationMinutes) || "",
+          question: s.question || "",
+          hint: s.hint || "",
+          answer: s.answer || "",
+          explanation: s.explanation || "",
+          mistake: s.mistake || "",
+          imageUrl: s.imageUrl || ""
+        }));
+
+        if (!state.steps.length && !state.giaoAn5512) {
+          throw new Error("AI không tạo được nội dung nào.");
+        }
+
+        renderEditor();
+        toast("✨ Đã tạo xong Giáo án 5512 & Kịch bản Web App!");
+
+      } catch (e) {
+        let msg = e.message;
+        if (msg.includes("JSON")) msg = "AI đang bị lúng túng khi đóng gói dữ liệu. Vui lòng bấm tạo lại.";
+        toast("❌ " + msg, 5000);
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "⚡ Tạo Kép (Giáo án 5512 + Kịch bản App)";
+      }
+    }
+
+    $("btnGen").addEventListener("click", generateScript);
+    $("btnQuickAI").addEventListener("click", generateScript);
+
+    /* ─── SAMPLE BUTTONS ─── */
+    function loadSample() {
+      selectSubject("toan", false);
+      $("title").value = SAMPLE_LESSON.title;
+      $("grade").value = SAMPLE_LESSON.grade;
+      $("classId").value = SAMPLE_LESSON.classId;
+      $("date").value = SAMPLE_LESSON.date;
+      $("week").value = SAMPLE_LESSON.week;
+      $("objectives").value = SAMPLE_LESSON.objectives;
+      $("requirements").value = SAMPLE_LESSON.requirements;
+      $("digital").value = SAMPLE_LESSON.digital;
+
+      state.id = "sample_lesson_1";
+      state.ppctKey = SAMPLE_LESSON.ppctKey;
+      state.teachingMode = "model-practice";
+      $("teachingMode").value = state.teachingMode;
+      state.giaoAn5512 = SAMPLE_LESSON.giaoAn5512;
+      state.blackboard = JSON.parse(JSON.stringify(SAMPLE_LESSON.blackboard));
+      state.steps = JSON.parse(JSON.stringify(SAMPLE_LESSON.steps));
+
+      renderEditor();
+      toast("Đã tải bài mẫu Toán 9!");
+    }
+
+    $("btnSample").addEventListener("click", loadSample);
+    $("btnQuickSample").addEventListener("click", loadSample);
+
+    $("btnQuickManual").addEventListener("click", () => {
+      state.giaoAn5512 = "I. MỤC TIÊU...\n\nII. THIẾT BỊ...\n\nIII. TIẾN TRÌNH...";
+      state.blackboard.push({ title: "1. Trọng tâm bài", content: "Nội dung ghi bảng" });
+      state.steps.push({ level: "de", question: "Câu hỏi khởi động bài học?", hint: "Gợi ý", answer: "Đáp án", explanation: "", mistake: "", imageUrl: "" });
+      renderEditor();
+    });
+
+    /* ─── EDITOR INPUT DELEGATION ─── */
+    $("editorWrap").addEventListener("input", e => {
+      const box = e.target.closest("[data-list]");
+      if (!box || !e.target.dataset.k) return;
+      const listName = box.dataset.list;
+      const idx = +box.dataset.i;
+      const key = e.target.dataset.k;
+
+      state[listName][idx][key] = e.target.value;
+      if (key === "level") box.dataset.level = e.target.value;
+
+      // Cập nhật khung xem trước ảnh tức thì khi gõ/dán link ảnh
+      if (key === "imageUrl") {
+        const val = e.target.value.trim();
+        const prevWrap = $(`imgPrev_${idx}`);
+        const imgEl = $(`imgElem_${idx}`);
+        if (prevWrap && imgEl) {
+          if (val) {
+            prevWrap.style.display = "block";
+            imgEl.style.display = "inline-block";
+            if (imgEl.nextElementSibling) imgEl.nextElementSibling.style.display = "none";
+            imgEl.src = val;
+          } else {
+            prevWrap.style.display = "none";
+          }
+        }
+      }
+    });
+
+    // Xử lý chọn file ảnh từ máy tính (tự chuyển thành Base64 để lưu vào bài học)
+    $("editorWrap").addEventListener("change", e => {
+      if (e.target.classList.contains("file-img-upload")) {
+        const idx = +e.target.dataset.i;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+          return toast("⚠️ Vui lòng chọn đúng tệp hình ảnh (PNG, JPG, WebP...).");
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          return toast("⚠️ Kích thước ảnh quá lớn (vui lòng chọn ảnh < 5MB).");
+        }
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const base64 = ev.target.result;
+          if (state.steps[idx]) {
+            state.steps[idx].imageUrl = base64;
+            renderEditor();
+            toast("✅ Đã tải ảnh từ máy lên Bước " + (idx + 1) + "! Thầy/cô nhớ bấm 💾 Lưu bài nhé.");
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    $("editorWrap").addEventListener("click", e => {
+      // Xử lý nút xóa ảnh minh họa
+      const clearImgBtn = e.target.closest(".btn-clear-img");
+      if (clearImgBtn) {
+        const idx = +clearImgBtn.dataset.i;
+        if (state.steps[idx]) {
+          state.steps[idx].imageUrl = "";
+          renderEditor();
+          toast("Đã xóa ảnh minh họa của Bước " + (idx + 1));
+        }
+        return;
+      }
+
+      const act = e.target.dataset.act;
+      const box = e.target.closest("[data-list]");
+      if (!act || !box) return;
+
+      const list = state[box.dataset.list];
+      const i = +box.dataset.i;
+
+      if (act === "del") list.splice(i, 1);
+      if (act === "up" && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      if (act === "down" && i < list.length - 1) [list[i + 1], list[i]] = [list[i], list[i + 1]];
+
+      renderEditor();
+    });
+
+    $("addBB").addEventListener("click", () => {
+      state.blackboard.push({ title: "", content: "" });
+      renderEditor();
+    });
+    $("addBB2").addEventListener("click", () => {
+      state.blackboard.push({ title: "", content: "" });
+      renderEditor();
+    });
+    $("addStep").addEventListener("click", () => {
+      state.steps.push({ level: "vua", phase: "", teacherAction: "", studentTask: "", expectedProduct: "", grouping: "", durationMinutes: "", question: "", hint: "", answer: "", explanation: "", mistake: "", imageUrl: "" });
+      renderEditor();
+    });
+    $("addStep2").addEventListener("click", () => {
+      state.steps.push({ level: "vua", phase: "", teacherAction: "", studentTask: "", expectedProduct: "", grouping: "", durationMinutes: "", question: "", hint: "", answer: "", explanation: "", mistake: "", imageUrl: "" });
+      renderEditor();
+    });
+
+    /* ─── SAVE LESSON (LOCAL + FIRESTORE SYNC) ─── */
+    async function saveLesson() {
+      const title = $("title").value.trim();
+      if (!title) {
+        toast("Vui lòng nhập tên bài trước khi lưu.");
+        $("title").focus();
+        return;
+      }
+
+      const validSteps = state.steps.filter(s => 
+        (s.question && s.question.trim()) || 
+        (s.answer && s.answer.trim()) || 
+        (s.hint && s.hint.trim()) ||
+        (s.explanation && s.explanation.trim()) ||
+        (s.teacherAction && s.teacherAction.trim()) ||
+        (s.studentTask && s.studentTask.trim()) ||
+        (s.expectedProduct && s.expectedProduct.trim())
+      );
+      validSteps.forEach((s, idx) => {
+        if (!s.question || !s.question.trim()) {
+          s.question = s.studentTask || s.phase || `Bước ${idx + 1}`;
+        }
+      });
+      if (!validSteps.length && !state.giaoAn5512) {
+        toast("Cần có kịch bản vấn đáp hoặc giáo án để lưu.");
+        return;
+      }
+
+      const gradeVal = +$("grade").value || 9;
+      let cls = classes.find(c => (c.id || c.name) === $("classId").value);
+      if (!cls && gradeVal) {
+        cls = classes.find(c => String(c.grade) === String(gradeVal) || (c.name || "").startsWith(String(gradeVal)));
+      }
+      const tietInputVal = +$("tiet").value || null;
+      const computedPpctKey = state.ppctKey || (tietInputVal ? `${gradeVal}-${tietInputVal}` : null);
+
+      const payload = {
+        id: state.id || "les_" + Date.now(),
+        title,
+        grade: gradeVal,
+        classId: cls ? (cls.id || cls.name) : ($("classId").value || ""),
+        className: cls ? cls.name : "",
+        date: $("date").value || todayStr(),
+        tiet: tietInputVal || (computedPpctKey ? +computedPpctKey.split("-")[1] : null),
+        week: +$("week").value || null,
+        objectives: $("objectives").value.trim(),
+        requirements: $("requirements").value.trim(),
+        digital: $("digital").value.trim(),
+        subjectId: currentSubject,
+        subjectName: getSubjectName(currentSubject),
+        ppctKey: computedPpctKey,
+        giaoAn5512: state.giaoAn5512 || "",
+        blackboard: state.blackboard.filter(b => b.title.trim() || b.content.trim()),
+        steps: validSteps,
+        teachingMode: $("teachingMode").value || state.teachingMode || "guided-discovery",
+        updatedAt: new Date().toISOString()
+      };
+
+      const btn = $("btnSave");
+      btn.disabled = true;
+      $("saveStatus").textContent = "Đang lưu...";
+
+      try {
+        const existingIdx = recentLessons.findIndex(l => l.id === payload.id);
+        if (existingIdx >= 0) {
+          recentLessons[existingIdx] = payload;
+        } else {
+          recentLessons.unshift(payload);
+        }
+
+        saveLocalData();
+
+        if (isFirebaseOnline) {
+          try {
+            await setDoc(doc(db, "lessons", payload.id), {
+              ...payload,
+              ownerUid: currentUser.uid,
+              updatedAt: serverTimestamp(),
+              updatedBy: currentUser.email
+            }, { merge: true });
+          } catch (fe) {
+            console.warn("Firestore sync warning:", fe);
+          }
+        }
+
+        state.id = payload.id;
+        state.ppctKey = payload.ppctKey;
+        if (state.ppctKey) lessonByKey[state.ppctKey] = payload.id;
+
+        $("saveStatus").textContent = "Đã lưu lúc " + new Date().toLocaleTimeString("vi-VN");
+        toast("💾 Đã lưu bài giảng thành công!");
+        renderRecentLessons();
+        updateStats();
+        renderPpct();
+        return payload;
+
+      } catch (e) {
+        toast("Lỗi khi lưu: " + e.message, 5000);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $("btnSave").addEventListener("click", saveLesson);
+
+    function resetForm() {
+      state.id = null;
+      state.ppctKey = null;
+      state.giaoAn5512 = "";
+      state.blackboard = [];
+      state.steps = [];
+      state.teachingMode = "guided-discovery";
+      $("teachingMode").value = state.teachingMode;
+
+      ["title", "objectives", "requirements", "digital", "aiPrompt", "week", "tiet", "notebookLmJson"].forEach(id => {
+        if ($(id)) $(id).value = "";
+      });
+
+      if ($("ppctKeyDisplay")) $("ppctKeyDisplay").value = "";
+      $("date").value = todayStr();
+      $("saveStatus").textContent = "";
+
+      if ($("pedagogyBadge")) {
+        $("pedagogyBadge").style.display = "none";
+        $("pedagogyBadge").innerHTML = "";
+      }
+
+      updateBanner();
+      renderEditor();
+      toast("Đã đặt lại form soạn bài.");
+    }
+
+    $("btnNew").addEventListener("click", resetForm);
+
+    /* ─── OPEN RECENT LESSON ─── */
+    function openLessonByIdx(i) {
+      const l = recentLessons[i];
+      if (!l) return;
+
+      state.id = l.id;
+      state.ppctKey = l.ppctKey || null;
+      selectSubject(l.subjectId || "toan", false);
+      state.giaoAn5512 = l.giaoAn5512 || "";
+      state.blackboard = JSON.parse(JSON.stringify(l.blackboard || []));
+      state.steps = JSON.parse(JSON.stringify(l.steps || []));
+      state.teachingMode = TEACHING_MODES[l.teachingMode] ? l.teachingMode : "guided-discovery";
+      $("teachingMode").value = state.teachingMode;
+
+      $("title").value = l.title || "";
+      $("grade").value = l.grade || 9;
+      $("classId").value = l.classId || "";
+      $("date").value = l.date || todayStr();
+      $("tiet").value = l.tiet || (l.ppctKey ? l.ppctKey.split("-")[1] : "");
+      $("week").value = l.week || "";
+      $("objectives").value = l.objectives || "";
+      $("requirements").value = l.requirements || "";
+      $("digital").value = l.digital || "";
+
+      updatePpctDisplay();
+      renderEditor();
+      showTab("lesson");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast(`Đã mở bài: ${l.title}`);
+    }
+
+    $("recentList").addEventListener("click", e => {
+      const openIdx = e.target.dataset.openlesson;
+      if (openIdx !== undefined) openLessonByIdx(+openIdx);
+
+      const delIdx = e.target.dataset.delles;
+      if (delIdx !== undefined) {
+        if (!confirm("Xóa bài soạn này?")) return;
+        recentLessons.splice(+delIdx, 1);
+        saveLocalData();
+        renderRecentLessons();
+        updateStats();
+        toast("Đã xóa bài soạn.");
+      }
+    });
+
+    /* ─── PPCT TAB ─── */
+    function renderPpct() {
+      const q = ($("ppctSearch").value || "").trim().toLowerCase();
+      const allData = getAllPpctData();
+      const grades = Object.keys(allData[currentSubject]?.grades || {}).sort((a, b) => +a - +b);
+      const visibleGrades = grades.length ? grades : ["7", "9"];
+      if (!visibleGrades.includes(String(ppctGrade))) ppctGrade = visibleGrades[visibleGrades.length - 1];
+      const gradeButtons = visibleGrades.map(grade => `<button class="btn ${grade === String(ppctGrade) ? "btn-primary" : "btn-ghost"} btn-sm" data-g="${grade}">Lớp ${grade}</button>`).join("");
+      $("gradeBtns").innerHTML = gradeButtons;
+      const list = getSubjectPpctList(currentSubject, ppctGrade);
+      let html = "";
+      let lastCh = null;
+
+      for (const r of list) {
+        if (q && !r.title.toLowerCase().includes(q) && !(r.chapter || "").toLowerCase().includes(q)) continue;
+
+        if (r.chapter !== lastCh) {
+          lastCh = r.chapter;
+          html += `<tr class="ch"><td colspan="6">${esc(r.chapter)}</td></tr>`;
+        }
+
+        const key = `${ppctGrade}-${r.tiet}`;
+        const done = recentLessons.some(l => l.ppctKey === key && (l.subjectId || "toan") === currentSubject);
+
+        html += `
+      <tr>
+        <td><b>${r.tiet}</b></td>
+        <td>${r.week}</td>
+        <td>
+          <b>${esc(r.title)}</b>
+          ${r.subject ? `<small>${esc(r.subject)}</small>` : ""}
+        </td>
+        <td><span class="pill ${r.kind || 'bai'}">${KIND_LABEL[r.kind] || r.kind}</span></td>
+        <td>${done ? '<span class="ok">✅ Đã soạn</span>' : '<span class="todo">Chưa soạn</span>'}</td>
+        <td>
+          <button class="btn ${done ? 'btn-ghost' : 'btn-primary'} btn-sm" data-ppct="${key}">
+            ${done ? 'Sửa bài' : 'Soạn'}
+          </button>
+        </td>
+      </tr>
+    `;
+      }
+
+      $("ppctBody").innerHTML = html || '<tr><td colspan="6" style="padding:18px;text-align:center;color:var(--dim)">Không tìm thấy bài nào phù hợp.</td></tr>';
+
+      const doneCount = list.filter(r => recentLessons.some(l => l.ppctKey === `${ppctGrade}-${r.tiet}` && (l.subjectId || "toan") === currentSubject)).length;
+      $("ppctCount").textContent = `Đã soạn ${doneCount} / ${list.length} tiết`;
+    }
+
+    $("gradeBtns").addEventListener("click", e => {
+      if (e.target.dataset.g) {
+        ppctGrade = e.target.dataset.g;
+        renderPpct();
+      }
+    });
+
+    $("lessonSubject").addEventListener("change", () => selectSubject($("lessonSubject").value));
+    $("ppctSubject").addEventListener("change", () => selectSubject($("ppctSubject").value));
+
+    $("ppctSearch").addEventListener("input", renderPpct);
+
+    function startFromPpct(key) {
+      const parts = key.split("-");
+      const g = parts[0];
+      const t = parts[1];
+      const r = getLessonPpct(g, +t, currentSubject);
+
+      if (!r) return toast(`Chưa có PPCT môn ${getSubjectName()} lớp ${g}. Hãy nhập PPCT ở trang Kế hoạch dạy học.`);
+
+      const existing = recentLessons.find(l => l.ppctKey === key && (l.subjectId || "toan") === currentSubject);
+      if (existing) {
+        const idx = recentLessons.indexOf(existing);
+        return openLessonByIdx(idx);
+      }
+
+      resetForm();
+      state.ppctKey = key;
+      $("title").value = r.title;
+      $("grade").value = g;
+      $("tiet").value = t;
+      $("week").value = r.week;
+      $("digital").value = r.digital || "";
+
+      // Phân tích sư phạm chống trùng lặp giữa các tiết
+      const ped = analyzeLessonPedagogy(r.title, +t, g, r.requirement || "");
+      $("objectives").value = ped.autoObjective;
+      $("requirements").value = ped.autoRequirement;
+
+      updatePpctDisplay();
+      updatePedagogyNotice();
+      showTab("lesson");
+      renderEditor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      const partText = ped.isMultiPart ? ` · Tiết ${ped.currentPart}/${ped.totalParts}` : "";
+      toast(`Đã nạp sẵn Tiết ${t} (${getSubjectName()} ${g})${partText}.`);
+    }
+
+    $("ppctBody").addEventListener("click", e => {
+      if (e.target.dataset.ppct) {
+        startFromPpct(e.target.dataset.ppct);
+      }
+    });
+
+    /* ─── CLASS & STUDENT MANAGEMENT ─── */
+    const DAY_NAMES = { 1: "Thứ 2", 2: "Thứ 3", 3: "Thứ 4", 4: "Thứ 5", 5: "Thứ 6", 6: "Thứ 7" };
+
+    $("clsDays").innerHTML = Object.entries(DAY_NAMES).map(([k, n]) => `
+  <div>
+    <label class="lbl" style="margin:0 0 2px;font-size:0.7rem">${n}</label>
+    <select data-day="${k}" style="padding:4px 6px">
+      ${[0, 1, 2, 3, 4].map(v => `<option>${v}</option>`).join("")}
+    </select>
+  </div>
+`).join("");
+
+    function readDaysInput() {
+      const days = {};
+      $("clsDays").querySelectorAll("select").forEach(s => {
+        if (+s.value > 0) days[s.dataset.day] = +s.value;
+      });
+      return days;
+    }
+
+    $("clsDays").addEventListener("change", () => {
+      const total = Object.values(readDaysInput()).reduce((a, b) => a + b, 0);
+      $("daysSum").textContent = total ? `Tổng ${total} tiết / tuần.` : "";
+    });
+
+    $("btnAddClass").addEventListener("click", () => {
+      const name = $("clsName").value.trim().toUpperCase();
+      if (!name) {
+        toast("Vui lòng nhập tên lớp.");
+        $("clsName").focus();
+        return;
+      }
+
+      const grade = +$("clsGrade").value;
+      const days = readDaysInput();
+
+      if (classes.some(c => c.name === name)) {
+        return toast("Lớp này đã có trong danh sách.");
+      }
+
+      classes.push({ id: "cls_" + Date.now(), name, grade, days, taught: 0 });
+      saveLocalData();
+      populateClassSelects();
+      renderClassTable();
+      updateStats();
+
+      $("clsName").value = "";
+      $("clsDays").querySelectorAll("select").forEach(s => s.value = "0");
+      $("daysSum").textContent = "";
+      toast(`Đã thêm lớp ${name}!`);
+    });
+
+    $("btnAddStudent").addEventListener("click", () => {
+      const classId = $("stuClass").value;
+      const name = $("stuName").value.trim();
+      const level = $("stuLevel").value;
+
+      if (!classId) return toast("Hãy chọn hoặc tạo lớp trước.");
+      if (!name) {
+        toast("Nhập họ và tên học sinh.");
+        $("stuName").focus();
+        return;
+      }
+
+      const cls = classes.find(c => (c.id || c.name) === classId);
+      const className = cls ? cls.name : classId;
+      const stt = students.filter(s => s.className === className).length + 1;
+      const grade = cls ? cls.grade : 9;
+
+      students.push({
+        id: "stu_" + Date.now(),
+        stt: stt,
+        name: name,
+        classId: cls ? cls.id || cls.name : classId,
+        className: className,
+        grade: grade,
+        level: level,
+        points: 0
+      });
+
+      saveLocalData();
+      renderStudentTable();
+      updateStats();
+
+      $("stuName").value = "";
+      $("stuName").focus();
+      toast(`Đã thêm học sinh ${name}!`);
+    });
+
+    $("stuBody").addEventListener("change", e => {
+      if (!e.target.dataset.stulevel) return;
+      const stu = students.find(s => s.id === e.target.dataset.stulevel);
+      if (stu) {
+        stu.level = e.target.value;
+        saveLocalData();
+        updateStats();
+        toast(`Đã cập nhật học lực của ${stu.name}.`);
+      }
+    });
+
+    $("stuBody").addEventListener("click", e => {
+      const addBtn = e.target.closest("[data-pointadd]");
+      if (addBtn) {
+        const stu = students.find(s => s.id === addBtn.dataset.pointadd);
+        if (stu) {
+          stu.points = Math.max(0, (stu.points || 0) + (+addBtn.dataset.val));
+          saveLocalData();
+          renderStudentTable();
+        }
+        return;
+      }
+
+      const delId = e.target.dataset.delstu;
+      if (delId) {
+        const stu = students.find(s => s.id === delId);
+        if (!confirm(`Xóa học sinh ${stu ? stu.name : ""}?`)) return;
+        students = students.filter(s => s.id !== delId);
+        saveLocalData();
+        renderStudentTable();
+        updateStats();
+        toast("Đã xóa học sinh.");
+      }
+    });
+
+    $("classBody").addEventListener("click", e => {
+      const saveTaught = e.target.dataset.savetaught;
+      if (saveTaught) {
+        const inputElement = document.querySelector(`[data-taught-input="${saveTaught}"]`);
+        const n = Math.max(0, Math.min(140, +inputElement.value || 0));
+        const cls = classes.find(c => (c.id || c.name) === saveTaught);
+        if (cls) {
+          cls.taught = n;
+          saveLocalData();
+          toast(`Đã lưu tiến độ ${cls.name}: dạy đến tiết ${n}`);
+        }
+        return;
+      }
+
+      const delCls = e.target.dataset.delclass;
+      if (delCls) {
+        const cls = classes.find(c => (c.id || c.name) === delCls);
+        if (!confirm(`Xóa lớp ${cls ? cls.name : ""}?`)) return;
+        classes = classes.filter(c => (c.id || c.name) !== delCls);
+        saveLocalData();
+        populateClassSelects();
+        renderClassTable();
+        updateStats();
+        toast("Đã xóa lớp.");
+      }
+    });
+
+    $("filterClass").addEventListener("change", renderStudentTable);
+    $("filterLevel").addEventListener("change", renderStudentTable);
+    $("stuSearch").addEventListener("input", renderStudentTable);
+
+    $("btnExportStudents").addEventListener("click", () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ classes, students }, null, 2));
+      const dlAnchor = document.createElement("a");
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `HeroMath_Danh_Sach_HS_${todayStr()}.json`);
+      dlAnchor.click();
+      toast("Đã tải tệp sao lưu JSON!");
+    });
+
+    /* ========================================================
+       MODULE THỜI KHÓA BIỂU & LỊCH SOẠN BÀI (QUY TẮC SOẠN TRƯỚC 1 NGÀY)
+       ======================================================== */
+    let timetable = {
+      teacher: "Trần Văn Trọng",
+      schoolYear: "2026-2027",
+      weeks: "Tuần 4, 5",
+      applyDate: "2026-09-28", // Thứ 2 ngày 28/09/2026
+      slots: { ...DEFAULT_TKB_SLOTS }
+    };
+
+    let tkbFilter = "all";
+    let tkbSelectedSlotKey = null;
+    let uploadedTkbImageBase64 = null;
+
+    function loadTkbData() {
+      try {
+        const raw = localStorage.getItem("app_timetable");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          timetable = {
+            teacher: parsed.teacher || "Trần Văn Trọng",
+            schoolYear: parsed.schoolYear || "2026-2027",
+            weeks: parsed.weeks || "Tuần 4, 5",
+            applyDate: parsed.applyDate || "2026-09-28",
+            slots: (parsed.slots && Object.keys(parsed.slots).length > 0) ? parsed.slots : { ...DEFAULT_TKB_SLOTS }
+          };
+        } else {
+          timetable = {
+            teacher: "Trần Văn Trọng",
+            schoolYear: "2026-2027",
+            weeks: "Tuần 4, 5",
+            applyDate: "2026-09-28",
+            slots: { ...DEFAULT_TKB_SLOTS }
+          };
+          localStorage.setItem("app_timetable", JSON.stringify(timetable));
+        }
+      } catch (e) {
+        console.warn("Lỗi load timetable:", e);
+      }
+
+      if ($("tkbTeacher")) $("tkbTeacher").value = timetable.teacher || "";
+      if ($("tkbYear")) $("tkbYear").value = timetable.schoolYear || "";
+      if ($("tkbWeeks")) $("tkbWeeks").value = timetable.weeks || "";
+      if ($("tkbApplyDate")) $("tkbApplyDate").value = timetable.applyDate || "2026-09-28";
+    }
+
+    function saveTkbData(silent = false) {
+      if ($("tkbTeacher")) timetable.teacher = $("tkbTeacher").value.trim();
+      if ($("tkbYear")) timetable.schoolYear = $("tkbYear").value.trim();
+      if ($("tkbWeeks")) timetable.weeks = $("tkbWeeks").value.trim();
+      if ($("tkbApplyDate")) timetable.applyDate = $("tkbApplyDate").value.trim();
+
+      localStorage.setItem("app_timetable", JSON.stringify(timetable));
+      syncClassesDaysFromTkb();
+
+      if (isFirebaseOnline) {
+        try {
+          setDoc(doc(db, "settings", "timetable"), timetable, { merge: true });
+        } catch (e) { }
+      }
+
+      renderTkb();
+      if (!silent) toast("💾 Đã lưu Thời Khóa Biểu thành công!");
+    }
+
+    function syncClassesDaysFromTkb() {
+      const daysMap = {};
+      Object.entries(timetable.slots || {}).forEach(([key, clsName]) => {
+        if (!clsName) return;
+        const day = +key.split("_")[0];
+        const dowKey = String(day - 1);
+        const cNorm = clsName.toUpperCase().trim();
+        if (!daysMap[cNorm]) daysMap[cNorm] = {};
+        daysMap[cNorm][dowKey] = (daysMap[cNorm][dowKey] || 0) + 1;
+      });
+
+      classes.forEach(c => {
+        const cName = (c.name || "").toUpperCase().trim();
+        if (daysMap[cName]) {
+          c.days = daysMap[cName];
+        }
+      });
+      saveLocalData();
+    }
+
+    function renderTkbGrid() {
+      const tbody = $("tkbGridBody");
+      if (!tbody) return;
+
+      const days = [2, 3, 4, 5, 6, 7];
+      let html = "";
+
+      // SÁNG (Tiết 1 đến 5)
+      for (let p = 1; p <= 5; p++) {
+        html += `<tr>`;
+        if (p === 1) html += `<td class="session-col" rowspan="5">SÁNG</td>`;
+        html += `<td class="period-col">T${p}</td>`;
+        days.forEach(d => {
+          const key = `${d}_S_${p}`;
+          const val = (timetable.slots && timetable.slots[key]) || "";
+          const isSelected = tkbSelectedSlotKey === key;
+          html += `
+        <td class="tkb-cell" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
+          ${val ? `
+            <div class="tkb-tag ${val.toUpperCase().startsWith('7') ? 'k7' : 'k9'}">
+              <span><b>${esc(val)}</b>-Toán</span>
+              <span class="cls-del" data-del="${key}" title="Xóa tiết này">✕</span>
+            </div>
+          ` : `<span class="tkb-empty-slot" title="Bấm để xếp lớp vào tiết này">+</span>`}
+        </td>`;
+        });
+        html += `</tr>`;
+      }
+
+      // CHIỀU (Tiết 1 đến 5)
+      for (let p = 1; p <= 5; p++) {
+        html += `<tr>`;
+        if (p === 1) html += `<td class="session-col" rowspan="5" style="color:#60a5fa">CHIỀU</td>`;
+        html += `<td class="period-col">T${p}</td>`;
+        days.forEach(d => {
+          const key = `${d}_C_${p}`;
+          const val = (timetable.slots && timetable.slots[key]) || "";
+          const isSelected = tkbSelectedSlotKey === key;
+          html += `
+        <td class="tkb-cell" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
+          ${val ? `
+            <div class="tkb-tag ${val.toUpperCase().startsWith('7') ? 'k7' : 'k9'}">
+              <span><b>${esc(val)}</b>-Toán</span>
+              <span class="cls-del" data-del="${key}" title="Xóa tiết này">✕</span>
+            </div>
+          ` : `<span class="tkb-empty-slot" title="Bấm để xếp lớp vào tiết này">+</span>`}
+        </td>`;
+        });
+        html += `</tr>`;
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    let adminTkbActiveWeek = null;
+
+    function computeTkbSchedule() {
+      const allWeeks = getAvailableWeeks(timetable);
+      if (!adminTkbActiveWeek || !allWeeks.includes(adminTkbActiveWeek)) {
+        adminTkbActiveWeek = getActiveWeek(timetable, todayStr());
+      }
+
+      const res = computeTkbScheduleModule({
+        timetable,
+        recentLessons,
+        curToday: todayStr(),
+        targetWeekNum: adminTkbActiveWeek
+      });
+
+      // Render các nút chọn tuần trong admin
+      const weekBtnsEl = $("adminWeekBtns");
+      if (weekBtnsEl) {
+        weekBtnsEl.innerHTML = allWeeks.map(w => `
+          <button type="button" class="btn ${w === adminTkbActiveWeek ? 'btn-primary' : 'btn-ghost'} btn-sm" data-admin-week="${w}" style="padding:2px 8px;font-size:0.75rem">
+            Tuần ${w}
+          </button>
+        `).join("");
+      }
+
+      return res.scheduleList;
+    }
+
+    function renderTkbSchedule() {
+      const tbody = $("tkbScheduleBody");
+      if (!tbody) return;
+
+      const schedule = computeTkbSchedule();
+
+      const total = schedule.length;
+      const urgent = schedule.filter(s => s.status === "urgent").length;
+      const overdue = schedule.filter(s => s.status === "overdue").length;
+      const done = schedule.filter(s => s.status === "done").length;
+
+      if ($("statTkbTotalPeriods")) $("statTkbTotalPeriods").textContent = total;
+      if ($("statTkbUrgent")) $("statTkbUrgent").textContent = urgent;
+      if ($("statTkbOverdue")) $("statTkbOverdue").textContent = overdue;
+      if ($("statTkbDone")) $("statTkbDone").textContent = done;
+
+      if ($("cntAllPrep")) $("cntAllPrep").textContent = total;
+      if ($("cntUrgentPrep")) $("cntUrgentPrep").textContent = urgent;
+      if ($("cntOverduePrep")) $("cntOverduePrep").textContent = overdue;
+      if ($("cntDonePrep")) $("cntDonePrep").textContent = done;
+
+      const filtered = schedule.filter(s => {
+        if (tkbFilter === "urgent") return s.status === "urgent";
+        if (tkbFilter === "overdue") return s.status === "overdue";
+        if (tkbFilter === "done") return s.status === "done";
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--dim)">Không có tiết nào trong mục này.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        let badgeHtml = "";
+        if (item.status === "done") {
+          badgeHtml = `<span class="status-badge done">✅ Đã soạn xong</span>`;
+        } else if (item.status === "urgent") {
+          badgeHtml = `<span class="status-badge urgent">⚠️ Cần soạn hôm nay!</span>`;
+        } else if (item.status === "overdue") {
+          badgeHtml = `<span class="status-badge overdue">🚨 Quá hạn soạn</span>`;
+        } else {
+          badgeHtml = `<span class="status-badge future">⏳ Chưa đến hạn</span>`;
+        }
+
+        const clsObj = classes.find(c => (c.name || "").toUpperCase() === item.className);
+        const classIdToUse = clsObj ? clsObj.id : item.className;
+
+        return `
+      <tr style="${item.status === 'urgent' ? 'background:rgba(245,158,11,0.06);' : ''}">
+        <td>
+          <b>${item.teachDateDisplay}</b>
+          <small>${item.teachDateStr}</small>
+        </td>
+        <td>
+          <span style="font-weight:700;color:${item.session === 'Sáng' ? 'var(--yellow)' : '#60a5fa'}">${item.session}</span>
+          <span>· Tiết ${item.period}</span>
+        </td>
+        <td>
+          <span class="chip chip-${item.grade}" style="font-size:0.85rem;padding:3px 8px">Lớp ${esc(item.className)}</span>
+        </td>
+        <td>
+          <b>Tiết ${item.tietPpct}: ${renderMath(item.title)}</b>
+          ${item.chapter ? `<small>${esc(item.chapter)}</small>` : ""}
+          ${item.savedLesson ? `<small style="color:var(--green)">✓ Đã có kịch bản (${(item.savedLesson.steps || []).length} bước)</small>` : ""}
+        </td>
+        <td>
+          <div><b>${item.prepDateDisplay}</b></div>
+          <div style="margin-top:3px">${badgeHtml}</div>
+        </td>
+        <td style="text-align:center">
+          ${item.isDone ? `
+            <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+              <a href="classroom.html?lesson=${encodeURIComponent(item.savedLesson.id)}&class=${encodeURIComponent(classIdToUse)}" target="_blank" class="btn btn-primary btn-sm" style="padding:4px 8px;font-size:0.75rem;text-decoration:none">
+                🚀 Vào dạy
+              </a>
+              <button class="btn btn-ghost btn-sm btn-open-tkb-lesson" data-lid="${esc(item.savedLesson.id)}" style="padding:4px 8px;font-size:0.75rem">
+                ✏️ Sửa
+              </button>
+            </div>
+          ` : `
+            <button class="btn btn-primary btn-sm btn-prep-now" data-item='${esc(JSON.stringify(item))}' style="background:var(--grad);font-size:0.78rem;padding:5px 10px;white-space:nowrap;box-shadow:0 2px 8px rgba(16,185,129,0.3)">
+              ⚡ Soạn bài ngay
+            </button>
+          `}
+        </td>
+      </tr>`;
+      }).join("");
+    }
+
+    function renderTkb() {
+      loadTkbData();
+      renderTkbGrid();
+      renderTkbSchedule();
+    }
+
+    // Bấm "⚡ Soạn bài ngay" từ Lịch TKB -> Tự động điền đầy đủ và mở tab Soạn bài
+    function startFromTkbItem(item) {
+      resetForm();
+      selectSubject(item.subjectId || "toan", false);
+      state.ppctKey = item.ppctKey;
+      $("title").value = item.title;
+      $("grade").value = item.grade;
+      $("tiet").value = item.tietPpct;
+      $("date").value = item.teachDateStr;
+
+      const cls = classes.find(c => (c.name || "").toUpperCase() === item.className);
+      if (cls) {
+        $("classId").value = cls.id;
+      }
+
+      const r = item.ppctInfo;
+      if (r) {
+        $("week").value = r.week || "";
+        $("digital").value = r.digital || "";
+        const ped = analyzeLessonPedagogy(r.title, item.tietPpct, item.grade, r.requirement || "");
+        $("objectives").value = ped.autoObjective;
+        $("requirements").value = ped.autoRequirement;
+      }
+
+      updatePpctDisplay();
+      updatePedagogyNotice();
+      showTab("lesson");
+      renderEditor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      toast(`
+    <div style="text-align:left;line-height:1.5;max-width:380px">
+      <b style="color:var(--green)">⚡ Đã nạp thông tin bài dạy theo TKB!</b><br>
+      <span>Lớp: <b>${item.className}</b> · Ngày dạy: <b>${item.teachDateDisplay}</b></span><br>
+      <span style="font-size:0.8rem;color:var(--yellow)">Thầy/cô chỉ cần bấm nút "🌐 Đẩy sang Gemini Web" hoặc "✨ Tạo bằng AI" để chuẩn bị bài trước 1 ngày nhé!</span>
+    </div>
+  `, 8000);
+    }
+
+    // Quick fill cho các nút chọn nhanh lớp
+    window.tkbQuickFill = function (clsName) {
+      if (tkbSelectedSlotKey) {
+        timetable.slots[tkbSelectedSlotKey] = clsName;
+        saveTkbData(true);
+        renderTkbGrid();
+        renderTkbSchedule();
+        toast(`Đã gán lớp ${clsName} vào ô đang chọn.`);
+      } else {
+        toast(`Thầy/cô vui lòng bấm chọn một ô trên lưới TKB trước, sau đó bấm chọn lớp ${clsName} nhé!`, 4000);
+      }
+    };
+
+    // Đọc file Excel TKB bằng SheetJS
+    function parseTkbExcel(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const wb = XLSX.read(data, { type: "array" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+          let foundSlots = 0;
+          let colMap = {};
+
+          rows.forEach((row) => {
+            if (!Array.isArray(row)) return;
+            row.forEach((cell, cIdx) => {
+              const str = String(cell || "").toLowerCase().trim();
+              if (str.includes("thứ 2") || str.includes("thu 2") || str === "t2") colMap[cIdx] = 2;
+              if (str.includes("thứ 3") || str.includes("thu 3") || str === "t3") colMap[cIdx] = 3;
+              if (str.includes("thứ 4") || str.includes("thu 4") || str === "t4") colMap[cIdx] = 4;
+              if (str.includes("thứ 5") || str.includes("thu 5") || str === "t5") colMap[cIdx] = 5;
+              if (str.includes("thứ 6") || str.includes("thu 6") || str === "t6") colMap[cIdx] = 6;
+              if (str.includes("thứ 7") || str.includes("thu 7") || str === "t7") colMap[cIdx] = 7;
+            });
+          });
+
+          if (Object.keys(colMap).length < 2) {
+            colMap = { 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7 };
+          }
+
+          let curSession = "S";
+          rows.forEach((row) => {
+            if (!Array.isArray(row)) return;
+            const rowStr = row.map(c => String(c || "")).join(" ");
+            if (rowStr.includes("Trần Văn Trọng")) timetable.teacher = "Trần Văn Trọng";
+            if (rowStr.toLowerCase().includes("chiều") || rowStr.includes(" C ") || row[1] === "C") curSession = "C";
+            if (rowStr.toLowerCase().includes("sáng") || rowStr.includes(" S ") || row[1] === "S") curSession = "S";
+
+            let period = null;
+            for (let c = 0; c < 4; c++) {
+              const v = String(row[c] || "").trim();
+              if (/^[1-5]$/.test(v)) { period = +v; break; }
+            }
+
+            if (period) {
+              Object.entries(colMap).forEach(([cIdx, dayNum]) => {
+                const val = String(row[cIdx] || "").trim();
+                if (val) {
+                  const mCls = val.match(/(?:^|\b)(7|8|9)\s*[a-zA-Z0-9]+/i);
+                  if (mCls) {
+                    const clsName = mCls[0].toUpperCase().replace(/\s+/g, "");
+                    const slotKey = `${dayNum}_${curSession}_${period}`;
+                    timetable.slots[slotKey] = clsName;
+                    foundSlots++;
+                  }
+                }
+              });
+            }
+          });
+
+          saveTkbData(true);
+          renderTkbGrid();
+          renderTkbSchedule();
+          toast(`🎉 Đã nạp thành công ${foundSlots} tiết dạy từ file Excel Thời Khóa Biểu!`);
+        } catch (err) {
+          toast("❌ Lỗi đọc file Excel: " + err.message, 6000);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Tải file Excel mẫu TKB của Thầy Trần Văn Trọng
+    function downloadTkbExcelTemplate() {
+      try {
+        const data = [
+          ["THỜI KHÓA BIỂU MÔN TOÁN NĂM HỌC 2026-2027 ÁP DỤNG TỪ 28-09-2026"],
+          ["Giáo Viên:", "Trần Văn Trọng", "", "Tuần:", "Tuần 4, 5"],
+          [],
+          ["Giáo Viên", "Buổi", "Tiết", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"],
+          ["Trần Văn Trọng", "S", 1, "", "9a6-Toán", "", "9a6-Toán", "9a4-Toán", ""],
+          ["", "S", 2, "", "9a6-Toán", "", "9a6-Toán", "9a4-Toán", ""],
+          ["", "S", 3, "", "", "", "", "", ""],
+          ["", "S", 4, "", "", "", "9a4-Toán", "", ""],
+          ["", "S", 5, "", "", "", "9a4-Toán", "", ""],
+          ["", "C", 1, "7a4-Toán", "", "", "", "7a7-Toán", "7a4-Toán"],
+          ["", "C", 2, "7a4-Toán", "", "", "", "7a7-Toán", "7a4-Toán"],
+          ["", "C", 3, "", "", "", "", "", "7a2-Toán"],
+          ["", "C", 4, "", "7a7-Toán", "", "", "7a2-Toán", "7a2-Toán"],
+          ["", "C", 5, "", "7a7-Toán", "", "", "7a2-Toán", ""]
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TKB_Thay_Trong");
+        XLSX.writeFile(wb, "Thoi_Khoa_Bieu_Mau_Toan_Thay_Trong.xlsx");
+        toast("✅ Đã tải xuống file Excel mẫu Thời Khóa Biểu!");
+      } catch (err) {
+        toast("Lỗi tải file mẫu: " + err.message);
+      }
+    }
+
+    // AI Quét ảnh Thời Khóa Biểu bằng Gemini Vision
+    async function ocrTkbWithAi(base64Data) {
+      const key = apiKeyInput.value.trim();
+      const model = modelHidden.value.trim() || "gemini-1.5-flash";
+
+      if (!key) {
+        toast("⚠️ Thầy/cô vui lòng nhập Khóa API Gemini trong mục Cài đặt trước khi dùng tính năng quét ảnh nhé!", 5000);
+        $("settings").open = true;
+        return;
+      }
+
+      const btn = $("btnOcrTkbAi");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Đang phân tích ảnh...';
+
+      try {
+        const pureBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, "");
+        const mimeMatch = base64Data.match(/^data:(image\/[a-z]+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+
+        const promptText = `Bạn là trợ lý AI chuyên phân tích ảnh Thời Khóa Biểu (TKB) trường học Việt Nam.
+Hãy đọc ảnh Thời Khóa Biểu này và trích xuất bảng phân công tiết dạy môn Toán:
+- Thứ: 2, 3, 4, 5, 6, 7
+- Buổi: S (Sáng) hoặc C (Chiều)
+- Tiết: 1, 2, 3, 4, 5
+- Tên lớp dạy (Ví dụ: 7A2, 7A4, 7A7, 9A4, 9A6...)
+
+CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong markdown):
+{
+  "teacher": "Trần Văn Trọng",
+  "applyDate": "2026-09-28",
+  "weeks": "Tuần 4, 5",
+  "slots": {
+    "2_C_1": "7A4",
+    "2_C_2": "7A4",
+    "3_S_1": "9A6",
+    "3_S_2": "9A6"
+  }
+}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({
+            contents: [{
+              role: "user",
+              parts: [
+                { text: promptText },
+                { inlineData: { mimeType, data: pureBase64 } }
+              ]
+            }],
+            generationConfig: { temperature: 0.1 }
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error?.message || "Lỗi API Gemini");
+
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        let cleanJson = reply.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+        const firstB = cleanJson.indexOf("{");
+        const lastB = cleanJson.lastIndexOf("}");
+        if (firstB >= 0 && lastB > firstB) cleanJson = cleanJson.substring(firstB, lastB + 1);
+
+        const parsed = JSON.parse(cleanJson);
+        if (parsed.teacher) timetable.teacher = parsed.teacher;
+        if (parsed.applyDate) timetable.applyDate = parsed.applyDate;
+        if (parsed.weeks) timetable.weeks = parsed.weeks;
+        if (parsed.slots && Object.keys(parsed.slots).length > 0) {
+          timetable.slots = parsed.slots;
+        }
+
+        saveTkbData(true);
+        renderTkbGrid();
+        renderTkbSchedule();
+        toast(`🎉 AI đã nhận diện thành công Thời Khóa Biểu từ ảnh chụp!`);
+      } catch (err) {
+        toast("❌ Lỗi AI quét ảnh: " + err.message, 6000);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🤖 AI phân tích ảnh &amp; tự động điền TKB';
+      }
+    }
+
+    // Bắt sự kiện cho Module Thời Khóa Biểu
+    $("btnSaveTkb").addEventListener("click", () => saveTkbData(false));
+
+    $("btnApplyDefaultTkb").addEventListener("click", () => {
+      timetable = {
+        teacher: "Trần Văn Trọng",
+        schoolYear: "2026-2027",
+        weeks: "Tuần 4, 5",
+        applyDate: "2026-09-28",
+        slots: { ...DEFAULT_TKB_SLOTS }
+      };
+      saveTkbData(true);
+      renderTkbGrid();
+      renderTkbSchedule();
+      toast("⚡ Đã nạp chính xác Thời Khóa Biểu Tuần 4-5 của Thầy Trần Văn Trọng (như trong ảnh)!");
+    });
+
+    $("fileTkbExcel").addEventListener("change", e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) parseTkbExcel(f);
+    });
+
+    $("btnDownloadTkbTemplate").addEventListener("click", downloadTkbExcelTemplate);
+
+    $("fileTkbImg").addEventListener("change", e => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        uploadedTkbImageBase64 = ev.target.result;
+        $("tkbImgElem").src = uploadedTkbImageBase64;
+        $("tkbImgPreviewWrap").style.display = "block";
+        toast("✅ Đã tải ảnh TKB! Thầy/cô có thể bấm nút '🤖 AI phân tích ảnh' bên trên để hệ thống tự điền.");
+      };
+      reader.readAsDataURL(f);
+    });
+
+    $("btnCloseTkbImg").addEventListener("click", () => {
+      $("tkbImgPreviewWrap").style.display = "none";
+    });
+
+    $("btnOcrTkbAi").addEventListener("click", () => {
+      if (uploadedTkbImageBase64) {
+        ocrTkbWithAi(uploadedTkbImageBase64);
+      } else {
+        toast("Vui lòng tải ảnh chụp TKB trước.");
+      }
+    });
+
+    // Click vào ô trên lưới TKB
+    $("tkbGridTable").addEventListener("click", e => {
+      const delBtn = e.target.closest("[data-del]");
+      if (delBtn) {
+        const key = delBtn.dataset.del;
+        delete timetable.slots[key];
+        saveTkbData(true);
+        renderTkbGrid();
+        renderTkbSchedule();
+        toast("Đã xóa tiết dạy.");
+        return;
+      }
+
+      const cell = e.target.closest(".tkb-cell");
+      if (cell) {
+        const key = cell.dataset.key;
+        tkbSelectedSlotKey = key;
+        renderTkbGrid();
+
+        const cur = timetable.slots[key] || "";
+        const promptAns = prompt(`Nhập tên lớp cho tiết này (VD: 7A2, 7A4, 7A7, 9A4, 9A6)\nHoặc bấm nút "Chọn nhanh lớp" ở thanh trên cùng\n(Để trống nếu muốn xóa):`, cur);
+        if (promptAns !== null) {
+          const cleanVal = promptAns.toUpperCase().trim();
+          if (cleanVal) {
+            timetable.slots[key] = cleanVal;
+          } else {
+            delete timetable.slots[key];
+          }
+          saveTkbData(true);
+          renderTkbGrid();
+          renderTkbSchedule();
+        }
+      }
+    });
+
+    // Click nút chọn tuần xem lịch soạn
+    const adminWeekBtnsEl = $("adminWeekBtns");
+    if (adminWeekBtnsEl) {
+      adminWeekBtnsEl.addEventListener("click", e => {
+        const b = e.target.closest("[data-admin-week]");
+        if (!b) return;
+        adminTkbActiveWeek = +b.dataset.adminWeek;
+        renderTkbSchedule();
+      });
+    }
+
+    // Click nút lọc lịch soạn
+    $("prepFilterBtns").addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b || !b.dataset.filter) return;
+      tkbFilter = b.dataset.filter;
+      $("prepFilterBtns").querySelectorAll("button").forEach(btn => {
+        btn.className = btn === b ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm";
+      });
+      renderTkbSchedule();
+    });
+
+    // Click trong bảng lịch soạn
+    $("tkbScheduleBody").addEventListener("click", e => {
+      const prepBtn = e.target.closest(".btn-prep-now");
+      if (prepBtn) {
+        try {
+          const item = JSON.parse(prepBtn.dataset.item);
+          startFromTkbItem(item);
+        } catch (err) {
+          console.error(err);
+        }
+        return;
+      }
+
+      const openBtn = e.target.closest(".btn-open-tkb-lesson");
+      if (openBtn) {
+        const lid = openBtn.dataset.lid;
+        const idx = recentLessons.findIndex(l => l.id === lid);
+        if (idx >= 0) openLessonByIdx(idx);
+      }
+    });
+
+    // Tự động soạn bài bằng AI cho cả tuần (Batch Auto Generation)
+    $("btnAutoBatchGen").addEventListener("click", async () => {
+      const schedule = computeTkbSchedule();
+      const unPrepared = schedule.filter(s => !s.isDone);
+
+      if (!unPrepared.length) {
+        return toast("🎉 Tuyệt vời! Tất cả các tiết trong tuần đều đã được soạn sẵn sàng.");
+      }
+
+      const key = apiKeyInput.value.trim();
+      if (!key) {
+        toast("⚠️ Tính năng này yêu cầu Khóa API Gemini trong Cài đặt để chạy tự động.", 5000);
+        $("settings").open = true;
+        return;
+      }
+
+      if (!confirm(`Hệ thống sẽ dùng Gemini AI tự động soạn bài cho ${unPrepared.length} tiết chưa soạn trong tuần. Bạn có muốn tiếp tục?`)) {
+        return;
+      }
+
+      const btn = $("btnAutoBatchGen");
+      btn.disabled = true;
+      let doneCount = 0;
+
+      for (let i = 0; i < unPrepared.length; i++) {
+        const item = unPrepared[i];
+        btn.innerHTML = `<span class="spin"></span> Đang soạn (${i + 1}/${unPrepared.length}): ${item.className} - Tiết ${item.tietPpct}...`;
+
+        try {
+          // 1. Chuẩn bị prompt
+          startFromTkbItem(item);
+          const promptText = buildPrompt();
+
+          // 2. Gọi AI
+          const rawRes = await callGemini(promptText);
+          const cleaned = cleanAndParseNotebookLMJson(rawRes);
+          const lessonData = Array.isArray(cleaned) ? cleaned[0] : cleaned;
+
+          // 3. Nạp kịch bản
+          state.teachingMode = TEACHING_MODES[lessonData.teachingMode] ? lessonData.teachingMode : $("teachingMode").value;
+          $("teachingMode").value = state.teachingMode;
+          const generatedSteps = lessonData.steps || lessonData.cac_buoc_dan_dat;
+          if (Array.isArray(generatedSteps)) {
+            state.steps = generatedSteps.map(s => ({
+              level: ["de", "vua", "kho"].includes(s.level) ? s.level : "vua",
+              phase: s.phase || s.chang || "",
+              teacherAction: s.teacherAction || s.viec_giao_vien_lam || "",
+              studentTask: s.studentTask || s.nhiem_vu_hoc_sinh || "",
+              expectedProduct: s.expectedProduct || s.san_pham_mong_doi || "",
+              grouping: s.grouping || s.hinh_thuc_to_chuc || "",
+              durationMinutes: Number(s.durationMinutes || s.thoi_luong_phut) || "",
+              question: s.question || s.cau_hoi_gv || "",
+              hint: s.hint || s.goi_y_khi_sai || "",
+              answer: s.answer || s.dap_an_hs || "",
+              explanation: s.explanation || s.giai_thich || "",
+              mistake: s.mistake || s.loi_hay_gap || "",
+              imageUrl: s.imageUrl || s.hinh_anh || ""
+            }));
+          }
+
+          if (Array.isArray(lessonData.blackboard)) {
+            state.blackboard = lessonData.blackboard.map(b => ({
+              title: b.title || "",
+              content: b.content || ""
+            }));
+          } else if (lessonData.bai_toan_sgk) {
+            state.blackboard = [{ title: "Bài toán mở đầu", content: lessonData.bai_toan_sgk }];
+          }
+
+          if (lessonData.giao_an_5512) {
+            state.giaoAn5512 = lessonData.giao_an_5512;
+          }
+
+          await saveLesson();
+          doneCount++;
+        } catch (err) {
+          console.warn("Lỗi auto gen item:", item, err);
+        }
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = "🤖 Tự động soạn bài bằng AI";
+      showTab("tkb");
+      renderTkb();
+      toast(`🎉 Đã tự động soạn xong ${doneCount} / ${unPrepared.length} bài học cho tuần!`);
+    });
+
+    /* ─── INITIALIZATION ─── */
+    loadLocalData();
+    loadTkbData();
+    populateSubjectSelects();
+    populateClassSelects();
+    renderClassTable();
+    renderStudentTable();
+    renderRecentLessons();
+    renderEditor();
+    updateStats();
+    renderPpct();
+    renderTkb();
+
+    const urlParams = new URLSearchParams(location.search);
+    const urlPpct = urlParams.get("ppct");
+    const urlDate = urlParams.get("date") || urlParams.get("teachDate");
+    const urlClass = urlParams.get("class");
+    const urlSubject = urlParams.get("subject") || getActiveSubject() || "toan";
+    const urlGrade = urlParams.get("grade");
+    const urlTiet = urlParams.get("tiet");
+    const urlTitle = urlParams.get("title");
+
+    selectSubject(urlSubject, false);
+
+    if (urlPpct) {
+      startFromPpct(urlPpct);
+      if (urlDate) $("date").value = urlDate;
+      if (urlClass) {
+        const cObj = classes.find(c => c.id === urlClass || (c.name || "").toUpperCase() === urlClass.toUpperCase());
+        if (cObj) $("classId").value = cObj.id;
+      }
+      const parts = urlPpct.split("-");
+      toast(`⚡ <b>Đã nạp bài soạn từ Kế hoạch Dạy học!</b><br>Khối ${parts[0]} - Tiết ${parts[1]}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày dạy: ${urlDate}` : ''}`, 5000);
+    } else if (urlGrade && urlTiet) {
+      const gStr = String(urlGrade);
+      const tNum = parseInt(urlTiet);
+      state.ppctKey = `${gStr}-${tNum}`;
+      $("grade").value = gStr;
+      $("tiet").value = tNum;
+      if (urlDate) $("date").value = urlDate;
+      if (urlClass) {
+        const cObj = classes.find(c => c.id === urlClass || (c.name || "").toUpperCase() === urlClass.toUpperCase());
+        if (cObj) $("classId").value = cObj.id;
+      } else {
+        const cObj = classes.find(c => String(c.grade) === String(gStr) || (c.name || "").startsWith(String(gStr)));
+        if (cObj) $("classId").value = cObj.id || cObj.name;
+      }
+
+      const ppctItem = getLessonPpct(gStr, tNum, urlSubject);
+      if (ppctItem) {
+        $("title").value = urlTitle || ppctItem.title;
+        $("week").value = ppctItem.week || Math.ceil(tNum / 4);
+        $("digital").value = ppctItem.digital || "";
+        const ped = analyzeLessonPedagogy(ppctItem.title, tNum, gStr, ppctItem.requirement || "");
+        $("objectives").value = ped.autoObjective;
+        $("requirements").value = ped.autoRequirement;
+      } else if (urlTitle) {
+        $("title").value = urlTitle;
+        $("week").value = Math.ceil(tNum / 4);
+      }
+      updatePpctDisplay();
+      updatePedagogyNotice();
+      showTab("lesson");
+      renderEditor();
+      toast(`⚡ <b>Đã nạp bài học từ Kế hoạch!</b><br>Khối ${gStr} - Tiết ${tNum}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày: ${urlDate}` : ''}`, 5000);
+    }
+
+    const urlLesson = new URLSearchParams(location.search).get("lesson");
+    if (urlLesson) {
+      const lIdx = recentLessons.findIndex(l => l.id === urlLesson);
+      if (lIdx >= 0) openLessonByIdx(lIdx);
+    }
+
+    if (location.hash === "#tkb") showTab("tkb");
+    else if (location.hash === "#ppct") showTab("ppct");
+    else if (location.hash === "#class") showTab("class");
+
+    (async () => {
+      const syncStatus = $("syncStatus");
+      const syncText = $("syncText");
+
+      try {
+        syncText.textContent = "Đang kiểm tra Cloud...";
+        currentUser = await requireTeacher();
+        await getDocs(query(collection(db, "classes"), limit(1)));
+
+        isFirebaseOnline = true;
+        syncStatus.className = "sync-badge";
+        syncText.textContent = "Cloud Firebase";
+        syncStatus.title = "Đã kết nối Firestore Cloud. Dữ liệu tự động đồng bộ.";
+
+        try {
+          const lesSnap = await getDocs(query(collection(db, "lessons"), where("ownerUid", "==", currentUser.uid), limit(30)));
+          if (!lesSnap.empty) {
+            const ownedLessons = lesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            ownedLessons.sort((a, b) => {
+              const timeA = a.updatedAt?.toMillis?.() || a.createdAt?.toMillis?.() || Date.parse(a.updatedAt || "") || 0;
+              const timeB = b.updatedAt?.toMillis?.() || b.createdAt?.toMillis?.() || Date.parse(b.updatedAt || "") || 0;
+              return timeB - timeA;
+            });
+            ownedLessons.slice(0, 10).forEach(l => {
+              if (!recentLessons.some(rl => rl.id === l.id)) {
+                recentLessons.push(l);
+              }
+            });
+            saveLocalData();
+            renderRecentLessons();
+            updateStats();
+          }
+        } catch (e) {
+          console.warn("Lỗi đồng bộ bài giảng:", e);
+        }
+
+      } catch (e) {
+        isFirebaseOnline = false;
+        syncStatus.className = "sync-badge offline";
+        syncText.textContent = "Lưu máy cục bộ";
+        syncStatus.title = "Đang lưu an toàn trên máy này.";
+      }
+    })();
+
+    $("syncStatus").addEventListener("click", () => {
+      if (isFirebaseOnline) {
+        toast("🟢 Hệ thống đang kết nối trực tiếp với Firestore Cloud.");
+      } else {
+        toast("💾 Đang chạy chế độ Cục bộ: Mọi bài soạn, học sinh đều lưu an toàn trên máy.", 4000);
+      }
+    });
+  </script>
+</body>
+
+</html>

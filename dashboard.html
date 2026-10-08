@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bảng điều khiển · Trợ lý lên lớp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&display=swap" rel="stylesheet">
+<!-- Tích hợp KaTeX để hiển thị công thức Toán học chuẩn, khử dấu $ -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --board: #15352d; --board-2: #0f2620; --chalk: #f1f4ea; --yellow: #f2d16b;
+    --paper: #f4f6f5; --card: #fff; --ink: #17232b; --muted: #55666e; --line: #d5ddd9; --green: #1f5c4d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Be Vietnam Pro", system-ui, "Segoe UI", sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; padding-bottom: env(safe-area-inset-bottom); }
+  a, button { font-family: inherit; }
+  :focus-visible { outline: 3px solid #2f7d6a; outline-offset: 2px; }
+
+  header { background: var(--board); color: var(--chalk); border-bottom: 6px solid #8a6a43; padding: calc(16px + env(safe-area-inset-top)) 20px 20px; }
+  .head-in { max-width: 1180px; margin: 0 auto; }
+  .bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: .88rem; opacity: .95; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: thin; }
+  .bar .sp { display: none; }
+  .bar a, .bar button { flex: none; color: var(--chalk); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.28); padding: 7px 12px; border-radius: 8px; font-size: .82rem; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s; }
+  .bar a:hover, .bar button:hover { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.6); }
+  .bar a[aria-current="page"] { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.62); font-weight: 700; }
+  h1 { font-size: clamp(1.6rem, 5vw, 2.3rem); margin: 14px 0 2px; font-weight: 800; line-height: 1.15; }
+  .date { color: #b8cbc0; margin: 0; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 820px) { main { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 22px; } .wide { grid-column: 1 / -1; } }
+  @media (max-width: 520px) { main { padding: 16px 14px 28px; gap: 16px; } header { padding-left: 14px; padding-right: 14px; } .bar { justify-content: flex-start; margin: 0 -2px; } }
+  section { min-width: 0; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+
+  /* Bài hôm nay: điểm nhấn chính */
+  .today { display: grid; gap: 12px; }
+  .lesson {
+    background: var(--card); border: 1px solid var(--line); border-left: 8px solid var(--yellow);
+    border-radius: 10px; padding: 18px; display: grid; gap: 12px;
+  }
+  .lesson .cls { font-weight: 800; font-size: 1.05rem; color: var(--green); }
+  .lesson .name { font-size: 1.35rem; font-weight: 800; line-height: 1.25; }
+  .lesson .meta { color: var(--muted); font-size: .92rem; }
+  .go {
+    display: block; text-align: center; text-decoration: none; background: var(--board); color: var(--chalk);
+    padding: 16px 18px; border-radius: 10px; font-weight: 800; font-size: 1.1rem; min-height: 56px;
+  }
+  .go:active { background: var(--board-2); }
+  .none { background: var(--card); border: 1px dashed var(--line); border-radius: 10px; padding: 22px; color: var(--muted); }
+
+  /* Tiến độ */
+  .prog { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .track { height: 12px; background: #e3e9e6; border-radius: 99px; overflow: hidden; margin: 10px 0 8px; }
+  .fill { height: 100%; background: var(--green); width: 0; transition: width .5s; }
+  .prog .nums { display: flex; justify-content: space-between; font-size: .9rem; color: var(--muted); }
+  .prog b { color: var(--ink); }
+  .upcoming { list-style: none; margin: 14px 0 0; padding: 0; }
+  .upcoming li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: .93rem; }
+  .upcoming .d { color: var(--muted); font-size: .85rem; }
+  .upcoming a { color: var(--green); font-weight: 600; text-decoration: none; padding: 6px 8px; }
+
+  /* Lớp */
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .quick-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .quick-link { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; background: var(--card); color: var(--ink); text-decoration: none; box-shadow: 0 2px 7px rgba(23,35,43,.035); transition: transform .15s, box-shadow .15s, border-color .15s; }
+  .quick-link:hover { transform: translateY(-2px); border-color: #9cb8ac; box-shadow: 0 5px 14px rgba(23,35,43,.08); }
+  .quick-link .icon { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 9px; background: #eaf2ee; font-size: 1.05rem; }
+  .quick-link b { display: block; font-size: .86rem; line-height: 1.25; }
+  .quick-link small { display: block; margin-top: 3px; color: var(--muted); font-size: .73rem; line-height: 1.3; }
+  @media (max-width: 760px) { .quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .quick-link { min-height: 60px; padding: 9px; } }
+  @media (max-width: 380px) { .quick-link { gap: 7px; } .quick-link .icon { width: 31px; height: 31px; } .quick-link b { font-size: .8rem; } .quick-link small { font-size: .68rem; } }
+  .chip {
+    flex: none; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px;
+    padding: 10px 16px; font-weight: 600; font-size: 1rem; cursor: pointer; min-height: 48px; text-align: left;
+  }
+  .chip small { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; }
+  .chip[aria-pressed="true"] { background: var(--board); color: var(--chalk); border-color: var(--board); }
+  .chip[aria-pressed="true"] small { color: #b8cbc0; }
+
+  /* HS cần lưu ý */
+  .weak { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  .weak li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .weak li:first-child { border-top: 0; }
+  .weak .n { flex: 1; font-weight: 600; }
+  .weak .c { color: var(--muted); font-size: .88rem; }
+  .weak .p { font-size: .85rem; background: #fde7d4; color: #7a3d00; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+  .weak .p.ok { background: #e2efe7; color: #1d5a35; }
+  .hintline { color: var(--muted); font-size: .85rem; margin: 8px 2px 0; }
+  .empty { padding: 18px 16px; color: var(--muted); }
+  .lesson.done { border-left-color: #7aa89a; opacity: .75; }
+  .lesson .row { display: grid; gap: 8px; }
+  .go.warn { background: #fff6d6; color: #5a4700; border: 2px solid #d1a800; }
+  .ghostbtn { background: #fff; border: 1.5px solid var(--line); color: var(--ink); border-radius: 10px; padding: 12px; font-weight: 600; font-size: .95rem; cursor: pointer; min-height: 48px; }
+  .cls-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .cls-card h3 { margin: 0; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .cls-card h3 span { color: var(--muted); font-weight: 400; font-size: .9rem; }
+  .next { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .next b { display: block; }
+  .next small { color: var(--muted); }
+  .next a { text-decoration: none; background: var(--board); color: var(--chalk); padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: .92rem; white-space: nowrap; }
+  .next a.warn { background: #fff6d6; color: #5a4700; border: 1.5px solid #d1a800; }
+  .after { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+  [hidden] { display: none !important; }
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--board); color: var(--chalk); padding: 12px 20px; border-radius: 8px; opacity: 0; pointer-events: none; transition: .25s; z-index: 50; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (prefers-reduced-motion: reduce) { .fill, #toast { transition: none; } }
+
+  /* Saved Lessons Grid */
+  .saved-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  @media (min-width: 720px) {
+    .saved-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .saved-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .saved-card:hover {
+    border-color: #2f7d6a;
+    box-shadow: 0 4px 12px rgba(31,92,77,0.1);
+  }
+  .saved-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+  .saved-badge-cls {
+    background: #e6f3ef;
+    color: var(--green);
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  .saved-badge-cls-select {
+    background: #e6f3ef;
+    color: var(--green);
+    font-weight: 700;
+    padding: 3px 22px 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #b7dfd2;
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5z' fill='%231f5c4d'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .saved-badge-cls-select:hover,
+  .saved-badge-cls-select:focus {
+    background-color: #d6ede5;
+    border-color: #1f5c4d;
+    box-shadow: 0 0 0 2px rgba(31,92,77,0.15);
+  }
+  .saved-badge-date {
+    color: var(--muted);
+  }
+  .saved-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .saved-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+  .saved-preview {
+    background: #f8faf9;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.86rem;
+  }
+  .saved-preview summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--green);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .saved-preview summary::-webkit-details-marker { display: none; }
+  .saved-preview-body {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preview-sec-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .preview-bb-item {
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+    border: 1px solid var(--line);
+    border-left: 3.5px solid var(--green);
+  }
+  .preview-step-item {
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+  }
+  .saved-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .btn-teach {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    background: var(--board);
+    color: var(--chalk);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: center;
+    transition: background 0.15s;
+  }
+  .btn-teach:hover { background: #1f4f43; }
+  .btn-edit-lesson {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #fff;
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+  .btn-edit-lesson:hover { background: #f0f4f2; }
+
+  /* Toolbar lọc khối, tìm kiếm và sắp xếp cho danh sách bài đã soạn */
+  .saved-toolbar {
+    background: #f4f8f6;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .saved-toolbar-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .saved-grade-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .saved-grade-pill {
+    background: #fff;
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+  }
+  .saved-grade-pill small {
+    font-size: 0.72rem;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  .saved-grade-pill:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .saved-grade-pill.active {
+    background: var(--board);
+    color: var(--chalk);
+    border-color: var(--board);
+  }
+  .saved-grade-pill.active small {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+  .saved-toolbar-row2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .saved-search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .saved-search-box input {
+    width: 100%;
+    padding: 8px 32px 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    font-size: 0.86rem;
+    font-family: inherit;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .saved-search-box input:focus {
+    border-color: var(--green);
+  }
+  .saved-search-clear {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.88rem;
+    padding: 4px;
+    display: none;
+    line-height: 1;
+  }
+  .saved-sort-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .saved-sort-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+  .saved-sort-select:focus {
+    border-color: var(--green);
+  }
+
+  /* Badges cho thẻ bài học */
+  .badge-grade {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .badge-grade-7 { background: #e0f2fe; color: #0284c7; }
+  .badge-grade-8 { background: #fef3c7; color: #d97706; }
+  .badge-grade-9 { background: #dcfce7; color: #16a34a; }
+  .badge-tiet-part {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .badge-tiet-part.part-1 { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+  .badge-tiet-part.part-2 { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+  .badge-tiet-part.part-3 { background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; }
+  .btn-del-lesson {
+    background: #fff;
+    border: 1.5px solid #fee2e2;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 9px 10px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .btn-del-lesson:hover { background: #fee2e2; }
+
+  /* STYLES CHO MODULE NHẮC VIỆC & KẾ HOẠCH DẠY HỌC (QUY TẮC SOẠN TRƯỚC 1 NGÀY) */
+  .tkb-remind-box {
+    background: #ffffff;
+    border: 1.5px solid #fed7aa;
+    border-left: 8px solid #f59e0b;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+    margin-bottom: 24px;
+  }
+  .tkb-remind-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #fef3c7;
+    padding-bottom: 12px;
+  }
+  .tkb-remind-h3 {
+    margin: 0;
+    font-size: 1.12rem;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 800;
+  }
+  .tkb-rule-badge {
+    font-size: 0.75rem;
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .tkb-remind-sub {
+    margin: 4px 0 0 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .tkb-remind-head-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tkb-week-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .tkb-week-pills {
+    display: inline-flex;
+    gap: 4px;
+  }
+  .tkb-week-pill {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .tkb-week-pill:hover {
+    border-color: #f59e0b;
+    color: #b45309;
+  }
+  .tkb-week-pill.active {
+    background: #f59e0b;
+    color: #fff;
+    border-color: #d97706;
+  }
+  .tkb-manage-link {
+    color: var(--green);
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 5px 10px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .tkb-manage-link:hover {
+    background: #dcfce7;
+  }
+
+  /* THỐNG KÊ 4 Ô */
+  .tkb-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tkb-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid transparent;
+    background: #f8fafc;
+    transition: transform 0.15s;
+  }
+  .tkb-stat-card:hover {
+    transform: translateY(-1px);
+  }
+  .tkb-stat-card.card-urgent {
+    background: #fffbeb;
+    border-color: #fde68a;
+  }
+  .tkb-stat-card.card-overdue {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+  .tkb-stat-card.card-tomorrow {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+  .tkb-stat-card.card-done {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  .tkb-stat-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .tkb-stat-num {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .card-urgent .tkb-stat-num { color: #b45309; }
+  .card-overdue .tkb-stat-num { color: #dc2626; }
+  .card-tomorrow .tkb-stat-num { color: #1d4ed8; }
+  .card-done .tkb-stat-num { color: #15803d; }
+  .tkb-stat-label {
+    font-size: 0.76rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* BỘ LỌC TABS */
+  .tkb-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .tkb-filter-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tkb-filter-btn {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    color: #475569;
+    border-radius: 8px;
+    padding: 6px 13px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .tkb-filter-btn:hover {
+    border-color: #f59e0b;
+    color: #b45309;
+  }
+  .tkb-filter-btn.active {
+    background: #b45309;
+    color: #fff;
+    border-color: #92400e;
+  }
+  .tkb-scope-notice {
+    font-size: 0.8rem;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* CARDS DANH SÁCH BÀI NHẮC VIỆC */
+  .tkb-remind-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tkb-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .tkb-item-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .tkb-item-card.is-urgent {
+    border-color: #fde68a;
+    background: #fffdf5;
+    border-left: 6px solid #f59e0b;
+  }
+  .tkb-item-card.is-overdue {
+    border-color: #fecaca;
+    background: #fff8f8;
+    border-left: 6px solid #ef4444;
+  }
+  .tkb-item-card.is-done {
+    border-color: #bbf7d0;
+    border-left: 6px solid #22c55e;
+  }
+  .tkb-item-info {
+    flex: 1;
+    min-width: 260px;
+  }
+  .tkb-item-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .tkb-item-day {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .tkb-badge-sess {
+    font-size: 0.74rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .tkb-badge-sess.sang {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .tkb-badge-sess.chieu {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  .tkb-status-pill {
+    font-size: 0.74rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .tkb-status-pill.urgent {
+    background: #fef08a;
+    color: #854d0e;
+    border: 1px solid #fde047;
+  }
+  .tkb-status-pill.overdue {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+  }
+  .tkb-status-pill.done {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+  }
+  .tkb-status-pill.future {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  .tkb-item-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .tkb-item-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tkb-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-tkb-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-tkb-prep {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+  }
+  .btn-tkb-prep:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    transform: translateY(-1px);
+  }
+  .btn-tkb-teach {
+    background: var(--board);
+    color: var(--chalk) !important;
+    box-shadow: 0 2px 6px rgba(27, 67, 50, 0.25);
+  }
+  .btn-tkb-teach:hover {
+    background: #2d6a4f;
+    transform: translateY(-1px);
+  }
+  .btn-tkb-edit {
+    background: #f1f5f9;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1;
+  }
+  .btn-tkb-edit:hover {
+    background: #e2e8f0;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="bar">
+      <span class="sp"></span>
+      <a href="dashboard.html" id="lnkDashboard" aria-current="page">🏠 Bảng điều khiển</a>
+      <a href="admin.html" id="lnkAdmin">✏️ Soạn bài giảng</a>
+      <a href="tkb.html" id="lnkTkb">📅 Thời khóa biểu</a>
+      <a href="ppct.html" id="lnkPpct">📋 Kế hoạch dạy (PPCT)</a>
+      <a href="lop-hoc.html" id="lnkClass">👥 Lớp &amp; Học sinh</a>
+      <a href="diem-tham-gia.html" id="lnkParticipation">⭐ Tổng kết điểm phát biểu</a>
+      <a href="classroom.html" id="lnkClassroom">🚀 Vào lớp dạy</a>
+    </div>
+    <h1 id="greet">Xin chào</h1>
+    <p class="date" id="dateLine"></p>
+  </div>
+</header>
+
+<main>
+  <section class="wide">
+    <h2>Các lớp đang dạy</h2>
+    <div class="chips" id="chips" role="group" aria-label="Chọn lớp"></div>
+  </section>
+
+  <section class="wide">
+    <h2>Truy cập nhanh</h2>
+    <nav class="quick-links" aria-label="Liên kết chức năng chính">
+      <a class="quick-link" href="tkb.html">
+        <span class="icon" aria-hidden="true">📅</span>
+        <span><b>Thời khóa biểu</b><small>Xem lịch dạy và hạn soạn</small></span>
+      </a>
+      <a class="quick-link" href="ppct.html">
+        <span class="icon" aria-hidden="true">📋</span>
+        <span><b>PPCT môn Toán</b><small>Tra cứu tiết, tuần và yêu cầu</small></span>
+      </a>
+      <a class="quick-link" href="admin.html">
+        <span class="icon" aria-hidden="true">✏️</span>
+        <span><b>Soạn bài</b><small>Tạo hoặc chỉnh sửa kịch bản</small></span>
+      </a>
+      <a class="quick-link" href="lop-hoc.html">
+        <span class="icon" aria-hidden="true">👥</span>
+        <span><b>Lớp &amp; điểm tuần</b><small>Quản lý học sinh, ghi KT thường xuyên</small></span>
+      </a>
+      <a class="quick-link" href="diem-tham-gia.html">
+        <span class="icon" aria-hidden="true">⭐</span>
+        <span><b>Tổng kết điểm phát biểu</b><small>Quy đổi điểm và xuất bảng Excel</small></span>
+      </a>
+    </nav>
+  </section>
+
+  <!-- NHẮC VIỆC & KẾ HOẠCH SOẠN BÀI TỰ ĐỘNG (QUY TẮC SOẠN TRƯỚC 1 NGÀY) -->
+  <section class="wide" id="secTkbReminder">
+    <div class="tkb-remind-box">
+      <!-- HEADER -->
+      <div class="tkb-remind-head">
+        <div>
+          <h3 class="tkb-remind-h3">
+            <span>⏰ Nhắc việc: Kế hoạch Dạy học &amp; Lịch Soạn bài tự động</span>
+            <span class="tkb-rule-badge">Quy tắc soạn trước 1 ngày</span>
+          </h3>
+          <p class="tkb-remind-sub" id="tkbRemindSub">
+            Đồng bộ theo Thời khóa biểu &amp; PPCT chuẩn. Hệ thống tự động đếm ngược hạn soạn trước ngày dạy 1 ngày.
+          </p>
+        </div>
+        <div class="tkb-remind-head-right">
+          <div class="tkb-week-switcher" id="tkbWeekSwitcher">
+            <span style="font-size:0.8rem;color:var(--muted);font-weight:600">Chọn tuần:</span>
+            <div id="tkbWeekPills" class="tkb-week-pills"></div>
+          </div>
+          <a href="tkb.html" class="tkb-manage-link" title="Xem bảng phân công TKB và kế hoạch chi tiết">
+            📅 Kế hoạch chi tiết ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- 4 THẺ THỐNG KÊ NHẮC VIỆC -->
+      <div class="tkb-stat-grid">
+        <div class="tkb-stat-card card-urgent" id="cardUrgent">
+          <div class="tkb-stat-icon">⚠️</div>
+          <div>
+            <div class="tkb-stat-num" id="statUrgentCount">0</div>
+            <div class="tkb-stat-label">Cần soạn hôm nay</div>
+          </div>
+        </div>
+        <div class="tkb-stat-card card-overdue" id="cardOverdue">
+          <div class="tkb-stat-icon">🚨</div>
+          <div>
+            <div class="tkb-stat-num" id="statOverdueCount">0</div>
+            <div class="tkb-stat-label">Quá hạn soạn bài</div>
+          </div>
+        </div>
+        <div class="tkb-stat-card card-tomorrow" id="cardTomorrow">
+          <div class="tkb-stat-icon">📅</div>
+          <div>
+            <div class="tkb-stat-num" id="statTomorrowCount">0</div>
+            <div class="tkb-stat-label" id="statTomorrowLabel">Tiết dạy ngày mai</div>
+          </div>
+        </div>
+        <div class="tkb-stat-card card-done" id="cardDone">
+          <div class="tkb-stat-icon">🟢</div>
+          <div>
+            <div class="tkb-stat-num" id="statDoneCount">0</div>
+            <div class="tkb-stat-label">Đã chuẩn bị xong</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BỘ LỌC DANH SÁCH NHẮC VIỆC -->
+      <div class="tkb-filter-bar">
+        <div class="tkb-filter-btns" id="tkbFilterBtns">
+          <button type="button" class="tkb-filter-btn active" data-filter="urgent_overdue">
+            ⚡ Cần chuẩn bị ngay (<span id="cntFilterUrgentOverdue">0</span>)
+          </button>
+          <button type="button" class="tkb-filter-btn" data-filter="tomorrow">
+            📅 Tiết ngày mai (<span id="cntFilterTomorrow">0</span>)
+          </button>
+          <button type="button" class="tkb-filter-btn" data-filter="all">
+            📋 Toàn bộ tuần (<span id="cntFilterAll">0</span>)
+          </button>
+          <button type="button" class="tkb-filter-btn" data-filter="done">
+            🟢 Đã soạn kịch bản (<span id="cntFilterDone">0</span>)
+          </button>
+        </div>
+        <div id="tkbScopeNotice" class="tkb-scope-notice" style="display:none"></div>
+      </div>
+
+      <!-- DANH SÁCH CÁC TIẾT NHẮC VIỆC -->
+      <div id="tkbTomorrowList" class="tkb-remind-list"></div>
+    </div>
+  </section>
+
+  <section class="wide" id="secWeak">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <h2 style="margin:0">Học sinh cần lưu ý</h2>
+      <a href="lop-hoc.html" class="tkb-manage-link">👥 Mở danh sách lớp &amp; điểm tuần ↗</a>
+    </div>
+    <ul class="weak" id="weak"></ul>
+    <p class="hintline" id="weakHint">Ưu tiên học sinh cần hỗ trợ; điểm KT thường xuyên lấy theo tuần đang chọn trên dashboard.</p>
+  </section>
+
+  <!-- DANH SÁCH BÀI ĐÃ LƯU & KỊCH BẢN LÊN LỚP -->
+  <section class="wide" id="secSaved">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">
+        <span>📂 Danh sách bài đã soạn &amp; Kịch bản lên lớp</span>
+        <span id="savedCountBadge" style="font-size:0.75rem;background:var(--board);color:var(--chalk);padding:2px 8px;border-radius:12px;font-weight:600">0 bài</span>
+      </h2>
+      <a href="admin.html" style="color:var(--green);font-size:0.88rem;font-weight:700;text-decoration:none">+ Soạn bài mới</a>
+    </div>
+
+    <div class="saved-toolbar">
+      <div class="saved-toolbar-row1">
+        <div class="saved-grade-pills" id="savedGradePills" role="group" aria-label="Lọc theo khối lớp">
+          <button type="button" class="saved-grade-pill active" data-grade="">Tất cả các khối <small id="cntAll">0</small></button>
+          <button type="button" class="saved-grade-pill" data-grade="7">Toán 7 <small id="cntK7">0</small></button>
+          <button type="button" class="saved-grade-pill" data-grade="9">Toán 9 <small id="cntK9">0</small></button>
+        </div>
+        <div class="saved-sort-wrap">
+          <label for="savedSortSelect">Sắp xếp:</label>
+          <select id="savedSortSelect" class="saved-sort-select" title="Chọn kiểu sắp xếp danh sách bài">
+            <option value="grade-created-desc">🏫 Theo khối, bài soạn mới nhất trước</option>
+            <option value="date-desc">📅 Ngày dạy: Mới nhất trước</option>
+            <option value="date-asc">📅 Ngày dạy: Cũ nhất trước</option>
+            <option value="ppct-asc">🔢 Tiến trình PPCT: Tiết 1 → 140</option>
+            <option value="title-asc">🔤 Tên bài: A → Z</option>
+          </select>
+        </div>
+      </div>
+      <div class="saved-toolbar-row2">
+        <div class="saved-search-box">
+          <input type="search" id="savedSearchInput" placeholder="🔍 Tìm bài học theo tên, tiết, tuần hoặc nội dung..." autocomplete="off">
+          <button type="button" id="savedSearchClear" class="saved-search-clear" title="Xóa tìm kiếm">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="savedLessons" class="saved-grid"></div>
+  </section>
+</main>
+
+<script type="module">
+import { db, esc, renderMath, fixLatexEscapes, todayStr, requireTeacher, toast } from "./firebase-config.js";
+import { collection, getDocs, getDoc, query, orderBy, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getActiveSubject } from "./ppct-manager.js";
+import { DEFAULT_CLASSES, DEFAULT_STUDENTS } from "./default-students.js";
+import {
+  computeTkbSchedule,
+  getAvailableWeeks,
+  getActiveWeek,
+  getStoredTimetable,
+  DEFAULT_TIMETABLE,
+  DEFAULT_TKB_SLOTS
+} from "./tkb-schedule.js";
+
+const $ = (id) => document.getElementById(id);
+const currentSubject = getActiveSubject() || "toan";
+let user;
+try { user = await requireTeacher(); } catch { user = { uid: "local", email: "Giáo viên" }; }
+
+const today = todayStr();
+const d = new Date();
+const h = d.getHours();
+$("greet").textContent = h < 11 ? "Chào buổi sáng" : h < 14 ? "Chào buổi trưa" : h < 18 ? "Chào buổi chiều" : "Chào buổi tối";
+$("dateLine").textContent = d.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric", year: "numeric" });
+
+let classes = [], lessonByKey = {}, students = [], recentLessons = [];
+let selected = ""; // "" = tất cả các lớp
+let tkbActiveWeek = null;
+let tkbReminderFilter = "urgent_overdue"; // "urgent_overdue", "tomorrow", "all", "done"
+const gradeOf = (c) => String(c.grade || parseInt(c.name) || "");
+const inScope = (x) => !selected || x.classId === selected || x.id === selected || x.className === selected || x.name === selected;
+
+const inScopeLesson = (l) => {
+  if (!selected) return true;
+  if (l.classId === selected || l.className === selected) return true;
+  const selClass = classes.find(c => c.id === selected || c.name === selected);
+  if (selClass && l.grade && +l.grade === +gradeOf(selClass)) return true;
+  return false;
+};
+
+function syncLessonIndex() {
+  lessonByKey = {};
+  recentLessons.filter(x => (x.subjectId || "toan") === currentSubject).forEach(x => {
+    if (x.ppctKey) lessonByKey[x.ppctKey] = x.id;
+    if (x.grade && x.tiet) lessonByKey[`${x.grade}-${x.tiet}`] = x.id;
+    if (x.classId && x.tiet) {
+      const cls = classes.find(c => (c.id || c.name) === x.classId || c.name === x.classId);
+      if (cls) {
+        const g = gradeOf(cls);
+        if (g) lessonByKey[`${g}-${x.tiet}`] = x.id;
+      }
+    }
+  });
+}
+
+const ALLOWED_CLASS_NAMES = ["7A2", "7A4", "7A7", "9A4", "9A6"];
+
+function loadLocal() {
+  try {
+    const rawC = localStorage.getItem("app_classes");
+    const parsedC = rawC ? JSON.parse(rawC) : [];
+    const filteredC = Array.isArray(parsedC) ? parsedC.filter(c => c && c.name && ALLOWED_CLASS_NAMES.includes(c.name.toUpperCase())) : [];
+    const classMap = new Map();
+    DEFAULT_CLASSES.forEach(c => classMap.set(c.name.toUpperCase(), { id: c.name, ...c }));
+    filteredC.forEach(c => {
+      const key = c.name.toUpperCase();
+      if (classMap.has(key)) {
+        classMap.set(key, { ...classMap.get(key), ...c, id: c.name, name: c.name });
+      }
+    });
+    classes = ALLOWED_CLASS_NAMES.map(name => classMap.get(name)).filter(Boolean);
+
+    const rawS = localStorage.getItem("app_students");
+    const parsedS = rawS ? JSON.parse(rawS) : [];
+    const filteredS = Array.isArray(parsedS) ? parsedS.filter(s => {
+      const cls = (s.className || s.classId || "").toUpperCase();
+      return ALLOWED_CLASS_NAMES.includes(cls);
+    }) : [];
+
+    if (filteredS.length === 0) {
+      students = [...DEFAULT_STUDENTS];
+    } else {
+      const existingClasses = new Set(filteredS.map(s => (s.className || s.classId || "").toUpperCase()));
+      let combined = [...filteredS];
+      DEFAULT_CLASSES.forEach(c => {
+        if (!existingClasses.has(c.name.toUpperCase())) {
+          const defStu = DEFAULT_STUDENTS.filter(s => (s.className || s.classId || "").toUpperCase() === c.name.toUpperCase());
+          combined.push(...defStu);
+        }
+      });
+      students = combined;
+    }
+
+    // Làm sạch và đồng bộ lại localStorage
+    try {
+      localStorage.setItem("app_classes", JSON.stringify(classes));
+      localStorage.setItem("app_students", JSON.stringify(students));
+    } catch (err) {}
+
+    const rawL = localStorage.getItem("app_recent_lessons");
+    recentLessons = rawL ? JSON.parse(rawL) : [];
+    recentLessons.forEach(l => {
+      if (l.title) l.title = fixLatexEscapes(l.title);
+      (l.blackboard || []).forEach(b => {
+        if (b.title) b.title = fixLatexEscapes(b.title);
+        if (b.content) b.content = fixLatexEscapes(b.content);
+      });
+      (l.steps || []).forEach(s => {
+        ["question", "hint", "answer", "explanation", "mistake"].forEach(k => {
+          if (s[k]) s[k] = fixLatexEscapes(s[k]);
+        });
+      });
+
+      // Tự động chuẩn hóa lớp cụ thể (tránh bị trùng thông tin "Toán 7" / "Toán 9")
+      const gNum = l.grade || (l.className ? l.className.replace(/\D/g, "")[0] : 9);
+      const isGeneric = !l.className || /^toán\s*\d+/i.test(l.className.trim()) || l.className.trim() === String(gNum);
+      if (isGeneric) {
+        let concreteCls = "";
+        try {
+          const tb = getStoredTimetable();
+          const tbRes = computeTkbSchedule({ timetable: tb, curToday: today });
+          const m = (tbRes.scheduleList || []).find(s => 
+            s.subjectId === (l.subjectId || "toan") && ((l.ppctKey && s.ppctKey === l.ppctKey) ||
+            (+s.grade === +gNum && +s.tietPpct === +l.tiet) ||
+            (l.id && s.savedLesson && s.savedLesson.id === l.id)
+            )
+          );
+          if (m && m.className) concreteCls = m.className;
+        } catch (err) {}
+
+        if (!concreteCls) {
+          const matchCls = classes.find(c => String(c.grade || "") === String(gNum) || (c.name || "").startsWith(String(gNum)));
+          if (matchCls) concreteCls = matchCls.name;
+        }
+
+        if (concreteCls) {
+          l.className = concreteCls;
+          const cObj = classes.find(c => (c.name || "").toUpperCase() === concreteCls.toUpperCase());
+          if (cObj) l.classId = cObj.id || cObj.name;
+        }
+      }
+    });
+    syncLessonIndex();
+  } catch (e) {
+    console.warn("Local load:", e);
+    classes = DEFAULT_CLASSES;
+    students = DEFAULT_STUDENTS;
+    recentLessons = [];
+    lessonByKey = {};
+  }
+}
+
+async function load() {
+  loadLocal();
+  render();
+  try {
+    const [c, l, s, tbDoc] = await Promise.all([
+      getDocs(query(collection(db, "classes"), orderBy("name"))),
+      getDocs(collection(db, "lessons")),
+      getDocs(collection(db, "students")),
+      getDoc(doc(db, "settings", "timetable")).catch(() => null)
+    ]);
+    if (tbDoc && tbDoc.exists && tbDoc.exists()) {
+      const cloudTb = tbDoc.data();
+      if (cloudTb && cloudTb.slots && Object.keys(cloudTb.slots).length > 0) {
+        localStorage.setItem("app_timetable", JSON.stringify(cloudTb));
+      }
+    }
+    if (!c.empty) classes = c.docs.map((x) => ({ id: x.id, ...x.data() }));
+    if (!l.empty) {
+      const cloudLessons = l.docs.map((x) => ({ id: x.id, ...x.data() }));
+      cloudLessons.forEach(cl => {
+        const idx = recentLessons.findIndex(rl => rl.id === cl.id);
+        if (idx >= 0) recentLessons[idx] = cl;
+        else recentLessons.push(cl);
+      });
+      syncLessonIndex();
+      try {
+        localStorage.setItem("app_recent_lessons", JSON.stringify(recentLessons));
+      } catch (err) {}
+    }
+    if (!s.empty) students = s.docs.map((x) => ({ id: x.id, ...x.data() }));
+    render();
+  } catch (e) {
+    console.warn("Firestore sync skipped:", e.message);
+  }
+}
+
+function render() {
+  renderChips();
+  renderTkbTomorrowReminder();
+  renderSavedLessons();
+  renderWeak();
+}
+
+function renderTkbTomorrowReminder() {
+  const container = $("tkbTomorrowList");
+  if (!container) return;
+
+  const timetable = getStoredTimetable();
+  const allWeeks = getAvailableWeeks(timetable);
+  if (!tkbActiveWeek || !allWeeks.includes(tkbActiveWeek)) {
+    tkbActiveWeek = getActiveWeek(timetable, today);
+  }
+
+  // Render week switcher pills
+  const pillsEl = $("tkbWeekPills");
+  if (pillsEl) {
+    pillsEl.innerHTML = allWeeks.map(w => {
+      const isCur = w === getActiveWeek(timetable, today);
+      return `<button type="button" class="tkb-week-pill ${w === tkbActiveWeek ? 'active' : ''}" data-week="${w}" title="Kế hoạch dạy học & soạn bài Tuần ${w}">
+        Tuần ${w}${isCur ? ' (Hiện tại)' : ''}
+      </button>`;
+    }).join("");
+  }
+
+  // Tính toán kế hoạch tuần bằng module tkb-schedule chuẩn
+  const res = computeTkbSchedule({
+    timetable,
+    recentLessons,
+    curToday: today,
+    targetWeekNum: tkbActiveWeek
+  });
+
+  // Cập nhật phụ đề (thông tin tuần & ngày bắt đầu)
+  const subEl = $("tkbRemindSub");
+  if (subEl) {
+    subEl.innerHTML = `Thầy/cô: <b>${esc(res.teacher)}</b> · Tuần <b>${res.weekNum}</b> (${res.baseMondayStr ? `bắt đầu từ Thứ 2, ${res.baseMondayStr.split("-").reverse().join("/")}` : ''}) · Năm học: <b>${esc(res.schoolYear)}</b>. Hạn soạn bài tự động trước ngày dạy 1 ngày.`;
+  }
+
+  // Cập nhật 4 thẻ thống kê
+  const elUrgent = $("statUrgentCount");
+  const elOverdue = $("statOverdueCount");
+  const elTomorrow = $("statTomorrowCount");
+  const elDone = $("statDoneCount");
+  const elTomLabel = $("statTomorrowLabel");
+
+  if (elUrgent) elUrgent.textContent = res.urgent;
+  if (elOverdue) elOverdue.textContent = res.overdue;
+  if (elTomorrow) elTomorrow.textContent = res.tomorrowCount;
+  if (elDone) elDone.textContent = res.done;
+
+  // Tính tên ngày mai
+  const nowD = new Date();
+  const tomD = new Date(nowD);
+  tomD.setDate(nowD.getDate() + 1);
+  const dowNames = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+  const tomDowName = dowNames[tomD.getDay()];
+  if (elTomLabel) {
+    elTomLabel.textContent = `Tiết ngày mai (${tomDowName})`;
+  }
+
+  // Cập nhật số đếm trên các nút lọc
+  const cUrgentOverdue = $("cntFilterUrgentOverdue");
+  const cTomorrow = $("cntFilterTomorrow");
+  const cAll = $("cntFilterAll");
+  const cDone = $("cntFilterDone");
+
+  if (cUrgentOverdue) cUrgentOverdue.textContent = res.urgent + res.overdue;
+  if (cTomorrow) cTomorrow.textContent = res.tomorrowCount;
+  if (cAll) cAll.textContent = res.total;
+  if (cDone) cDone.textContent = res.done;
+
+  // Highlight active filter button
+  const filterBtns = $("tkbFilterBtns");
+  if (filterBtns) {
+    filterBtns.querySelectorAll(".tkb-filter-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.filter === tkbReminderFilter);
+    });
+  }
+
+  // Lọc theo lớp được chọn từ chips phía trên
+  let items = res.scheduleList;
+  const scopeEl = $("tkbScopeNotice");
+  if (selected) {
+    const selClass = classes.find(c => c.id === selected || c.name === selected);
+    const selName = selClass ? selClass.name.toUpperCase().trim() : selected.toUpperCase().trim();
+    items = items.filter(s => s.className === selName || (selClass && +s.grade === +gradeOf(selClass)));
+    if (scopeEl) {
+      scopeEl.style.display = "inline-block";
+      scopeEl.textContent = `🎯 Đang lọc theo lớp: ${selClass ? selClass.name : selected}`;
+    }
+  } else {
+    if (scopeEl) scopeEl.style.display = "none";
+  }
+
+  // Lọc theo filter category
+  let filteredItems = [];
+  if (tkbReminderFilter === "urgent_overdue") {
+    filteredItems = items.filter(s => s.status === "urgent" || s.status === "overdue");
+  } else if (tkbReminderFilter === "tomorrow") {
+    filteredItems = items.filter(s => s.isTeachingTomorrow);
+  } else if (tkbReminderFilter === "done") {
+    filteredItems = items.filter(s => s.status === "done");
+  } else {
+    filteredItems = items;
+  }
+
+  // Render danh sách các bài
+  if (!filteredItems.length) {
+    if (tkbReminderFilter === "urgent_overdue") {
+      if (res.urgent === 0 && res.overdue === 0) {
+        container.innerHTML = `
+          <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:2rem">🎉</span>
+            <div>
+              <b style="color:#15803d;font-size:1rem">Thầy/cô đã chuẩn bị sẵn sàng tất cả bài dạy!</b>
+              <p style="margin:4px 0 0 0;font-size:0.86rem;color:#166534">
+                Không có bài nào bị quá hạn hay cần gấp hôm nay theo quy tắc soạn trước ngày dạy 1 ngày.
+                Thầy/cô có thể bấm chọn tab <b>"📅 Tiết ngày mai"</b> hoặc <b>"📋 Toàn bộ tuần"</b> để xem tiếp kế hoạch.
+              </p>
+            </div>
+          </div>`;
+      } else {
+        container.innerHTML = `<div style="padding:18px;text-align:center;color:var(--muted);font-size:0.9rem">Không có tiết nào cần chuẩn bị gấp theo bộ lọc lớp đang chọn.</div>`;
+      }
+    } else if (tkbReminderFilter === "tomorrow") {
+      container.innerHTML = `
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:2rem">🌴</span>
+          <div>
+            <b style="color:#1d4ed8;font-size:1rem">Ngày mai (${tomDowName}) thầy/cô không có tiết dạy theo TKB</b>
+            <p style="margin:4px 0 0 0;font-size:0.86rem;color:#1e40af">
+              Thầy/cô có thể thư thái hoặc bấm <b>"📋 Toàn bộ tuần"</b> để chuẩn bị trước cho các ngày tiếp theo trong tuần!
+            </p>
+          </div>
+        </div>`;
+    } else {
+      container.innerHTML = `<div style="padding:18px;text-align:center;color:var(--muted);font-size:0.9rem">Không có tiết nào trong mục này.</div>`;
+    }
+    return;
+  }
+
+  container.innerHTML = filteredItems.map(item => {
+    let statusBadge = "";
+    let cardClass = "";
+
+    if (item.status === "done") {
+      cardClass = "is-done";
+      statusBadge = `<span class="tkb-status-pill done">✅ Đã soạn xong</span>`;
+    } else if (item.status === "urgent") {
+      cardClass = "is-urgent";
+      statusBadge = `<span class="tkb-status-pill urgent">⚠️ Cần soạn hôm nay (Trước ngày dạy 1 ngày)</span>`;
+    } else if (item.status === "overdue") {
+      cardClass = "is-overdue";
+      statusBadge = `<span class="tkb-status-pill overdue">🚨 Quá hạn soạn bài</span>`;
+    } else {
+      statusBadge = `<span class="tkb-status-pill future">⏳ Chưa đến hạn</span>`;
+    }
+
+    const clsObj = classes.find(c => (c.name || "").toUpperCase() === item.className);
+    const classIdToUse = clsObj ? clsObj.id : item.className;
+
+    return `
+      <div class="tkb-item-card ${cardClass}">
+        <div class="tkb-item-info">
+          <div class="tkb-item-badges">
+            <span class="tkb-item-day">${item.teachDateDisplay}${item.isTeachingTomorrow ? ' (Ngày mai)' : (item.isTeachingToday ? ' (Hôm nay)' : '')}</span>
+            <span class="tkb-badge-sess ${item.session === 'Sáng' ? 'sang' : 'chieu'}">${item.session} · Tiết ${item.period}</span>
+            <span class="badge-grade badge-grade-${item.grade}" style="padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700">Lớp ${esc(item.className)}</span>
+            ${statusBadge}
+          </div>
+          <div class="tkb-item-title">
+            Tiết ${item.tietPpct}: ${renderMath(item.title)}
+          </div>
+          <div class="tkb-item-meta">
+            ${item.chapter ? `<span>📚 ${esc(item.chapter)}</span> · ` : ''}
+            <span>⏰ Hạn soạn: <b>${item.prepDateDisplay}</b></span>
+            ${item.savedLesson ? ` · <span style="color:#16a34a;font-weight:700">✓ Đã có kịch bản (${(item.savedLesson.steps || []).length} bước vấn đáp)</span>` : ''}
+          </div>
+        </div>
+        <div class="tkb-item-actions">
+          ${item.isDone ? `
+            <a href="classroom.html?lesson=${encodeURIComponent(item.savedLesson.id)}&class=${encodeURIComponent(classIdToUse)}" class="btn-tkb-action btn-tkb-teach" title="Vào lớp học bắt đầu dạy ngay bài này">
+              🚀 Vào dạy ngay
+            </a>
+            <a href="admin.html?lesson=${encodeURIComponent(item.savedLesson.id)}" class="btn-tkb-action btn-tkb-edit" title="Chỉnh sửa lại bài soạn này">
+              ✏️ Xem/Sửa
+            </a>
+          ` : `
+              <a href="admin.html?ppct=${encodeURIComponent(item.ppctKey)}&class=${encodeURIComponent(item.className)}&date=${encodeURIComponent(item.teachDateStr)}&subject=${encodeURIComponent(item.subjectId)}&tiet=${item.tietPpct}&week=${item.ppctInfo?.week || item.weekNum || ''}" class="btn-tkb-action btn-tkb-prep" title="Mở trang soạn bài và tự động điền sẵn bài này theo TKB">
+              ⚡ Soạn bài ngay
+            </a>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// Bắt sự kiện chọn tuần và bộ lọc trên bảng nhắc việc
+const tkbWeekPillsEl = $("tkbWeekPills");
+if (tkbWeekPillsEl) {
+  tkbWeekPillsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-week]");
+    if (!btn) return;
+    tkbActiveWeek = +btn.dataset.week;
+    renderTkbTomorrowReminder();
+    renderWeak();
+  });
+}
+
+const tkbFilterBtnsEl = $("tkbFilterBtns");
+if (tkbFilterBtnsEl) {
+  tkbFilterBtnsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-filter]");
+    if (!btn) return;
+    tkbReminderFilter = btn.dataset.filter;
+    renderTkbTomorrowReminder();
+  });
+}
+
+function renderChips() {
+  const normalizeClass = value => String(value || "").trim().toLocaleUpperCase("vi");
+  const count = (classItem) => {
+    const classKeys = new Set([classItem.id, classItem.name].filter(Boolean).map(normalizeClass));
+    return students.filter(student =>
+      classKeys.has(normalizeClass(student.classId)) || classKeys.has(normalizeClass(student.className))
+    ).length;
+  };
+  $("chips").innerHTML =
+    `<button class="chip" data-id="" aria-pressed="${selected === ""}">Tất cả<small>${classes.length} lớp</small></button>` +
+    classes.map((c) => `<button class="chip" data-id="${c.id || c.name}" aria-pressed="${selected === (c.id || c.name)}">${esc(c.name)}<small>${count(c)} học sinh</small></button>`).join("");
+}
+$("chips").addEventListener("click", (e) => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  selected = b.dataset.id; render();
+});
+
+let savedGrade = ""; // "" = tất cả các khối, hoặc "7", "9"
+let savedSort = "grade-created-desc"; // "grade-created-desc", "date-desc", "date-asc", "ppct-asc", "title-asc"
+let savedSearch = "";
+
+function compareSortValues(left, right) {
+  const normalize = value => {
+    if (value instanceof Date) return value.getTime();
+    if (value && typeof value.toMillis === "function") return value.toMillis();
+    if (value && Number.isFinite(value.seconds)) return value.seconds * 1000 + (Number(value.nanoseconds) || 0) / 1e6;
+    if (typeof value === "number") return value;
+    return String(value ?? "");
+  };
+  const a = normalize(left), b = normalize(right);
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return String(a).localeCompare(String(b), "vi", { numeric: true });
+}
+
+function lessonCreatedTime(lesson) {
+  const values = [lesson.updatedAt, lesson.createdAt];
+  const idTimestamp = String(lesson.id || "").match(/^les_(\d+)$/);
+  if (idTimestamp) values.push(Number(idTimestamp[1]));
+  values.push(lesson.date);
+
+  for (const value of values) {
+    if (value instanceof Date) return value.getTime();
+    if (value && typeof value.toMillis === "function") return value.toMillis();
+    if (value && Number.isFinite(value.seconds)) return value.seconds * 1000 + (Number(value.nanoseconds) || 0) / 1e6;
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const timestamp = Date.parse(value);
+      if (Number.isFinite(timestamp)) return timestamp;
+    }
+  }
+  return 0;
+}
+
+function lessonGrade(lesson) {
+  const grade = [lesson.grade, lesson.className, lesson.classId, lesson.title]
+    .map(value => String(value || "").match(/\d+/)?.[0])
+    .find(Boolean);
+  return grade ? Number(grade) : Number.POSITIVE_INFINITY;
+}
+
+// Cập nhật số đếm trên các pills khối lớp
+function updateSavedPillCounts() {
+  const allList = recentLessons.filter(inScopeLesson);
+  const cAll = $("cntAll"), c7 = $("cntK7"), c9 = $("cntK9");
+  if (cAll) cAll.textContent = allList.length;
+  if (c7) c7.textContent = allList.filter(l => String(l.grade || "").includes("7") || (l.className || "").startsWith("7")).length;
+  if (c9) c9.textContent = allList.filter(l => String(l.grade || "").includes("9") || (l.className || "").startsWith("9")).length;
+}
+
+function renderSavedLessons() {
+  const container = $("savedLessons");
+  if (!container) return;
+  updateSavedPillCounts();
+
+  let list = recentLessons.filter(inScopeLesson);
+
+  // 1. Lọc theo Khối lớp (Toán 7, Toán 8, Toán 9)
+  if (savedGrade) {
+    list = list.filter(l => {
+      const gStr = String(l.grade || "");
+      const cStr = String(l.className || "");
+      const tStr = String(l.title || "");
+      return gStr === savedGrade || cStr.startsWith(savedGrade) || tStr.includes(`Toán ${savedGrade}`);
+    });
+  }
+
+  // 2. Lọc theo từ khóa tìm kiếm nhanh
+  if (savedSearch) {
+    const q = savedSearch.toLowerCase();
+    list = list.filter(l => {
+      const t = (l.title || "").toLowerCase();
+      const cn = (l.className || "").toLowerCase();
+      const obj = (l.objectives || "").toLowerCase();
+      const req = (l.requirements || "").toLowerCase();
+      const d = (l.date || "").toLowerCase();
+      const pk = (l.ppctKey || "").toLowerCase();
+      const tietStr = l.tiet ? `tiết ${l.tiet}` : "";
+      return t.includes(q) || cn.includes(q) || obj.includes(q) || req.includes(q) || d.includes(q) || pk.includes(q) || tietStr.includes(q);
+    });
+  }
+
+  // 3. Sắp xếp danh sách bài soạn theo Thời gian / Tiến trình PPCT
+  list.sort((a, b) => {
+    if (savedSort === "grade-created-desc") {
+      const gradeDifference = lessonGrade(a) - lessonGrade(b);
+      if (gradeDifference) return gradeDifference;
+      return lessonCreatedTime(b) - lessonCreatedTime(a);
+    } else if (savedSort === "date-desc") {
+      // Ngày dạy mới nhất trước
+      const da = a.date || "";
+      const db = b.date || "";
+      if (da !== db) return db.localeCompare(da);
+      const ua = a.updatedAt || a.id || "";
+      const ub = b.updatedAt || b.id || "";
+      return compareSortValues(ub, ua);
+    } else if (savedSort === "date-asc") {
+      // Ngày dạy cũ nhất trước
+      const da = a.date || "";
+      const db = b.date || "";
+      if (da !== db) return da.localeCompare(db);
+      return compareSortValues(a.id || "", b.id || "");
+    } else if (savedSort === "ppct-asc") {
+      // Theo thứ tự Tiết PPCT (1 -> 140)
+      const ga = +(a.grade || 9);
+      const gb = +(b.grade || 9);
+      if (ga !== gb) return ga - gb; // Khối 7 trước, Khối 9 sau
+      const ta = +(a.tiet || (a.ppctKey ? a.ppctKey.split("-")[1] : 999));
+      const tb = +(b.tiet || (b.ppctKey ? b.ppctKey.split("-")[1] : 999));
+      if (ta !== tb) return ta - tb;
+      return (a.title || "").localeCompare(b.title || "", "vi");
+    } else if (savedSort === "title-asc") {
+      // Theo bảng chữ cái tên bài học
+      return (a.title || "").localeCompare(b.title || "", "vi");
+    }
+    return 0;
+  });
+
+  const badge = $("savedCountBadge");
+  if (badge) badge.textContent = `${list.length} bài`;
+
+  if (!list.length) {
+    const hasFilter = savedGrade || savedSearch;
+    container.innerHTML = `
+      <div class="none" style="grid-column:1/-1;text-align:center;padding:26px 16px">
+        <p style="font-size:1.05rem;font-weight:700;margin:0 0 6px;color:var(--ink)">
+          ${hasFilter ? "Không tìm thấy bài nào phù hợp bộ lọc" : "Chưa có bài soạn nào"}
+        </p>
+        <p style="margin:0 0 14px;color:var(--muted);font-size:0.88rem">
+          ${hasFilter 
+            ? 'Hãy thử chọn "Tất cả các khối" hoặc xóa bớt từ khóa trong ô tìm kiếm.' 
+            : 'Bạn vừa soạn bài trên trang Soạn bài? Hãy bấm "Soạn bài mới" để bắt đầu.'}
+        </p>
+        ${hasFilter ? `
+          <button type="button" id="btnResetSavedFilter" class="ghostbtn" style="display:inline-flex;margin:0 auto">
+            🔄 Đặt lại bộ lọc &amp; tìm kiếm
+          </button>
+        ` : `
+          <a href="admin.html" class="btn-teach" style="display:inline-flex;max-width:200px;margin:0 auto">✨ Soạn bài ngay</a>
+        `}
+      </div>
+    `;
+    const btnReset = $("btnResetSavedFilter");
+    if (btnReset) {
+      btnReset.addEventListener("click", () => {
+        savedGrade = "";
+        savedSearch = "";
+        $("savedSearchInput").value = "";
+        $("savedSearchClear").style.display = "none";
+        $("savedGradePills").querySelectorAll(".saved-grade-pill").forEach(b => {
+          b.classList.toggle("active", b.dataset.grade === "");
+        });
+        renderSavedLessons();
+      });
+    }
+    return;
+  }
+
+  container.innerHTML = list.map((l) => {
+    const bbCount = (l.blackboard || []).length;
+    const stepCount = (l.steps || []).length;
+    const tietInfo = l.tiet ? `Tiết ${l.tiet}` : (l.ppctKey ? `Tiết ${l.ppctKey.split("-")[1]}` : "");
+    const weekInfo = l.week ? `Tuần ${l.week}` : "";
+    const ppctSub = [tietInfo, weekInfo].filter(Boolean).join(" · ");
+    const gradeNum = l.grade || (l.className ? l.className.replace(/\D/g, "")[0] : 9);
+
+    // Danh sách các lớp cụ thể thuộc khối học này (VD Khối 7: 7A2, 7A4, 7A7)
+    const gradeClasses = classes.filter(c => {
+      const g = c.grade || (c.name ? c.name.replace(/\D/g, "")[0] : "");
+      return String(g) === String(gradeNum);
+    });
+
+    // Xác định tên lớp cụ thể (tránh tuyệt đối trùng thông tin "Toán 7" / "Toán 9")
+    let concreteClsName = "";
+    if (l.className && !/^toán\s*\d+/i.test(l.className.trim()) && l.className.trim() !== String(gradeNum)) {
+      concreteClsName = l.className.replace(/^lớp\s*/i, "").trim();
+    } else if (l.classId && !/^toán\s*\d+/i.test(l.classId.trim()) && l.classId.trim() !== String(gradeNum)) {
+      concreteClsName = l.classId.replace(/^lớp\s*/i, "").trim();
+    }
+
+    if (!concreteClsName) {
+      try {
+        const tb = getStoredTimetable();
+        const tbRes = computeTkbSchedule({ timetable: tb, curToday: today });
+        const matchSlot = (tbRes.scheduleList || []).find(s => 
+          (l.ppctKey && s.ppctKey === l.ppctKey) ||
+          (+s.grade === +gradeNum && +s.tietPpct === +l.tiet) ||
+          (l.id && s.savedLesson && s.savedLesson.id === l.id)
+        );
+        if (matchSlot && matchSlot.className) {
+          concreteClsName = matchSlot.className;
+        }
+      } catch (e) {}
+    }
+
+    if (!concreteClsName && gradeClasses.length > 0) {
+      concreteClsName = gradeClasses[0].name;
+    }
+
+    const cObj = classes.find(c => (c.name || "").toUpperCase() === (concreteClsName || "").toUpperCase());
+    const currentClassId = cObj ? (cObj.id || cObj.name) : concreteClsName;
+
+    // Badge / Dropdown chọn lớp cụ thể
+    let clsBadgeHtml = "";
+    if (gradeClasses.length > 1) {
+      clsBadgeHtml = `
+        <select class="saved-badge-cls-select" data-assign-cls="${esc(l.id)}" title="Bấm để chọn lớp ${gradeNum} cụ thể cho bài dạy này">
+          ${gradeClasses.map(c => `
+            <option value="${esc(c.name)}" ${(c.name.toUpperCase() === (concreteClsName || "").toUpperCase()) ? "selected" : ""}>
+              Lớp ${esc(c.name)}
+            </option>
+          `).join("")}
+        </select>
+      `;
+    } else if (concreteClsName) {
+      clsBadgeHtml = `<span class="saved-badge-cls">Lớp ${esc(concreteClsName)}</span>`;
+    } else {
+      clsBadgeHtml = `<span class="saved-badge-cls">Lớp ${gradeNum}</span>`;
+    }
+
+    // Phân tích bài nhiều tiết để hiển thị badge Tiết 1 / Tiết 2 / Tiết 3
+    const tietMatch = (l.title || "").match(/tiết\s*(\d+)/i);
+    const partNum = tietMatch ? parseInt(tietMatch[1], 10) : null;
+    const partBadgeHtml = partNum 
+      ? `<span class="badge-tiet-part part-${Math.min(partNum, 3)}" title="Tiết thứ ${partNum} của bài này">Tiết ${partNum}</span>` 
+      : "";
+    
+    // Blackboard preview HTML
+    const bbHtml = bbCount ? (l.blackboard || []).slice(0, 3).map(b => `
+      <div class="preview-bb-item">
+        <strong>${esc(b.title || "Ghi bảng")}:</strong> ${renderMath(esc(b.content || "").slice(0, 120))}${(b.content || "").length > 120 ? "..." : ""}
+      </div>
+    `).join("") : '<p style="margin:0;color:var(--muted);font-size:0.8rem">Chưa có nội dung ghi bảng</p>';
+
+    // Steps preview HTML
+    const stepsHtml = stepCount ? (l.steps || []).slice(0, 4).map((s, idx) => `
+      <div class="preview-step-item">
+        <span style="font-weight:700;color:var(--green)">Bước ${idx + 1}:</span> ${renderMath(esc(s.question || ""))}
+        ${s.answer ? `<div style="color:var(--muted);font-size:0.78rem;margin-top:2px">↳ Đáp án: ${renderMath(esc(s.answer))}</div>` : ""}
+      </div>
+    `).join("") : '<p style="margin:0;color:var(--muted);font-size:0.8rem">Chưa có câu hỏi vấn đáp</p>';
+
+    return `
+      <article class="saved-card" data-lesson-id="${esc(l.id)}">
+        <div class="saved-top">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span class="badge-grade badge-grade-${gradeNum}">Toán ${gradeNum}</span>
+            ${partBadgeHtml}
+            ${clsBadgeHtml}
+          </div>
+          <span class="saved-badge-date" title="Ngày dạy và tiến trình PPCT">
+            📅 ${esc(l.date || "Gần đây")}${ppctSub ? ` · ${ppctSub}` : ""}
+          </span>
+        </div>
+        <div class="saved-title">${renderMath(esc(l.title))}</div>
+        <div class="saved-meta">
+          <span>📋 ${bbCount} ý ghi bảng</span>
+          <span>⚡ ${stepCount} câu hỏi vấn đáp</span>
+        </div>
+
+        <details class="saved-preview">
+          <summary>
+            <span>👁️ Xem nhanh nội dung (${bbCount} bảng · ${stepCount} câu hỏi)</span>
+            <span style="font-size:0.75rem">▼</span>
+          </summary>
+          <div class="saved-preview-body">
+            <div class="preview-sec-title">📌 Lược đồ ghi bảng:</div>
+            ${bbHtml}
+            <div class="preview-sec-title" style="margin-top:6px">⚡ Câu hỏi vấn đáp mẫu:</div>
+            ${stepsHtml}
+            ${stepCount > 4 ? `<div style="font-size:0.78rem;color:var(--muted);text-align:right">+ Còn ${stepCount - 4} bước nữa khi vào lớp dạy</div>` : ""}
+          </div>
+        </details>
+
+        <div class="saved-actions">
+          <a class="btn-teach" href="classroom.html?lesson=${encodeURIComponent(l.id)}&class=${encodeURIComponent(currentClassId || concreteClsName || '')}">
+            🚀 Bắt đầu dạy
+          </a>
+          <a class="btn-edit-lesson" href="admin.html?lesson=${encodeURIComponent(l.id)}" title="Mở trang Soạn bài để chỉnh sửa bài này">
+            ✏️ Sửa bài
+          </a>
+          <button type="button" class="btn-del-lesson" data-delles="${esc(l.id)}" title="Xóa bài soạn này">
+            🗑️
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+// Bắt sự kiện Toolbar lọc Khối lớp
+$("savedGradePills").addEventListener("click", (e) => {
+  const btn = e.target.closest(".saved-grade-pill");
+  if (!btn) return;
+  $("savedGradePills").querySelectorAll(".saved-grade-pill").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  savedGrade = btn.dataset.grade || "";
+  renderSavedLessons();
+});
+
+// Bắt sự kiện chọn Sắp xếp
+$("savedSortSelect").addEventListener("change", (e) => {
+  savedSort = e.target.value;
+  renderSavedLessons();
+});
+
+// Bắt sự kiện Tìm kiếm
+const searchInput = $("savedSearchInput");
+const searchClear = $("savedSearchClear");
+if (searchInput) {
+  searchInput.addEventListener("input", (e) => {
+    savedSearch = e.target.value.trim();
+    if (searchClear) searchClear.style.display = savedSearch ? "block" : "none";
+    renderSavedLessons();
+  });
+}
+if (searchClear) {
+  searchClear.addEventListener("click", () => {
+    if (searchInput) searchInput.value = "";
+    savedSearch = "";
+    searchClear.style.display = "none";
+    renderSavedLessons();
+    if (searchInput) searchInput.focus();
+  });
+}
+
+// Bắt sự kiện đổi Lớp cụ thể trực tiếp trên thẻ bài soạn
+$("savedLessons").addEventListener("change", async (e) => {
+  const sel = e.target.closest("[data-assign-cls]");
+  if (!sel) return;
+  const id = sel.dataset.assignCls;
+  const newClsName = sel.value;
+  const les = recentLessons.find(x => x.id === id);
+  if (!les) return;
+
+  les.className = newClsName;
+  const cObj = classes.find(c => (c.name || "").toUpperCase() === newClsName.toUpperCase());
+  les.classId = cObj ? (cObj.id || cObj.name) : newClsName;
+
+  try {
+    localStorage.setItem("app_recent_lessons", JSON.stringify(recentLessons));
+  } catch (err) {}
+
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await updateDoc(doc(db, "lessons", id), {
+      className: les.className,
+      classId: les.classId
+    });
+  } catch (err) {}
+
+  const card = sel.closest(".saved-card");
+  if (card) {
+    const teachBtn = card.querySelector(".btn-teach");
+    if (teachBtn) {
+      teachBtn.href = `classroom.html?lesson=${encodeURIComponent(les.id)}&class=${encodeURIComponent(les.classId)}`;
+    }
+  }
+
+  toast(`✅ Đã chuyển bài soạn sang <b>Lớp ${esc(newClsName)}</b>!`);
+});
+
+// Bắt sự kiện Xóa bài soạn trực tiếp trên Dashboard
+$("savedLessons").addEventListener("click", async (e) => {
+  const delBtn = e.target.closest("[data-delles]");
+  if (!delBtn) return;
+  const id = delBtn.dataset.delles;
+  const les = recentLessons.find(x => x.id === id);
+  const lesTitle = les ? les.title : "bài này";
+  
+  if (!confirm(`Thầy/cô có chắc chắn muốn xóa bài soạn "${lesTitle}" không?`)) return;
+
+  recentLessons = recentLessons.filter(x => x.id !== id);
+  syncLessonIndex();
+  try {
+    localStorage.setItem("app_recent_lessons", JSON.stringify(recentLessons));
+  } catch (err) {}
+
+  try {
+    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    await deleteDoc(doc(db, "lessons", id));
+  } catch (err) {
+    console.warn("Firestore delete skipped:", err);
+  }
+
+  toast(`Đã xóa bài soạn: ${lesTitle}`);
+  renderSavedLessons();
+});
+
+function renderWeak() {
+  const timetable = getStoredTimetable();
+  const week = tkbActiveWeek || getActiveWeek(timetable, today);
+  const weekKey = `${timetable.schoolYear}-W${week}`;
+  const list = students.filter((s) => s.level === "yeu" && inScope(s))
+    .map(student => ({ ...student, weeklyAverage: getDashboardWeeklyAverage(student, weekKey) }))
+    .sort((a, b) => {
+      if (a.weeklyAverage === null && b.weeklyAverage !== null) return -1;
+      if (a.weeklyAverage !== null && b.weeklyAverage === null) return 1;
+      return (a.weeklyAverage ?? 0) - (b.weeklyAverage ?? 0) || a.name.localeCompare(b.name, "vi");
+    });
+  $("weak").innerHTML = list.length
+    ? list.map((s) => `<li><span class="n">${esc(s.name)}</span><span class="c">${esc(s.className || s.classId || "")}</span>
+        <span class="p ${s.weeklyAverage !== null ? "ok" : ""}">${s.weeklyAverage === null ? "Chưa ghi tuần" : `TB KT ${s.weeklyAverage}`}</span></li>`).join("")
+    : '<li class="empty">Chưa có học sinh yếu trong danh sách. Thêm học sinh ở trang Soạn bài, mục “Lớp và học sinh”.</li>';
+  $("weakHint").textContent = `Ưu tiên học sinh cần hỗ trợ; TB KT thường xuyên của Tuần ${week} chỉ tính các ngày đã nhập điểm.`;
+}
+
+function getDashboardWeeklyAverage(student, weekKey) {
+  const weekData = student.weeklyScores && student.weeklyScores[weekKey];
+  if (!weekData || typeof weekData !== "object" || Array.isArray(weekData)) return null;
+  const days = weekData.days && typeof weekData.days === "object" && !Array.isArray(weekData.days)
+    ? weekData.days
+    : weekData;
+  const scores = Array.from({ length: 6 }, (_, day) => {
+    const rawScore = days[String(day)];
+    if (rawScore === "" || rawScore === undefined || rawScore === null) return null;
+    const score = Number(rawScore);
+    return Number.isFinite(score) && score >= 0 ? score : null;
+  }).filter(score => score !== null);
+  return scores.length
+    ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length * 10) / 10
+    : null;
+}
+
+load();
+</script>
+</body>
+</html>
