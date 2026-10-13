@@ -988,7 +988,9 @@ import {
   computeTkbSchedule,
   getAvailableWeeks,
   getActiveWeek,
+  getWeekMonday,
   getStoredTimetable,
+  formatDateVN,
   DEFAULT_TIMETABLE,
   DEFAULT_TKB_SLOTS
 } from "./tkb-schedule.js";
@@ -1181,7 +1183,12 @@ function renderTkbTomorrowReminder() {
   const timetable = getStoredTimetable();
   const allWeeks = getAvailableWeeks(timetable);
   if (!tkbActiveWeek || !allWeeks.includes(tkbActiveWeek)) {
-    tkbActiveWeek = getActiveWeek(timetable, today);
+    const savedActiveWeek = Number(localStorage.getItem("app_tkb_active_week"));
+    if (savedActiveWeek && allWeeks.includes(savedActiveWeek)) {
+      tkbActiveWeek = savedActiveWeek;
+    } else {
+      tkbActiveWeek = getActiveWeek(timetable, today);
+    }
   }
 
   // Render week switcher pills
@@ -1189,8 +1196,13 @@ function renderTkbTomorrowReminder() {
   if (pillsEl) {
     pillsEl.innerHTML = allWeeks.map(w => {
       const isCur = w === getActiveWeek(timetable, today);
-      return `<button type="button" class="tkb-week-pill ${w === tkbActiveWeek ? 'active' : ''}" data-week="${w}" title="Kế hoạch dạy học & soạn bài Tuần ${w}">
+      const wMonday = getWeekMonday(timetable, w);
+      const wSaturday = new Date(wMonday);
+      wSaturday.setDate(wMonday.getDate() + 5);
+      const rangeLabel = `${String(wMonday.getDate()).padStart(2, '0')}/${String(wMonday.getMonth() + 1).padStart(2, '0')} - ${String(wSaturday.getDate()).padStart(2, '0')}/${String(wSaturday.getMonth() + 1).padStart(2, '0')}`;
+      return `<button type="button" class="tkb-week-pill ${w === tkbActiveWeek ? 'active' : ''}" data-week="${w}" title="Kế hoạch dạy học & soạn bài Tuần ${w} (${rangeLabel})">
         Tuần ${w}${isCur ? ' (Hiện tại)' : ''}
+        <span style="font-size:0.72rem;opacity:0.85;display:block;font-weight:normal">${rangeLabel}</span>
       </button>`;
     }).join("");
   }
@@ -1206,7 +1218,7 @@ function renderTkbTomorrowReminder() {
   // Cập nhật phụ đề (thông tin tuần & ngày bắt đầu)
   const subEl = $("tkbRemindSub");
   if (subEl) {
-    subEl.innerHTML = `Thầy/cô: <b>${esc(res.teacher)}</b> · Tuần <b>${res.weekNum}</b> (${res.baseMondayStr ? `bắt đầu từ Thứ 2, ${res.baseMondayStr.split("-").reverse().join("/")}` : ''}) · Năm học: <b>${esc(res.schoolYear)}</b>. Hạn soạn bài tự động trước ngày dạy 1 ngày.`;
+    subEl.innerHTML = `Thầy/cô: <b>${esc(res.teacher)}</b> · Tuần <b>${res.weekNum}</b> (${res.baseMondayStr ? `bắt đầu từ Thứ 2, ${formatDateVN(res.baseMondayStr)}` : ''}) · Năm học: <b>${esc(res.schoolYear)}</b>. Hạn soạn bài tự động trước ngày dạy 1 ngày.`;
   }
 
   // Cập nhật 4 thẻ thống kê
@@ -1376,6 +1388,7 @@ if (tkbWeekPillsEl) {
     const btn = e.target.closest("[data-week]");
     if (!btn) return;
     tkbActiveWeek = +btn.dataset.week;
+    try { localStorage.setItem("app_tkb_active_week", String(tkbActiveWeek)); } catch (err) {}
     renderTkbTomorrowReminder();
     renderWeak();
   });
@@ -1661,7 +1674,7 @@ function renderSavedLessons() {
             ${clsBadgeHtml}
           </div>
           <span class="saved-badge-date" title="Ngày dạy và tiến trình PPCT">
-            📅 ${esc(l.date || "Gần đây")}${ppctSub ? ` · ${ppctSub}` : ""}
+            📅 ${esc(l.date ? formatDateVN(l.date) : "Gần đây")}${ppctSub ? ` · ${ppctSub}` : ""}
           </span>
         </div>
         <div class="saved-title">${renderMath(esc(l.title))}</div>

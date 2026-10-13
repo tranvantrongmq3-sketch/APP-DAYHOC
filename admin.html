@@ -1004,6 +1004,91 @@
       font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
+      transition: all 0.2s ease;
+    }
+
+    .tkb-table th.col-today {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.28) 0%, rgba(16, 185, 129, 0.09) 100%) !important;
+      border-top: 3px solid #10b981 !important;
+      color: #fff !important;
+    }
+
+    .tkb-table .th-day-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      letter-spacing: 0.3px;
+    }
+
+    .tkb-table .th-day-date {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-top: 2px;
+      text-transform: none;
+    }
+
+    .tkb-table .th-today-badge {
+      display: inline-block;
+      background: #10b981;
+      color: #022c22;
+      font-size: 0.62rem;
+      font-weight: 900;
+      padding: 1px 7px;
+      border-radius: 999px;
+      margin-top: 3px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+      text-transform: uppercase;
+    }
+
+    .tkb-table td.col-today {
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    /* WIDGET NGÀY GIỜ HỆ THỐNG CHUẨN VIỆT NAM */
+    .tkb-clock-widget {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .tkb-clock-widget .clock-icon {
+      font-size: 0.95rem;
+      animation: pulseClock 2s infinite ease-in-out;
+    }
+
+    .tkb-clock-widget .clock-time {
+      font-weight: 800;
+      color: #38bdf8;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.6px;
+    }
+
+    .tkb-clock-widget .clock-sep {
+      color: var(--dim);
+    }
+
+    .tkb-clock-widget .clock-date {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .tkb-clock-widget .clock-tag {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 10px;
+      margin-left: 2px;
     }
 
     .tkb-table .session-col {
@@ -1332,9 +1417,9 @@
               </button>
             </div>
 
-            <label class="lbl" for="aiPrompt">Yêu cầu thêm cho AI</label>
+            <label class="lbl" for="aiPrompt">Yêu cầu thêm cho AI (Mặc định: Bám sát 100% SGK Kết nối tri thức)</label>
             <textarea id="aiPrompt" rows="2"
-              placeholder="VD: Chú trọng tạo nhiều câu hỏi dễ ở phần Ví dụ 1. Yêu cầu định dạng công thức Toán bằng dấu $ (VD: $x^2 = 4$)."></textarea>
+              placeholder="Mặc định AI luôn bám sát SGK Kết nối tri thức, không lấy kiến thức ngoài. Thầy/cô có thể ghi thêm: Chú trọng câu hỏi gợi ý cho học sinh yếu, nhấn mạnh bài tập 1 và 2 SGK..."></textarea>
 
             <label class="lbl" for="teachingMode">Kiểu tổ chức hoạt động</label>
             <select id="teachingMode">
@@ -1545,6 +1630,15 @@
             <button class="btn btn-ghost btn-sm" id="btnDownloadTkbTemplate" title="Tải file Excel mẫu Thời khóa biểu">
               📥 File mẫu Excel
             </button>
+            <button class="btn btn-ghost btn-sm" id="adminBtnCopyTkb" title="Sao chép Thời khóa biểu từ một tuần khác sang tuần đang xem" onclick="window.tkbCopyFromWeek()">
+              📋 Chép TKB
+            </button>
+            <button class="btn btn-danger btn-sm" id="adminBtnClearTkb" title="Xóa toàn bộ các ô trong tuần đang xem">
+              🗑️ Xóa TKB tuần này
+            </button>
+            <button class="btn btn-outline btn-sm" id="adminBtnClearAllWeeks" style="color:var(--red);border-color:rgba(239,68,68,0.4)" title="Xóa trắng thời khóa biểu của tất cả các tuần" onclick="window.tkbClearAllWeeks()">
+              💥 Xóa tất cả tuần
+            </button>
             <button class="btn btn-primary btn-sm" id="btnSaveTkb">
               💾 Lưu TKB
             </button>
@@ -1557,7 +1651,7 @@
             style="display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));gap:12px;margin-bottom:14px;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;border:1px solid var(--border)">
             <div>
               <label class="lbl" style="margin-bottom:2px" for="tkbTeacher">👨‍🏫 Giáo viên phụ trách</label>
-              <input id="tkbTeacher" value="Trần Văn Trong" placeholder="Họ và tên giáo viên">
+              <input id="tkbTeacher" value="Trần Văn Trọng" placeholder="Họ và tên giáo viên">
             </div>
             <div>
               <label class="lbl" style="margin-bottom:2px" for="tkbYear">🏫 Năm học</label>
@@ -1565,11 +1659,20 @@
             </div>
             <div>
               <label class="lbl" style="margin-bottom:2px" for="tkbWeeks">🗓️ Tuần áp dụng</label>
-              <input id="tkbWeeks" value="Tuần 4, 5" placeholder="VD: Tuần 4, 5">
+              <input id="tkbWeeks" value="Tuần 4, 5" placeholder="VD: Tuần 4, 5 hoặc Tuần 1-35">
+              <small style="display:block;margin-top:3px;font-size:0.75rem;color:var(--dim)">
+                Gợi ý:
+                <a href="javascript:void(0)" onclick="document.getElementById('tkbWeeks').value='Tuần 4, 5';document.getElementById('tkbWeeks').dispatchEvent(new Event('change'))" style="color:var(--yellow);text-decoration:underline">Tuần 4, 5</a> ·
+                <a href="javascript:void(0)" onclick="document.getElementById('tkbWeeks').value='Tuần 1 - 18';document.getElementById('tkbWeeks').dispatchEvent(new Event('change'))" style="color:var(--yellow);text-decoration:underline">Học kỳ 1 (1-18)</a> ·
+                <a href="javascript:void(0)" onclick="document.getElementById('tkbWeeks').value='Tuần 1 - 35';document.getElementById('tkbWeeks').dispatchEvent(new Event('change'))" style="color:var(--yellow);text-decoration:underline">Cả năm (1-35)</a>
+              </small>
             </div>
             <div>
               <label class="lbl" style="margin-bottom:2px" for="tkbApplyDate">📅 Ngày Thứ Hai đầu tuần</label>
               <input type="date" id="tkbApplyDate" value="2026-09-28">
+              <small id="adminTkbApplyDateNote" style="display:block;margin-top:4px;font-size:0.75rem;color:var(--yellow);font-weight:600">
+                Chuẩn VN: Thứ Hai, 28/09/2026
+              </small>
             </div>
           </div>
 
@@ -1594,16 +1697,22 @@
 
           <!-- BẢNG LƯỚI THỜI KHÓA BIỂU TUẦN -->
           <div
-            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-            <div>
+            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
               <h3
-                style="font-size:0.95rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:6px">
+                style="font-size:0.95rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:6px;margin:0">
                 📋 Lưới Thời Khóa Biểu trong tuần
               </h3>
-              <span style="font-size:0.78rem;color:var(--dim);margin-left:8px">(Bấm vào ô để chọn lớp hoặc xóa
-                tiết)</span>
+              <!-- WIDGET NGÀY GIỜ HỆ THỐNG CHUẨN VIỆT NAM -->
+              <div class="tkb-clock-widget" id="adminTkbClockWidget" title="Ngày giờ hệ thống chuẩn Việt Nam (Cập nhật tự động từng giây)">
+                <span class="clock-icon">🕒</span>
+                <span class="clock-time" id="adminTkbClockTime">--:--:--</span>
+                <span class="clock-sep">·</span>
+                <span class="clock-date" id="adminTkbClockDate">Đang lấy ngày hệ thống...</span>
+                <span class="clock-tag" id="adminTkbClockWeekTag">Tuần ...</span>
+              </div>
             </div>
-            <div style="display:flex;gap:6px;align-items:center">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <span style="font-size:0.75rem;color:var(--dim)">Chọn nhanh lớp:</span>
               <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
                 onclick="window.tkbQuickFill('7A2')">7A2</button>
@@ -1615,12 +1724,16 @@
                 onclick="window.tkbQuickFill('9A4')">9A4</button>
               <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
                 onclick="window.tkbQuickFill('9A6')">9A6</button>
+              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                onclick="window.tkbCopyFromWeek()" title="Sao chép TKB từ tuần khác sang tuần đang xem">📋 Chép TKB</button>
+              <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:0.75rem"
+                id="adminBtnQuickClearAllTkb" title="Xóa hết các ô trong tuần đang xem" onclick="window.tkbClearAll()">🗑️ Xóa tuần này</button>
             </div>
           </div>
 
           <div class="tkb-grid-wrap">
             <table class="tkb-table" id="tkbGridTable">
-              <thead>
+              <thead id="adminTkbGridThead">
                 <tr>
                   <th style="width:70px">Buổi</th>
                   <th style="width:50px">Tiết</th>
@@ -1645,9 +1758,12 @@
             <span class="ptitle-icon">⏰</span> Kế hoạch Dạy học &amp; Lịch Soạn bài tự động (Soạn trước ngày dạy 1 ngày)
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">
-              <span style="font-size:0.78rem;color:var(--dim)">Tuần xem:</span>
-              <div style="display:flex;gap:4px" id="adminWeekBtns"></div>
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.2);padding:3px 8px;border-radius:6px;border:1px solid var(--border);max-width:100%;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:var(--dim);white-space:nowrap">Tuần xem:</span>
+              <select id="adminWeekSelect" style="background:var(--bg2);color:var(--chalk);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:0.75rem;cursor:pointer" title="Chọn trực tiếp bất kỳ tuần nào trong năm học"></select>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnAdminPrevWeek" style="padding:2px 6px;font-size:0.75rem" title="Tuần trước">◀</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnAdminNextWeek" style="padding:2px 6px;font-size:0.75rem" title="Tuần sau">▶</button>
+              <div style="display:flex;gap:4px;overflow-x:auto;max-width:550px;white-space:nowrap;scrollbar-width:thin;padding-bottom:2px" id="adminWeekBtns"></div>
             </div>
             <div style="display:flex;gap:4px" id="prepFilterBtns">
               <button class="btn btn-primary btn-sm" data-filter="all">Tất cả tiết (<span
@@ -1898,12 +2014,23 @@
       computeTkbSchedule as computeTkbScheduleModule,
       getAvailableWeeks,
       getActiveWeek,
+      getWeekSlots,
+      setWeekSlots,
       getStoredTimetable,
       DEFAULT_TIMETABLE,
-      DEFAULT_TKB_SLOTS
+      DEFAULT_TKB_SLOTS,
+      parseFlexibleDate,
+      formatDateVN,
+      formatFullDateVN,
+      formatTimeVN,
+      formatSystemDateTimeVN,
+      toInputDateValue,
+      getWeekDates,
+      getWeekMonday
     } from "./tkb-schedule.js";
 
     const $ = id => document.getElementById(id);
+    window.$ = $;
 
     /* ─── STATE MANAGEMENT ─── */
     const state = {
@@ -2251,10 +2378,10 @@
           currentPart,
           totalParts,
           baseTitle,
-          guidancePrompt: `Soạn đúng đặc thù môn ${subjectName}; bám sát yêu cầu cần đạt và nội dung giáo viên cung cấp. Phân bổ hoạt động phù hợp với tiết ${currentPart}/${totalParts}, tránh lặp lại nội dung đã học.`,
-          badgeHtml: `<span style="color:#4ade80;font-weight:700">${esc(subjectName)} · Khối ${esc(grade)}</span>: Soạn theo yêu cầu cần đạt của môn học.`,
-          autoObjective: `Đạt yêu cầu cần đạt của bài học ${baseTitle} trong môn ${subjectName}.`,
-          autoRequirement: rawRequirement || `Học sinh vận dụng được kiến thức, kỹ năng của bài học ${baseTitle}.`
+          guidancePrompt: `BỘ SÁCH: Bắt buộc bám sát 100% nội dung SGK "Kết nối tri thức với cuộc sống" môn ${subjectName}. Tuyệt đối không lấy kiến thức ngoài SGK Kết nối tri thức. Phân bổ hoạt động phù hợp với tiết ${currentPart}/${totalParts}, tránh lặp lại nội dung đã học.`,
+          badgeHtml: `<span style="color:#4ade80;font-weight:700">${esc(subjectName)} · Khối ${esc(grade)}</span>: Soạn theo chuẩn SGK Kết nối tri thức.`,
+          autoObjective: `Đạt yêu cầu cần đạt của bài học ${baseTitle} trong môn ${subjectName} (SGK Kết nối tri thức).`,
+          autoRequirement: rawRequirement || `Học sinh vận dụng được kiến thức, kỹ năng của bài học ${baseTitle} theo chuẩn SGK Kết nối tri thức.`
         };
       }
 
@@ -2265,59 +2392,66 @@
 
       if (isMultiPart) {
         if (currentPart === 1) {
-          badgeHtml = `<span style="color:#38bdf8;font-weight:700">📘 Bài ${totalParts} tiết · Đang soạn TIẾT 1:</span> Tập trung Khởi động - Khám phá khái niệm, định nghĩa &amp; ví dụ nhận biết ban đầu (chống trùng với Tiết 2).`;
+          badgeHtml = `<span style="color:#38bdf8;font-weight:700">📘 Bài ${totalParts} tiết · Đang soạn TIẾT 1:</span> Bám sát SGK Kết nối tri thức: Khởi động - Khám phá khái niệm, định nghĩa &amp; ví dụ nhận biết ban đầu.`;
 
           guidancePrompt = `
-=== NGUYÊN TẮC PHÂN BỔ SƯ PHẠM BẮT BUỘC CHO TIẾT 1/${totalParts} (CHỐNG TRÙNG LẶP NỘI DUNG) ===
+=== NGUYÊN TẮC PHÂN BỔ SƯ PHẠM BẮT BUỘC CHO TIẾT 1/${totalParts} (BÁM SÁT SGK KẾT NỐI TRI THỨC) ===
+- BỘ SÁCH GIÁO KHOA: Bắt buộc bám sát 100% SGK "Kết nối tri thức với cuộc sống" (Toán ${grade} Kết nối tri thức).
+- RANH GIỚI KIẾN THỨC: TUYỆT ĐỐI KHÔNG lấy thêm kiến thức, công thức ngoài SGK Kết nối tri thức.
 - Bài dạy này là bài học nhiều tiết (${totalParts} tiết). ĐÂY LÀ TIẾT ĐẦU TIÊN (TIẾT 1).
 - NHIỆM VỤ TRỌNG TÂM CỦA TIẾT 1:
-  1. Hoạt động Khởi động: Tình huống thực tế hoặc câu hỏi gợi mở để dẫn dắt học sinh vào bài mới.
-  2. Khám phá - Hình thành kiến thức nền tảng: Hướng dẫn học sinh từng bước hình thành Khái niệm, Định nghĩa, Ký hiệu và Tính chất cơ bản ở phần đầu của bài học.
-  3. Luyện tập nhận biết: Cho các ví dụ đơn giản ở mức độ DỄ (nhận biết, thông hiểu) để học sinh nắm chắc lý thuyết ban đầu.
-  4. Lược đồ ghi bảng: Chỉ ghi Mục 1 và Mục 2 (các định nghĩa, tính chất nền tảng ban đầu).
-- ĐIỀU CẤM KỴ: TUYỆT ĐỐI KHÔNG đưa vào bài tập biến đổi phức tạp, bài toán thực tế nâng cao hay các công thức nâng cao thuộc về Tiết ${currentPart + 1}.`;
+  1. Hoạt động Khởi động: Lấy đúng bài toán mở đầu hoặc tình huống thực tế của SGK Kết nối tri thức để dẫn dắt học sinh vào bài mới.
+  2. Khám phá - Hình thành kiến thức nền tảng: Bám sát các Hoạt động (HĐ) trong SGK Kết nối tri thức để hình thành Khái niệm, Định nghĩa, Ký hiệu và Tính chất cơ bản ở phần đầu.
+  3. Luyện tập nhận biết: Cho các ví dụ mẫu và bài tập cơ bản bám đúng mức độ Luyện tập đầu bài của SGK Kết nối tri thức.
+  4. Lược đồ ghi bảng: Chỉ ghi Mục 1 và Mục 2 (các định nghĩa, tính chất nền tảng chuẩn SGK Kết nối tri thức).
+- ĐIỀU CẤM KỴ: TUYỆT ĐỐI KHÔNG đưa vào bài tập biến đổi phức tạp ngoài chương trình, bài toán thực tế nâng cao hay các công thức nâng cao thuộc về Tiết ${currentPart + 1}.`;
 
-          autoObjective = `Trọng tâm Tiết 1/${totalParts}: Hình thành khái niệm, định nghĩa, nhận biết các tính chất mở đầu của ${baseTitle} và làm tốt các ví dụ nhận biết cơ bản.`;
+          autoObjective = `Trọng tâm Tiết 1/${totalParts}: Hình thành khái niệm, định nghĩa, nhận biết các tính chất mở đầu của ${baseTitle} theo đúng SGK Kết nối tri thức và làm tốt các ví dụ nhận biết cơ bản.`;
         } else if (currentPart === 2) {
-          badgeHtml = `<span style="color:#fb923c;font-weight:700">📙 Bài ${totalParts} tiết · Đang soạn TIẾT 2:</span> Tập trung Luyện phương pháp giải, bài tập biến đổi &amp; sửa lỗi sai (TUYỆT ĐỐI KHÔNG lặp lại định nghĩa Tiết 1).`;
+          badgeHtml = `<span style="color:#fb923c;font-weight:700">📙 Bài ${totalParts} tiết · Đang soạn TIẾT 2:</span> Luyện phương pháp giải, bài tập biến đổi &amp; sửa lỗi sai chuẩn SGK Kết nối tri thức (Không lặp lại định nghĩa Tiết 1).`;
 
           guidancePrompt = `
-=== CẢNH BÁO SƯ PHẠM BẮT BUỘC CHO TIẾT 2/${totalParts} (TUYỆT ĐỐI KHÔNG TRÙNG NỘI DUNG VỚI TIẾT 1) ===
+=== CẢNH BÁO SƯ PHẠM BẮT BUỘC CHO TIẾT 2/${totalParts} (BÁM SÁT SGK KẾT NỐI TRI THỨC) ===
+- BỘ SÁCH GIÁO KHOA: Bắt buộc bám sát 100% SGK "Kết nối tri thức với cuộc sống" (Toán ${grade} Kết nối tri thức).
+- RANH GIỚI KIẾN THỨC: TUYỆT ĐỐI KHÔNG lấy thêm kiến thức, công thức giải nhanh ngoài SGK Kết nối tri thức.
 - Bài dạy này gồm ${totalParts} tiết. ĐÂY LÀ TIẾT THỨ HAI (TIẾT 2) - NỐI TIẾP TIẾT 1.
-- NGUYÊN TẮC BẮT BUỘC CHỐNG TRÙNG LẶP:
+- NGUYÊN TẮC BẮT BUỘC CHỐNG TRÙNG LẶP & ĐÚNG NỘI DUNG SÁCH:
   1. TUYỆT ĐỐI KHÔNG LẶP LẠI việc dạy lại khái niệm / định nghĩa mở đầu hoặc bài toán khởi động của Tiết 1!
   2. Tiết 1 học sinh đã học khái niệm rồi. Tiết 2 này BẮT BUỘC:
      - Khởi động nhanh (3-5 phút): Đặt 1 câu hỏi chớp nhoáng nhắc lại nhanh công thức/tính chất của Tiết 1.
      - ${isLuyenTap
-              ? 'Luyện tập chuyên sâu các dạng toán biến đổi linh hoạt, tìm ẩn số, bài toán thực tiễn và sửa các lỗi sai điển hình.'
-              : 'Hình thành kiến thức phần tiếp theo (tính chất 2, quy tắc biến đổi, công thức tiếp theo) VÀ Luyện tập các dạng bài tập thực hành trọng tâm.'}
-     - Rèn kỹ năng tính toán, phân tích các bẫy đề thi và lỗi sai học sinh hay mắc phải.
-  3. Lược đồ ghi bảng: Ghi tóm tắt Phương pháp giải các dạng toán, các bước giải mẫu và lưu ý quan trọng của Tiết 2 (không ghi lại lý thuyết Tiết 1).`;
+              ? 'Luyện tập chuyên sâu các dạng toán biến đổi theo đúng bài tập trong SGK Kết nối tri thức, rèn kỹ năng tính toán và sửa lỗi sai điển hình.'
+              : 'Hình thành kiến thức phần tiếp theo (tính chất tiếp theo, công thức trong SGK Kết nối tri thức) VÀ Luyện tập các bài tập thực hành trọng tâm của sách.'}
+     - Rèn kỹ năng tính toán, phân tích các bẫy câu hỏi và lỗi sai học sinh hay mắc phải bám sát câu hỏi Tranh luận / Lưu ý của SGK.
+  3. Lược đồ ghi bảng: Ghi tóm tắt Phương pháp giải các dạng toán, các bước giải mẫu và lưu ý quan trọng của Tiết 2 chuẩn SGK Kết nối tri thức (không ghi lại lý thuyết Tiết 1).`;
 
-          autoObjective = `Trọng tâm Tiết 2/${totalParts}: Rèn luyện thành thạo kỹ năng giải các dạng toán thực hành của ${baseTitle}, nhận diện và khắc phục lỗi sai thường gặp (Không nhắc lại lý thuyết mở đầu của Tiết 1).`;
+          autoObjective = `Trọng tâm Tiết 2/${totalParts}: Rèn luyện thành thạo kỹ năng giải các dạng toán thực hành của ${baseTitle} chuẩn SGK Kết nối tri thức, nhận diện và khắc phục lỗi sai thường gặp (Không nhắc lại lý thuyết mở đầu của Tiết 1).`;
         } else if (currentPart >= 3) {
-          badgeHtml = `<span style="color:#f472b6;font-weight:700">📕 Bài ${totalParts} tiết · Đang soạn TIẾT ${currentPart}:</span> Vận dụng thực tế, bài toán tổng hợp liên môn &amp; hệ thống hóa chủ đề.`;
+          badgeHtml = `<span style="color:#f472b6;font-weight:700">📕 Bài ${totalParts} tiết · Đang soạn TIẾT ${currentPart}:</span> Vận dụng thực tế &amp; hệ thống hóa chủ đề chuẩn SGK Kết nối tri thức.`;
 
           guidancePrompt = `
-=== CHỈ THỊ SƯ PHẠM CHO TIẾT ${currentPart}/${totalParts} (TIẾT TỔNG KẾT & VẬN DỤNG CAO) ===
+=== CHỈ THỊ SƯ PHẠM CHO TIẾT ${currentPart}/${totalParts} (TIẾT TỔNG KẾT & VẬN DỤNG CHUẨN SGK KẾT NỐI TRI THỨC) ===
+- BỘ SÁCH GIÁO KHOA: Bắt buộc bám sát 100% SGK "Kết nối tri thức với cuộc sống" (Toán ${grade} Kết nối tri thức).
+- RANH GIỚI KIẾN THỨC: TUYỆT ĐỐI KHÔNG lấy các bài toán thi học sinh giỏi, toán chuyên hay công thức nâng cao ngoài SGK Kết nối tri thức.
 - ĐÂY LÀ TIẾT THỨ ${currentPart}/${totalParts} CỦA CHỦ ĐỀ "${baseTitle}".
 - NGUYÊN TẮC: TUYỆT ĐỐI KHÔNG dạy lại lý thuyết mở đầu của Tiết 1 và Tiết 2.
 - NHIỆM VỤ TRỌNG TÂM:
-  1. Kết nối toàn bộ kiến thức của cả chủ đề.
-  2. Vận dụng giải các bài toán thực tiễn đời sống và bài toán liên môn.
-  3. Rèn luyện bài toán tổng hợp, phân hóa nâng cao cho học sinh khá giỏi.
-  4. Lược đồ ghi bảng: Sơ đồ tư duy hệ thống hóa toàn bộ chủ đề và các kỹ thuật giải toán nâng cao.`;
+  1. Kết nối toàn bộ kiến thức của cả chủ đề theo khung SGK Kết nối tri thức.
+  2. Bám sát các bài toán Vận dụng (VD) trong SGK Kết nối tri thức để giải quyết bài toán thực tế đời sống.
+  3. Rèn luyện bài toán tổng hợp vừa sức, phân hóa cho học sinh trong phạm vi bài tập cuối bài của SGK Kết nối tri thức.
+  4. Lược đồ ghi bảng: Sơ đồ tư duy hệ thống hóa toàn bộ chủ đề chuẩn SGK Kết nối tri thức.`;
 
-          autoObjective = `Trọng tâm Tiết ${currentPart}/${totalParts}: Vận dụng tổng hợp kiến thức ${baseTitle} vào bài toán thực tiễn; rèn kỹ năng giải bài toán phân hóa và hệ thống hóa toàn bộ chủ đề.`;
+          autoObjective = `Trọng tâm Tiết ${currentPart}/${totalParts}: Vận dụng tổng hợp kiến thức ${baseTitle} vào bài toán thực tiễn chuẩn SGK Kết nối tri thức; rèn kỹ năng giải bài toán phân hóa và hệ thống hóa toàn bộ chủ đề.`;
         }
       } else {
-        badgeHtml = `<span style="color:#4ade80;font-weight:700">📗 Bài 1 tiết trọn vẹn:</span> Phân bổ đầy đủ các bước Khởi động (5') ➔ Hình thành kiến thức (15') ➔ Luyện tập (20') ➔ Vận dụng (5').`;
+        badgeHtml = `<span style="color:#4ade80;font-weight:700">📗 Bài 1 tiết trọn vẹn:</span> Bám sát SGK Kết nối tri thức: Khởi động (5') ➔ Hình thành kiến thức (15') ➔ Luyện tập (20') ➔ Vận dụng (5').`;
 
         guidancePrompt = `
-=== QUY TẮC SƯ PHẠM CHO BÀI HỌC 1 TIẾT TRỌN VẸN ===
+=== QUY TẮC SƯ PHẠM CHO BÀI HỌC 1 TIẾT TRỌN VẸN (BÁM SÁT SGK KẾT NỐI TRI THỨC) ===
+- BỘ SÁCH: Bắt buộc bám sát 100% SGK "Kết nối tri thức với cuộc sống". Tuyệt đối không lấy kiến thức ngoài SGK.
 - Soạn bài hoàn chỉnh gói gọn trong 45 phút, cân đối thời gian giữa lý thuyết và bài tập thực hành.`;
 
-        autoObjective = `Nắm vững kiến thức trọng tâm và vận dụng giải thành thạo bài tập cơ bản của ${baseTitle}.`;
+        autoObjective = `Nắm vững kiến thức trọng tâm và vận dụng giải thành thạo bài tập cơ bản của ${baseTitle} theo đúng SGK Kết nối tri thức.`;
       }
 
       return {
@@ -3106,15 +3240,17 @@
 
       const teachingMode = $("teachingMode").value;
       const modeInfo = TEACHING_MODES[teachingMode] || TEACHING_MODES["guided-discovery"];
-      const promptText = `Bạn là một chuyên gia sư phạm THCS môn ${subjectName} tại Việt Nam (bám sát chương trình GDPT mới).
-Hãy soạn GIÁO ÁN CHUẨN 5512, lược đồ ghi bảng và kịch bản hoạt động lên lớp theo đúng kiểu giáo viên chọn.
+      const promptText = `Bạn là một chuyên gia sư phạm THCS môn ${subjectName} tại Việt Nam.
+BỘ SÁCH GIÁO KHOA ÁP DỤNG: BẮT BUỘC BÁM SÁT 100% NỘI DUNG BỘ SGK "KẾT NỐI TRI THỨC VỚI CUỘC SỐNG" (Bộ Giáo dục & Đào tạo).
+Nhiệm vụ: Hãy soạn GIÁO ÁN CHUẨN 5512, lược đồ ghi bảng và kịch bản hoạt động lên lớp bám sát đúng SGK Kết nối tri thức theo đúng kiểu giáo viên chọn.
 
 --- THÔNG TIN BÀI DẠY (LẤY TỪ GIÁO VIÊN) ---
 - Tên bài: ${title}
 - Môn: ${subjectName} - Khối ${grade} ${clsName ? `(Lớp: ${clsName})` : ''}
 - Tiết PPCT: ${tiet || '1'} | Tuần PPCT: ${week || '1'}
-- Mục tiêu bài dạy: ${objectives || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức trọng tâm môn ${subjectName}`}
-- Yêu cầu cần đạt: ${requirements || pedagogy.autoRequirement || 'Học sinh yếu làm được các bài tập cơ bản, học sinh khá giỏi giải thích được từng bước'}
+- Bộ sách quy chuẩn: Sách giáo khoa "Kết nối tri thức với cuộc sống"
+- Mục tiêu bài dạy: ${objectives || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức chuẩn bài học môn ${subjectName} SGK Kết nối tri thức`}
+- Yêu cầu cần đạt: ${requirements || pedagogy.autoRequirement || 'Đạt chuẩn yêu cầu cần đạt theo chương trình và SGK Kết nối tri thức'}
 - Năng lực số: ${digital || 'Tích hợp khi phù hợp với yêu cầu bài học'}
 - Đối tượng học sinh trọng tâm: Học sinh ${audience}
 - Kiểu hoạt động (teachingMode): ${teachingMode} — ${modeInfo.label}
@@ -3122,12 +3258,15 @@ Hãy soạn GIÁO ÁN CHUẨN 5512, lược đồ ghi bảng và kịch bản ho
 ${extra ? '- Yêu cầu bổ sung của giáo viên: ' + extra : ''}
 ${pedagogy.guidancePrompt}
 
---- CHỈ DẪN SƯ PHẠM ---
-1. Kiểu hoạt động đã chọn: ${modeInfo.guidance}
-2. Hỗ trợ học sinh ${audience}: kiểm tra kiến thức nền, chia nhỏ chỉ dẫn, dùng câu ngắn; nếu học sinh bí/sai thì đưa gợi ý theo nấc trước khi lộ đáp án.
-3. Với mỗi bước điền phase (chặng), teacherAction (việc GV làm), studentTask (nhiệm vụ HS), expectedProduct (sản phẩm mong đợi), grouping (cá nhân/cặp đôi/nhóm), durationMinutes (số phút), question, hint, answer, explanation, mistake, imageUrl.
-4. Có thực hành được hỗ trợ, lượt học sinh tự thử, kiểm tra hiểu và củng cố; phân bổ thời lượng hợp lý. Không bịa nội dung SGK; ghi rõ điều cần giáo viên kiểm chứng nếu thiếu tài liệu.
-5. MẢNG "blackboard" BẮT BUỘC có 3-6 mục, không được rỗng. Mỗi mục gồm title và content chứa kiến thức ghi bảng cụ thể, hoàn chỉnh, có thể chép trực tiếp lên bảng/vở; sắp xếp theo tiến trình lên lớp. Ghi đúng trọng tâm bài này (khái niệm/kết luận/quy tắc, cách thực hiện, ví dụ mẫu hoặc lưu ý phù hợp với môn học); content phải khớp với các bước, không viết lời giữ chỗ như "Nội dung ngắn gọn", không chỉ ghi mô tả chung, không bịa hoặc đưa kiến thức chưa dạy.
+--- RANH GIỚI VÀ CHỈ DẪN SƯ PHẠM BẮT BUỘC ---
+1. BẢO VỆ CHUẨN KIẾN THỨC SGK KẾT NỐI TRI THỨC:
+   - TUYỆT ĐỐI KHÔNG đưa vào các định lý, công thức mở rộng, bài toán nâng cao hay kiến thức ngoài SGK Kết nối tri thức.
+   - Toàn bộ lý thuyết, ví dụ, câu hỏi dẫn dắt phải lấy chất liệu từ đúng bài học này trong SGK Toán ${grade} Kết nối tri thức.
+2. Kiểu hoạt động đã chọn: ${modeInfo.guidance}
+3. Hỗ trợ học sinh ${audience}: kiểm tra kiến thức nền, chia nhỏ chỉ dẫn, dùng câu ngắn; nếu học sinh bí/sai thì đưa gợi ý theo nấc trước khi lộ đáp án.
+4. Với mỗi bước điền phase (chặng), teacherAction (việc GV làm), studentTask (nhiệm vụ HS), expectedProduct (sản phẩm mong đợi), grouping (cá nhân/cặp đôi/nhóm), durationMinutes (số phút), question, hint, answer, explanation, mistake, imageUrl.
+5. Có thực hành được hỗ trợ, lượt học sinh tự thử, kiểm tra hiểu và củng cố; phân bổ thời lượng hợp lý. Tuyệt đối không bịa nội dung ngoài SGK Kết nối tri thức.
+6. MẢNG "blackboard" BẮT BUỘC có 3-6 mục, không được rỗng. Mỗi mục gồm title và content chứa kiến thức ghi bảng cụ thể, hoàn chỉnh, đúng chuẩn bài học trong SGK Kết nối tri thức, có thể chép trực tiếp lên bảng/vở; sắp xếp theo tiến trình lên lớp. Ghi đúng trọng tâm bài này (khái niệm/kết luận/quy tắc, cách thực hiện, ví dụ mẫu hoặc lưu ý); content phải khớp với các bước, không viết lời giữ chỗ như "Nội dung ngắn gọn", không chỉ ghi mô tả chung, không bịa hoặc đưa kiến thức chưa dạy.
 
 --- QUY TẮC ĐẦU RA ---
 Chỉ trả về một JSON object hợp lệ thuần túy, không lời dẫn, không Markdown. Dùng dấu $ cho công thức Toán khi phù hợp; escape dấu gạch chéo ngược hợp lệ.
@@ -3341,18 +3480,19 @@ Tạo đủ đúng ${count} object trong steps. Các trường chuỗi không đ
     /* ========================================================
        NHÂN CÁCH MỚI TẠO KÉP VÀ DỰ PHÒNG DEEPSEEK (ĐÃ CHỐNG LỖI JSON TỐI ĐA)
        ======================================================== */
-    const SYSTEM_INSTRUCTION = `Bạn là chuyên gia sư phạm trung học cơ sở tại Việt Nam, có chuyên môn phù hợp với môn học giáo viên chọn.
-Nhiệm vụ: Soạn Giáo án chuẩn Công văn 5512 và kịch bản hoạt động học tập linh hoạt, có câu hỏi hỗ trợ vi mô.
+    const SYSTEM_INSTRUCTION = `Bạn là chuyên gia sư phạm trung học cơ sở tại Việt Nam, có chuyên môn sâu sắc về chương trình môn học và bộ Sách Giáo Khoa (SGK) "Kết nối tri thức với cuộc sống" (Bộ Giáo dục & Đào tạo).
+Nhiệm vụ: Soạn Giáo án chuẩn Công văn 5512, lược đồ ghi bảng và kịch bản hoạt động học tập lên lớp bám sát 100% nội dung SGK Kết nối tri thức.
 Quy tắc TỐI THƯỢNG:
-  1. Soạn đúng đặc thù môn, yêu cầu cần đạt, lứa tuổi và tài liệu giáo viên cung cấp; không tự chuyển nội dung sang môn Toán.
-  2. Thiết kế phù hợp đối tượng học sinh: kiểm tra kiến thức nền, chia nhiệm vụ nhỏ, câu ngắn từ dễ đến khó; sau phần trọng tâm có câu kiểm tra hiểu.
-  3. Nếu học sinh sai/bí, đưa gợi ý từng nấc trước khi tiết lộ đáp án; dự đoán lỗi phổ biến và chỉ cách sửa.
-  4. Nếu thiếu tài liệu, chỉ sử dụng kiến thức phổ thông đáng tin cậy và nêu rõ phần cần giáo viên kiểm tra; không bịa nội dung/trang SGK.
-  5. Phần 'giao_an_5512': Viết giáo án hoàn chỉnh bằng Markdown, dùng ký tự \\n để xuống dòng trong JSON.
-  6. 'blackboard' là bắt buộc, không được để mảng rỗng: tạo 3-6 mục ghi bảng theo đúng tiến trình bài học; mỗi mục có title và content cụ thể, hoàn chỉnh, đúng kiến thức môn học và có thể chép trực tiếp lên bảng/vở. Ghi các ý cốt lõi của bài như khái niệm/kết luận/quy tắc, quy trình hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải khớp với mục tiêu, yêu cầu cần đạt và các bước dạy học. Không dùng nội dung giữ chỗ như 'Nội dung ngắn gọn', không chỉ mô tả rằng giáo viên sẽ ghi bảng, không bịa kiến thức hoặc lặp lại phần không dạy trong tiết này.
-  7. Mỗi bước gồm phase, teacherAction, studentTask, expectedProduct, grouping, durationMinutes, question, hint, answer, explanation, mistake, imageUrl; nội dung phải cụ thể để giáo viên dùng ngay.
-  8. Với công thức Toán học, kẹp công thức trong cặp dấu $ và escape dấu gạch chéo ngược khi cần.
-  9. Trả về đúng định dạng JSON object thuần túy, không bọc trong markdown code block.`;
+  1. BẢO VỆ CHUẨN KIẾN THỨC SGK KẾT NỐI TRI THỨC: Bắt buộc bám sát 100% nội dung, thuật ngữ, định nghĩa, định lý và ví dụ của bộ SGK "Kết nối tri thức với cuộc sống". TUYỆT ĐỐI KHÔNG đưa vào kiến thức ngoài chương trình, định lý mở rộng hay các công thức nâng cao không có trong SGK Kết nối tri thức.
+  2. Soạn đúng đặc thù môn, yêu cầu cần đạt, lứa tuổi và phân phối chương trình; không tự ý chuyển môn học.
+  3. Thiết kế phù hợp đối tượng học sinh: kiểm tra kiến thức nền, chia nhiệm vụ nhỏ, câu ngắn từ dễ đến khó; sau phần trọng tâm có câu kiểm tra hiểu.
+  4. Nếu học sinh sai/bí, đưa gợi ý từng nấc trước khi tiết lộ đáp án; dự đoán lỗi phổ biến và chỉ cách sửa theo các chú ý, câu hỏi Tranh luận của SGK Kết nối tri thức.
+  5. Tuyệt đối không bịa đặt nội dung, số trang hay bài tập không có trong SGK Kết nối tri thức.
+  6. Phần 'giao_an_5512': Viết giáo án hoàn chỉnh bằng Markdown, dùng ký tự \\n để xuống dòng trong JSON.
+  7. 'blackboard' là bắt buộc, không được để mảng rỗng: tạo 3-6 mục ghi bảng theo đúng tiến trình bài học; mỗi mục có title và content cụ thể, hoàn chỉnh, đúng chuẩn SGK Kết nối tri thức và có thể chép trực tiếp lên bảng/vở. Ghi các ý cốt lõi của bài như khái niệm/kết luận/quy tắc, quy trình hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải khớp với mục tiêu, yêu cầu cần đạt và các bước dạy học. Không dùng nội dung giữ chỗ như 'Nội dung ngắn gọn', không chỉ mô tả chung, không bịa kiến thức hoặc lặp lại phần không dạy trong tiết này.
+  8. Mỗi bước gồm phase, teacherAction, studentTask, expectedProduct, grouping, durationMinutes, question, hint, answer, explanation, mistake, imageUrl; nội dung phải cụ thể để giáo viên dùng ngay.
+  9. Với công thức Toán học, kẹp công thức trong cặp dấu $ và escape dấu gạch chéo ngược khi cần.
+  10. Trả về đúng định dạng JSON object thuần túy, không bọc trong markdown code block.`;
 
     function buildPrompt() {
       const cls = classes.find(c => (c.id || c.name) === $("classId").value);
@@ -3373,14 +3513,16 @@ Quy tắc TỐI THƯỢNG:
         `Tên bài: ${title}`,
         `Khối: ${grade}${cls ? ", Lớp " + cls.name : ""}`,
         `Tiết PPCT: ${tiet}`,
-        `Mục tiêu: ${$("objectives").value.trim() || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức cơ bản của môn ${subjectName}`}`,
-        `Yêu cầu cần đạt: ${req || pedagogy.autoRequirement || "Học sinh đạt yêu cầu cần đạt của bài học"}`,
+        `BỘ SÁCH GIÁO KHOA: Bắt buộc bám sát 100% nội dung SGK "Kết nối tri thức với cuộc sống" môn ${subjectName} lớp ${grade}.`,
+        `GIỚI HẠN KIẾN THỨC: Tuyệt đối KHÔNG lấy kiến thức ngoài SGK Kết nối tri thức; không đưa công thức/định lý mở rộng hay bài tập của các bộ sách khác/nâng cao ngoài chương trình.`,
+        `Mục tiêu: ${$("objectives").value.trim() || pedagogy.autoObjective || `Hiểu và vận dụng kiến thức cơ bản của môn ${subjectName} theo chuẩn SGK Kết nối tri thức`}`,
+        `Yêu cầu cần đạt: ${req || pedagogy.autoRequirement || "Học sinh đạt yêu cầu cần đạt của bài học theo SGK Kết nối tri thức"}`,
         `Đối tượng học sinh: ${$("aiAudience").value}`,
         `Kiểu tổ chức hoạt động (teachingMode): ${teachingMode} - ${modeInfo.label}`,
         `Nguyên tắc riêng của kiểu hoạt động: ${modeInfo.guidance}`,
         `Tạo đúng ${n} bước trong mảng steps; mỗi bước là một nhiệm vụ nhỏ, vừa sức và tiến triển từ dễ đến khó.`,
         `Trong mọi bước, điền đầy đủ phase (tên chặng), teacherAction (việc giáo viên làm), studentTask (nhiệm vụ học sinh), expectedProduct (sản phẩm/câu trả lời cần đạt), grouping (cá nhân/cặp đôi/nhóm), durationMinutes (số phút), question, hint (gợi ý theo nấc), answer, explanation, mistake.`,
-        `BẮT BUỘC tạo mảng blackboard có 3-6 mục, không để trống. Mỗi mục có title là tiêu đề theo trình tự dạy học và content là nội dung ghi bảng cụ thể, hoàn chỉnh, đúng bài ${title}, có thể chép trực tiếp lên bảng/vở (không ghi câu giữ chỗ hoặc lời mô tả chung). Chọn các ý cốt lõi phù hợp môn học như kiến thức/kết luận/quy tắc, cách thực hiện hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải thống nhất với mục tiêu, yêu cầu cần đạt và các bước, không bịa hoặc đưa kiến thức chưa dạy trong tiết này.`
+        `BẮT BUỘC tạo mảng blackboard có 3-6 mục, không để trống. Mỗi mục có title là tiêu đề theo trình tự dạy học và content là nội dung ghi bảng cụ thể, hoàn chỉnh, đúng chuẩn bài học SGK Kết nối tri thức, có thể chép trực tiếp lên bảng/vở (không ghi câu giữ chỗ hoặc lời mô tả chung). Chọn các ý cốt lõi phù hợp môn học như kiến thức/kết luận/quy tắc, cách thực hiện hoặc ví dụ mẫu và lưu ý khi phù hợp; nội dung phải thống nhất với mục tiêu, yêu cầu cần đạt và các bước, không bịa hoặc đưa kiến thức chưa dạy trong tiết này.`
       ];
 
       if (state.ppctKey) {
@@ -3393,7 +3535,7 @@ Quy tắc TỐI THƯỢNG:
         promptArr.push(pedagogy.guidancePrompt);
       }
 
-      promptArr.push(`Yêu cầu bổ sung: ${$("aiPrompt").value.trim() || `Chú trọng chia nhỏ nhiệm vụ, hỗ trợ học sinh ${$("aiAudience").value} tiếp thu và tự làm được yêu cầu cốt lõi.`}`);
+      promptArr.push(`Yêu cầu bổ sung: ${$("aiPrompt").value.trim() || `Bám sát nội dung SGK Kết nối tri thức; chú trọng chia nhỏ nhiệm vụ, hỗ trợ học sinh ${$("aiAudience").value} tiếp thu và tự làm được yêu cầu cốt lõi.`}`);
       promptArr.push("Phần dạy học phải có nhịp: kiểm tra kiến thức nền → giáo viên gợi mở/làm mẫu phù hợp kiểu hoạt động → học sinh thực hành có hỗ trợ → học sinh tự thử → kiểm tra hiểu và củng cố. Phân bổ thời lượng hợp lý, không để giáo viên nói liên tục.");
 
       const sgk = $("sgkSource") ? $("sgkSource").value.trim() : "";
@@ -4204,18 +4346,35 @@ Quy tắc TỐI THƯỢNG:
     let tkbFilter = "all";
     let tkbSelectedSlotKey = null;
     let uploadedTkbImageBase64 = null;
+    let adminTkbActiveWeek = null;
+    try {
+      const s = localStorage.getItem("app_tkb_active_week");
+      if (s && !isNaN(parseInt(s, 10))) adminTkbActiveWeek = parseInt(s, 10);
+    } catch (e) {}
 
     function loadTkbData() {
       try {
         const raw = localStorage.getItem("app_timetable");
         if (raw) {
           const parsed = JSON.parse(raw);
+          const isCleared = parsed.cleared === true || (parsed.slots && Object.keys(parsed.slots).length === 0 && (parsed.cleared || parsed.manual));
+          const weekSlots = {};
+          if (parsed.weekSlots && typeof parsed.weekSlots === "object") {
+            Object.assign(weekSlots, parsed.weekSlots);
+          } else if (parsed.slots && Object.keys(parsed.slots).length > 0 && !isCleared) {
+            weekSlots[4] = { ...parsed.slots };
+            weekSlots[5] = { ...parsed.slots };
+          }
+
           timetable = {
             teacher: parsed.teacher || "Trần Văn Trọng",
             schoolYear: parsed.schoolYear || "2026-2027",
             weeks: parsed.weeks || "Tuần 4, 5",
             applyDate: parsed.applyDate || "2026-09-28",
-            slots: (parsed.slots && Object.keys(parsed.slots).length > 0) ? parsed.slots : { ...DEFAULT_TKB_SLOTS }
+            cleared: parsed.cleared || false,
+            activeWeek: parsed.activeWeek || null,
+            weekSlots,
+            slots: isCleared ? {} : ((parsed.slots && Object.keys(parsed.slots).length > 0) ? parsed.slots : { ...DEFAULT_TKB_SLOTS })
           };
         } else {
           timetable = {
@@ -4223,6 +4382,9 @@ Quy tắc TỐI THƯỢNG:
             schoolYear: "2026-2027",
             weeks: "Tuần 4, 5",
             applyDate: "2026-09-28",
+            cleared: false,
+            activeWeek: null,
+            weekSlots: { 4: { ...DEFAULT_TKB_SLOTS }, 5: { ...DEFAULT_TKB_SLOTS } },
             slots: { ...DEFAULT_TKB_SLOTS }
           };
           localStorage.setItem("app_timetable", JSON.stringify(timetable));
@@ -4231,19 +4393,93 @@ Quy tắc TỐI THƯỢNG:
         console.warn("Lỗi load timetable:", e);
       }
 
-      if ($("tkbTeacher")) $("tkbTeacher").value = timetable.teacher || "";
-      if ($("tkbYear")) $("tkbYear").value = timetable.schoolYear || "";
-      if ($("tkbWeeks")) $("tkbWeeks").value = timetable.weeks || "";
-      if ($("tkbApplyDate")) $("tkbApplyDate").value = timetable.applyDate || "2026-09-28";
+      if ($("tkbTeacher")) {
+        $("tkbTeacher").value = timetable.teacher || "";
+        $("tkbTeacher").onchange = () => {
+          timetable.teacher = $("tkbTeacher").value.trim();
+          saveTkbData(false);
+        };
+      }
+      if ($("tkbYear")) {
+        $("tkbYear").value = timetable.schoolYear || "";
+        $("tkbYear").onchange = () => {
+          timetable.schoolYear = $("tkbYear").value.trim();
+          saveTkbData(false);
+          renderTkbGrid();
+          renderTkbSchedule();
+        };
+      }
+      if ($("tkbWeeks")) {
+        $("tkbWeeks").value = timetable.weeks || "";
+        $("tkbWeeks").onchange = () => {
+          timetable.weeks = $("tkbWeeks").value.trim() || "Tuần 4, 5";
+          saveTkbData(false);
+          renderTkbGrid();
+          renderTkbSchedule();
+        };
+      }
+      if ($("tkbApplyDate")) {
+        $("tkbApplyDate").value = toInputDateValue(timetable.applyDate || "2026-09-28");
+        $("tkbApplyDate").onchange = () => {
+          timetable.applyDate = $("tkbApplyDate").value;
+          saveTkbData(false);
+          updateAdminApplyDateNote();
+        };
+        $("tkbApplyDate").oninput = updateAdminApplyDateNote;
+      }
+      updateAdminApplyDateNote();
+      updateAdminLiveClock();
     }
+
+    function updateAdminApplyDateNote() {
+      const el = $("tkbApplyDate");
+      const note = $("adminTkbApplyDateNote");
+      if (el && note) {
+        const d = parseFlexibleDate(el.value || "2026-09-28");
+        note.innerHTML = `Chuẩn VN: <b>${formatFullDateVN(d)}</b>`;
+      }
+    }
+
+    function updateAdminLiveClock() {
+      const elTime = $("adminTkbClockTime");
+      const elDate = $("adminTkbClockDate");
+      const elWeekTag = $("adminTkbClockWeekTag");
+      if (!elTime && !elDate) return;
+
+      const now = new Date();
+      if (elTime) elTime.textContent = formatTimeVN(now);
+      if (elDate) {
+        const days = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+        const dayName = days[now.getDay()];
+        const dateVN = formatDateVN(now);
+        elDate.textContent = `${dayName}, ${dateVN}`;
+      }
+      if (elWeekTag) {
+        const curW = getActiveWeek(timetable, toInputDateValue(now));
+        elWeekTag.textContent = `Tuần ${curW} (Hiện tại)`;
+      }
+    }
+    setInterval(updateAdminLiveClock, 1000);
 
     function saveTkbData(silent = false) {
       if ($("tkbTeacher")) timetable.teacher = $("tkbTeacher").value.trim();
       if ($("tkbYear")) timetable.schoolYear = $("tkbYear").value.trim();
       if ($("tkbWeeks")) timetable.weeks = $("tkbWeeks").value.trim();
       if ($("tkbApplyDate")) timetable.applyDate = $("tkbApplyDate").value.trim();
+      timetable.activeWeek = adminTkbActiveWeek;
+
+      if (!timetable.weekSlots) timetable.weekSlots = {};
+      const curSlots = getWeekSlots(timetable, adminTkbActiveWeek);
+      timetable.slots = { ...curSlots };
+
+      if (Object.keys(curSlots || {}).length > 0) {
+        timetable.cleared = false;
+      }
 
       localStorage.setItem("app_timetable", JSON.stringify(timetable));
+      if (adminTkbActiveWeek) {
+        try { localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek)); } catch(e){}
+      }
       syncClassesDaysFromTkb();
 
       if (isFirebaseOnline) {
@@ -4252,7 +4488,8 @@ Quy tắc TỐI THƯỢNG:
         } catch (e) { }
       }
 
-      renderTkb();
+      renderTkbGrid();
+      renderTkbSchedule();
       if (!silent) toast("💾 Đã lưu Thời Khóa Biểu thành công!");
     }
 
@@ -4271,6 +4508,8 @@ Quy tắc TỐI THƯỢNG:
         const cName = (c.name || "").toUpperCase().trim();
         if (daysMap[cName]) {
           c.days = daysMap[cName];
+        } else {
+          c.days = {};
         }
       });
       saveLocalData();
@@ -4280,8 +4519,50 @@ Quy tắc TỐI THƯỢNG:
       const tbody = $("tkbGridBody");
       if (!tbody) return;
 
+      const allWeeks = getAvailableWeeks(timetable);
+      if (!adminTkbActiveWeek || !allWeeks.includes(adminTkbActiveWeek)) {
+        let saved = null;
+        try {
+          const s = localStorage.getItem("app_tkb_active_week");
+          if (s && !isNaN(parseInt(s, 10))) saved = parseInt(s, 10);
+        } catch (e) {}
+        adminTkbActiveWeek = (saved && allWeeks.includes(saved))
+          ? saved
+          : getActiveWeek(timetable, todayStr());
+      }
+      const startWeek = allWeeks[0] || 4;
+      const weekDates = getWeekDates(timetable.applyDate, adminTkbActiveWeek, startWeek, timetable);
+
+      // Render thead động với ngày tháng chuẩn VN
+      const thead = $("adminTkbGridThead");
+      if (thead) {
+        let theadHtml = `
+          <tr>
+            <th style="width:70px">Buổi</th>
+            <th style="width:50px">Tiết</th>
+        `;
+        weekDates.forEach(dInfo => {
+          theadHtml += `
+            <th class="${dInfo.isToday ? 'col-today' : ''}">
+              <div class="th-day-title">${dInfo.shortName}</div>
+              <div class="th-day-date">${dInfo.dateVN}</div>
+              ${dInfo.isToday ? '<span class="th-today-badge">Hôm nay</span>' : ''}
+            </th>
+          `;
+        });
+        theadHtml += `</tr>`;
+        thead.innerHTML = theadHtml;
+      }
+
       const days = [2, 3, 4, 5, 6, 7];
       let html = "";
+      const activeSlots = getWeekSlots(timetable, adminTkbActiveWeek);
+
+      // Cập nhật tên nút xóa theo tuần đang xem
+      const btnClear = $("adminBtnClearTkb");
+      if (btnClear) btnClear.innerHTML = `🗑️ Xóa TKB Tuần ${adminTkbActiveWeek}`;
+      const btnQuickClear = $("adminBtnQuickClearAllTkb");
+      if (btnQuickClear) btnQuickClear.innerHTML = `🗑️ Xóa Tuần ${adminTkbActiveWeek}`;
 
       // SÁNG (Tiết 1 đến 5)
       for (let p = 1; p <= 5; p++) {
@@ -4290,14 +4571,17 @@ Quy tắc TỐI THƯỢNG:
         html += `<td class="period-col">T${p}</td>`;
         days.forEach(d => {
           const key = `${d}_S_${p}`;
-          const val = (timetable.slots && timetable.slots[key]) || "";
+          const val = activeSlots[key] || "";
           const isSelected = tkbSelectedSlotKey === key;
+          const dayInfo = weekDates.find(w => w.dayNum === d);
+          const isTodayCol = dayInfo ? dayInfo.isToday : false;
+          const colTodayClass = isTodayCol ? ' col-today' : '';
           html += `
-        <td class="tkb-cell" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
+        <td class="tkb-cell${colTodayClass}" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
           ${val ? `
             <div class="tkb-tag ${val.toUpperCase().startsWith('7') ? 'k7' : 'k9'}">
               <span><b>${esc(val)}</b>-Toán</span>
-              <span class="cls-del" data-del="${key}" title="Xóa tiết này">✕</span>
+              <span class="cls-del" data-del="${key}" title="Xóa tiết này ở Tuần ${adminTkbActiveWeek}">✕</span>
             </div>
           ` : `<span class="tkb-empty-slot" title="Bấm để xếp lớp vào tiết này">+</span>`}
         </td>`;
@@ -4312,14 +4596,17 @@ Quy tắc TỐI THƯỢNG:
         html += `<td class="period-col">T${p}</td>`;
         days.forEach(d => {
           const key = `${d}_C_${p}`;
-          const val = (timetable.slots && timetable.slots[key]) || "";
+          const val = activeSlots[key] || "";
           const isSelected = tkbSelectedSlotKey === key;
+          const dayInfo = weekDates.find(w => w.dayNum === d);
+          const isTodayCol = dayInfo ? dayInfo.isToday : false;
+          const colTodayClass = isTodayCol ? ' col-today' : '';
           html += `
-        <td class="tkb-cell" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
+        <td class="tkb-cell${colTodayClass}" data-key="${key}" style="${isSelected ? 'outline:2px solid var(--yellow);background:rgba(245,158,11,0.1)' : ''}">
           ${val ? `
             <div class="tkb-tag ${val.toUpperCase().startsWith('7') ? 'k7' : 'k9'}">
               <span><b>${esc(val)}</b>-Toán</span>
-              <span class="cls-del" data-del="${key}" title="Xóa tiết này">✕</span>
+              <span class="cls-del" data-del="${key}" title="Xóa tiết này ở Tuần ${adminTkbActiveWeek}">✕</span>
             </div>
           ` : `<span class="tkb-empty-slot" title="Bấm để xếp lớp vào tiết này">+</span>`}
         </td>`;
@@ -4330,12 +4617,17 @@ Quy tắc TỐI THƯỢNG:
       tbody.innerHTML = html;
     }
 
-    let adminTkbActiveWeek = null;
-
     function computeTkbSchedule() {
       const allWeeks = getAvailableWeeks(timetable);
       if (!adminTkbActiveWeek || !allWeeks.includes(adminTkbActiveWeek)) {
-        adminTkbActiveWeek = getActiveWeek(timetable, todayStr());
+        let saved = null;
+        try {
+          const s = localStorage.getItem("app_tkb_active_week");
+          if (s && !isNaN(parseInt(s, 10))) saved = parseInt(s, 10);
+        } catch (e) {}
+        adminTkbActiveWeek = (saved && allWeeks.includes(saved))
+          ? saved
+          : getActiveWeek(timetable, todayStr());
       }
 
       const res = computeTkbScheduleModule({
@@ -4345,14 +4637,100 @@ Quy tắc TỐI THƯỢNG:
         targetWeekNum: adminTkbActiveWeek
       });
 
-      // Render các nút chọn tuần trong admin
+      // 1. Cập nhật dropdown chọn tuần nhanh (hỗ trợ đầy đủ đến Tuần 35)
+      const weekSelectEl = $("adminWeekSelect");
+      if (weekSelectEl) {
+        weekSelectEl.innerHTML = allWeeks.map(w => {
+          const wMonday = getWeekMonday(timetable, w);
+          const wSaturday = new Date(wMonday);
+          wSaturday.setDate(wMonday.getDate() + 5);
+          const rangeLabel = `${String(wMonday.getDate()).padStart(2, '0')}/${String(wMonday.getMonth() + 1).padStart(2, '0')} - ${String(wSaturday.getDate()).padStart(2, '0')}/${String(wSaturday.getMonth() + 1).padStart(2, '0')}`;
+          return `<option value="${w}" ${w === adminTkbActiveWeek ? 'selected' : ''}>Tuần ${w} (${rangeLabel})</option>`;
+        }).join("");
+        weekSelectEl.onchange = () => {
+          adminTkbActiveWeek = +weekSelectEl.value;
+          try {
+            localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek));
+          } catch (err) {}
+          renderTkbGrid();
+          renderTkbSchedule();
+        };
+      }
+
+      // 2. Nút Tuần trước và Tuần sau
+      const btnPrev = $("btnAdminPrevWeek");
+      if (btnPrev) {
+        const idx = allWeeks.indexOf(adminTkbActiveWeek);
+        btnPrev.disabled = (idx <= 0);
+        btnPrev.onclick = () => {
+          const curIdx = allWeeks.indexOf(adminTkbActiveWeek);
+          if (curIdx > 0) {
+            adminTkbActiveWeek = allWeeks[curIdx - 1];
+            try { localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek)); } catch (err) {}
+            renderTkbGrid();
+            renderTkbSchedule();
+          }
+        };
+      }
+      const btnNext = $("btnAdminNextWeek");
+      if (btnNext) {
+        const idx = allWeeks.indexOf(adminTkbActiveWeek);
+        btnNext.disabled = (idx >= allWeeks.length - 1);
+        btnNext.onclick = () => {
+          const curIdx = allWeeks.indexOf(adminTkbActiveWeek);
+          if (curIdx >= 0 && curIdx < allWeeks.length - 1) {
+            adminTkbActiveWeek = allWeeks[curIdx + 1];
+            try { localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek)); } catch (err) {}
+            renderTkbGrid();
+            renderTkbSchedule();
+          }
+        };
+      }
+
+      // 3. Render các nút chọn tuần trong admin (có thanh cuộn ngang mượt mà)
       const weekBtnsEl = $("adminWeekBtns");
       if (weekBtnsEl) {
-        weekBtnsEl.innerHTML = allWeeks.map(w => `
-          <button type="button" class="btn ${w === adminTkbActiveWeek ? 'btn-primary' : 'btn-ghost'} btn-sm" data-admin-week="${w}" style="padding:2px 8px;font-size:0.75rem">
-            Tuần ${w}
-          </button>
-        `).join("");
+        const curWeekNow = getActiveWeek(timetable, todayStr());
+        let btnsHtml = allWeeks.map(w => {
+          const wMonday = getWeekMonday(timetable, w);
+          const wSaturday = new Date(wMonday);
+          wSaturday.setDate(wMonday.getDate() + 5);
+          const rangeLabel = `${String(wMonday.getDate()).padStart(2, '0')}/${String(wMonday.getMonth() + 1).padStart(2, '0')} - ${String(wSaturday.getDate()).padStart(2, '0')}/${String(wSaturday.getMonth() + 1).padStart(2, '0')}`;
+          return `
+            <button type="button" class="btn ${w === adminTkbActiveWeek ? 'btn-primary' : 'btn-ghost'} btn-sm" data-admin-week="${w}" title="Tuần ${w}: ${rangeLabel}" style="padding:2px 8px;font-size:0.75rem;white-space:nowrap">
+              Tuần ${w}${w === curWeekNow ? ' (Hiện tại)' : ''} <span style="font-size:0.68rem;opacity:0.85">(${rangeLabel})</span>
+            </button>
+          `;
+        }).join("");
+
+        if (allWeeks.includes(curWeekNow) && adminTkbActiveWeek !== curWeekNow) {
+          btnsHtml += `
+            <button type="button" class="btn btn-outline btn-sm" id="btnAdminGoCurrentWeek" style="padding:2px 8px;font-size:0.75rem;color:var(--yellow);border-color:var(--yellow);margin-left:4px;white-space:nowrap" title="Chuyển xem ngay Tuần ${curWeekNow} (hiện tại)">
+              📅 Về tuần hiện tại (Tuần ${curWeekNow})
+            </button>
+          `;
+        }
+        weekBtnsEl.innerHTML = btnsHtml;
+
+        const btnGoCur = $("btnAdminGoCurrentWeek");
+        if (btnGoCur) {
+          btnGoCur.onclick = () => {
+            adminTkbActiveWeek = curWeekNow;
+            try {
+              localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek));
+            } catch (err) {}
+            renderTkbGrid();
+            renderTkbSchedule();
+          };
+        }
+
+        // Tự động cuộn nút tuần đang chọn vào giữa tầm nhìn
+        setTimeout(() => {
+          const activePill = weekBtnsEl.querySelector(".btn-primary");
+          if (activePill && typeof activePill.scrollIntoView === "function") {
+            activePill.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+          }
+        }, 50);
       }
 
       return res.scheduleList;
@@ -4409,8 +4787,10 @@ Quy tắc TỐI THƯỢNG:
         return `
       <tr style="${item.status === 'urgent' ? 'background:rgba(245,158,11,0.06);' : ''}">
         <td>
-          <b>${item.teachDateDisplay}</b>
-          <small>${item.teachDateStr}</small>
+          <div style="font-weight:700;color:var(--text)">${item.teachDateDisplay}</div>
+          <div style="font-size:0.75rem;margin-top:2px">
+            ${item.isTeachingToday ? '<span style="color:var(--green);font-weight:700">⚡ Hôm nay</span>' : (item.isTeachingTomorrow ? '<span style="color:var(--yellow);font-weight:700">📅 Ngày mai</span>' : `<span style="color:var(--dim)">Chuẩn VN: ${item.teachDateVN || item.teachDateStr}</span>`)}
+          </div>
         </td>
         <td>
           <span style="font-weight:700;color:${item.session === 'Sáng' ? 'var(--yellow)' : '#60a5fa'}">${item.session}</span>
@@ -4496,11 +4876,17 @@ Quy tắc TỐI THƯỢNG:
     // Quick fill cho các nút chọn nhanh lớp
     window.tkbQuickFill = function (clsName) {
       if (tkbSelectedSlotKey) {
-        timetable.slots[tkbSelectedSlotKey] = clsName;
+        if (clsName) {
+          timetable.slots[tkbSelectedSlotKey] = clsName;
+          timetable.cleared = false;
+          toast(`Đã gán lớp ${clsName} vào ô đang chọn.`);
+        } else {
+          delete timetable.slots[tkbSelectedSlotKey];
+          toast("Đã xóa tiết trong ô đang chọn.");
+        }
         saveTkbData(true);
         renderTkbGrid();
         renderTkbSchedule();
-        toast(`Đã gán lớp ${clsName} vào ô đang chọn.`);
       } else {
         toast(`Thầy/cô vui lòng bấm chọn một ô trên lưới TKB trước, sau đó bấm chọn lớp ${clsName} nhé!`, 4000);
       }
@@ -4519,17 +4905,52 @@ Quy tắc TỐI THƯỢNG:
 
           let foundSlots = 0;
           let colMap = {};
+          const importedSlots = {};
 
+          // 1. Quét tìm giáo viên, ngày áp dụng, tuần và các cột Thứ
           rows.forEach((row) => {
             if (!Array.isArray(row)) return;
+            const rowStr = row.map(c => String(c || "")).join(" ");
+
+            // Nhận diện giáo viên
+            const mTeacher = rowStr.match(/(?:giáo\s*viên|gv|thầy|cô)\s*[:\-]\s*([^\s,;]+(?:\s+[^\s,;]+){1,4})/i);
+            if (mTeacher && mTeacher[1]) {
+              timetable.teacher = mTeacher[1].trim();
+              if ($("tkbTeacher")) $("tkbTeacher").value = timetable.teacher;
+            } else if (rowStr.includes("Trần Văn Trọng")) {
+              timetable.teacher = "Trần Văn Trọng";
+              if ($("tkbTeacher")) $("tkbTeacher").value = timetable.teacher;
+            }
+
+            // Tự động nhận diện ngày áp dụng TKB từ file Excel nếu có
+            const mDate = rowStr.match(/áp\s*dụng\s*từ\s*[:\s]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/i);
+            if (mDate) {
+              const dObj = parseFlexibleDate(mDate[1]);
+              timetable.applyDate = toInputDateValue(dObj);
+              if ($("tkbApplyDate")) {
+                $("tkbApplyDate").value = timetable.applyDate;
+              }
+            }
+
+            // Nhận diện tuần
+            const mWeek = rowStr.match(/tuần\s*[:\-]?\s*([0-9\s,\-–đến]+)/i);
+            if (mWeek && mWeek[1]) {
+              const cleanW = mWeek[1].trim();
+              if (cleanW) {
+                timetable.weeks = `Tuần ${cleanW}`;
+                if ($("tkbWeeks")) $("tkbWeeks").value = timetable.weeks;
+              }
+            }
+
+            // Tìm cột Thứ 2..Thứ 7 (hoặc Thứ Hai..Thứ Bảy, T2..T7)
             row.forEach((cell, cIdx) => {
               const str = String(cell || "").toLowerCase().trim();
-              if (str.includes("thứ 2") || str.includes("thu 2") || str === "t2") colMap[cIdx] = 2;
-              if (str.includes("thứ 3") || str.includes("thu 3") || str === "t3") colMap[cIdx] = 3;
-              if (str.includes("thứ 4") || str.includes("thu 4") || str === "t4") colMap[cIdx] = 4;
-              if (str.includes("thứ 5") || str.includes("thu 5") || str === "t5") colMap[cIdx] = 5;
-              if (str.includes("thứ 6") || str.includes("thu 6") || str === "t6") colMap[cIdx] = 6;
-              if (str.includes("thứ 7") || str.includes("thu 7") || str === "t7") colMap[cIdx] = 7;
+              if (str.includes("thứ 2") || str.includes("thu 2") || str.includes("thứ hai") || str.includes("thu hai") || str === "t2" || str === "t.hai") colMap[cIdx] = 2;
+              if (str.includes("thứ 3") || str.includes("thu 3") || str.includes("thứ ba") || str.includes("thu ba") || str === "t3" || str === "t.ba") colMap[cIdx] = 3;
+              if (str.includes("thứ 4") || str.includes("thu 4") || str.includes("thứ tư") || str.includes("thu tu") || str === "t4" || str === "t.tư") colMap[cIdx] = 4;
+              if (str.includes("thứ 5") || str.includes("thu 5") || str.includes("thứ năm") || str.includes("thu nam") || str === "t5" || str === "t.năm") colMap[cIdx] = 5;
+              if (str.includes("thứ 6") || str.includes("thu 6") || str.includes("thứ sáu") || str.includes("thu sau") || str === "t6" || str === "t.sáu") colMap[cIdx] = 6;
+              if (str.includes("thứ 7") || str.includes("thu 7") || str.includes("thứ bảy") || str.includes("thu bay") || str === "t7" || str === "t.bảy") colMap[cIdx] = 7;
             });
           });
 
@@ -4537,29 +4958,42 @@ Quy tắc TỐI THƯỢNG:
             colMap = { 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7 };
           }
 
+          // 2. Quét qua các hàng để đọc tiết và xếp lớp
           let curSession = "S";
           rows.forEach((row) => {
             if (!Array.isArray(row)) return;
             const rowStr = row.map(c => String(c || "")).join(" ");
-            if (rowStr.includes("Trần Văn Trọng")) timetable.teacher = "Trần Văn Trọng";
-            if (rowStr.toLowerCase().includes("chiều") || rowStr.includes(" C ") || row[1] === "C") curSession = "C";
-            if (rowStr.toLowerCase().includes("sáng") || rowStr.includes(" S ") || row[1] === "S") curSession = "S";
+            const rowLower = rowStr.toLowerCase();
+
+            if (rowLower.includes("chiều") || rowLower.includes("chieu") || rowStr.includes(" C ") || row[1] === "C" || row[0] === "C") curSession = "C";
+            if (rowLower.includes("sáng") || rowLower.includes("sang") || rowStr.includes(" S ") || row[1] === "S" || row[0] === "S") curSession = "S";
 
             let period = null;
-            for (let c = 0; c < 4; c++) {
+            for (let c = 0; c < 5; c++) {
               const v = String(row[c] || "").trim();
-              if (/^[1-5]$/.test(v)) { period = +v; break; }
+              const mPeriod = v.match(/^(?:tiết|tiet|t)?\s*([1-9]|10)$/i);
+              if (mPeriod) {
+                const pNum = parseInt(mPeriod[1], 10);
+                if (pNum >= 1 && pNum <= 5) {
+                  period = pNum;
+                  break;
+                } else if (pNum >= 6 && pNum <= 10) {
+                  curSession = "C";
+                  period = pNum - 5;
+                  break;
+                }
+              }
             }
 
             if (period) {
               Object.entries(colMap).forEach(([cIdx, dayNum]) => {
                 const val = String(row[cIdx] || "").trim();
                 if (val) {
-                  const mCls = val.match(/(?:^|\b)(7|8|9)\s*[a-zA-Z0-9]+/i);
+                  const mCls = val.match(/(?:^|[^\w])([6-9]|1[0-2])\s*([a-zA-Z0-9_\-\/\.]+)/i) || val.match(/(?:^|\b)(6|7|8|9)\s*[a-zA-Z0-9]+/i);
                   if (mCls) {
-                    const clsName = mCls[0].toUpperCase().replace(/\s+/g, "");
+                    let clsName = (mCls[1] + (mCls[2] || "")).toUpperCase().replace(/\s+/g, "").replace(/[-–—].*$/, "");
                     const slotKey = `${dayNum}_${curSession}_${period}`;
-                    timetable.slots[slotKey] = clsName;
+                    importedSlots[slotKey] = clsName;
                     foundSlots++;
                   }
                 }
@@ -4567,22 +5001,50 @@ Quy tắc TỐI THƯỢNG:
             }
           });
 
+          if (foundSlots === 0) {
+            toast("⚠️ Không tìm thấy tiết dạy nào trong file Excel. Vui lòng kiểm tra lại: file cần có cột Thứ (Thứ 2..Thứ 7), cột Tiết (1..5) và tên lớp (VD: 7A2, 9A6...).", 6000);
+            return;
+          }
+
+          const curW = adminTkbActiveWeek || 5;
+          const allWeeks = getAvailableWeeks(timetable);
+
+          // Cập nhật weekSlots cho tuần hiện tại
+          setWeekSlots(timetable, curW, importedSlots);
+          timetable.slots = { ...importedSlots };
+          timetable.cleared = false;
+
+          const applyAll = confirm(`🎉 Đã nhận diện thành công ${foundSlots} tiết dạy từ file Excel!\n\nThầy/cô có muốn áp dụng Thời khóa biểu này cho TẤT CẢ các tuần (${allWeeks.length} tuần) trong năm học không?\n\n- Bấm OK: Áp dụng cho TẤT CẢ các tuần.\n- Bấm CANCEL: Chỉ áp dụng riêng cho TUẦN ${curW} đang xem.`);
+
+          if (applyAll) {
+            if (!timetable.weekSlots) timetable.weekSlots = {};
+            allWeeks.forEach(w => {
+              timetable.weekSlots[w] = { ...importedSlots };
+            });
+            toast(`✅ Đã nạp ${foundSlots} tiết dạy và áp dụng cho TẤT CẢ các tuần!`);
+          } else {
+            toast(`✅ Đã nạp ${foundSlots} tiết dạy vào TUẦN ${curW}!`);
+          }
+
+          updateAdminApplyDateNote();
           saveTkbData(true);
           renderTkbGrid();
           renderTkbSchedule();
-          toast(`🎉 Đã nạp thành công ${foundSlots} tiết dạy từ file Excel Thời Khóa Biểu!`);
         } catch (err) {
           toast("❌ Lỗi đọc file Excel: " + err.message, 6000);
+        } finally {
+          const fileInp = $("fileTkbExcel");
+          if (fileInp) fileInp.value = "";
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    // Tải file Excel mẫu TKB của Thầy Trần Văn Trọng
+    // Tải file Excel mẫu TKB của Thầy Trần Văn Trọng (chuẩn Việt Nam)
     function downloadTkbExcelTemplate() {
       try {
         const data = [
-          ["THỜI KHÓA BIỂU MÔN TOÁN NĂM HỌC 2026-2027 ÁP DỤNG TỪ 28-09-2026"],
+          ["THỜI KHÓA BIỂU MÔN TOÁN NĂM HỌC 2026-2027 ÁP DỤNG TỪ 28/09/2026"],
           ["Giáo Viên:", "Trần Văn Trọng", "", "Tuần:", "Tuần 4, 5"],
           [],
           ["Giáo Viên", "Buổi", "Tiết", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"],
@@ -4602,7 +5064,7 @@ Quy tắc TỐI THƯỢNG:
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "TKB_Thay_Trong");
         XLSX.writeFile(wb, "Thoi_Khoa_Bieu_Mau_Toan_Thay_Trong.xlsx");
-        toast("✅ Đã tải xuống file Excel mẫu Thời Khóa Biểu!");
+        toast("✅ Đã tải xuống file Excel mẫu Thời Khóa Biểu (chuẩn Việt Nam)!");
       } catch (err) {
         toast("Lỗi tải file mẫu: " + err.message);
       }
@@ -4677,7 +5139,10 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
         if (parsed.applyDate) timetable.applyDate = parsed.applyDate;
         if (parsed.weeks) timetable.weeks = parsed.weeks;
         if (parsed.slots && Object.keys(parsed.slots).length > 0) {
-          timetable.slots = parsed.slots;
+          const curW = adminTkbActiveWeek || 5;
+          setWeekSlots(timetable, curW, parsed.slots);
+          timetable.slots = { ...parsed.slots };
+          timetable.cleared = false;
         }
 
         saveTkbData(true);
@@ -4695,14 +5160,87 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
     // Bắt sự kiện cho Module Thời Khóa Biểu
     $("btnSaveTkb").addEventListener("click", () => saveTkbData(false));
 
+    // Xóa TKB: Mặc định chỉ xóa riêng tuần đang xem (các tuần khác giữ nguyên)
+    window.tkbClearAll = function () {
+      const curW = adminTkbActiveWeek || 5;
+      if (!confirm(`Thầy/cô có chắc chắn muốn XÓA CÁC Ô CỦA TUẦN ${curW} không?\n\n(Lưu ý: Thao tác này chỉ xóa riêng Tuần ${curW}, các tuần khác vẫn giữ nguyên 100%)`)) {
+        return;
+      }
+      setWeekSlots(timetable, curW, {});
+      tkbSelectedSlotKey = null;
+      saveTkbData(true);
+      renderTkbGrid();
+      renderTkbSchedule();
+      toast(`🗑️ Đã xóa sạch toàn bộ các ô của TUẦN ${curW}! (Các tuần khác được giữ nguyên)`);
+    };
+
+    // Xóa tất cả các tuần trong năm học
+    window.tkbClearAllWeeks = function () {
+      if (!confirm("⚠️ CẢNH BÁO: Thầy/cô có chắc muốn XÓA TRẮNG TKB CỦA TẤT CẢ CÁC TUẦN TRONG NĂM HỌC không?")) {
+        return;
+      }
+      timetable.weekSlots = {};
+      timetable.slots = {};
+      timetable.cleared = true;
+      tkbSelectedSlotKey = null;
+      saveTkbData(true);
+      renderTkbGrid();
+      renderTkbSchedule();
+      toast("🗑️ Đã xóa sạch thời khóa biểu của TẤT CẢ các tuần!");
+    };
+
+    // Sao chép TKB từ một tuần khác sang tuần hiện tại
+    window.tkbCopyFromWeek = function () {
+      const curW = adminTkbActiveWeek || 5;
+      const allWeeks = getAvailableWeeks(timetable);
+      const defaultSrc = curW === 5 ? "4" : (allWeeks[0] ? String(allWeeks[0]) : "5");
+      const srcInput = prompt(`Sao chép TKB sang TUẦN ${curW}:\nNhập số tuần nguồn muốn sao chép (VD: 5):`, defaultSrc);
+      if (!srcInput) return;
+      const srcW = parseInt(srcInput, 10);
+      if (isNaN(srcW) || srcW < 1) {
+        toast("Số tuần không hợp lệ.");
+        return;
+      }
+      const srcSlots = getWeekSlots(timetable, srcW);
+      if (!srcSlots || Object.keys(srcSlots).length === 0) {
+        toast(`⚠️ Tuần ${srcW} hiện chưa có tiết dạy nào để sao chép.`);
+        return;
+      }
+      setWeekSlots(timetable, curW, { ...srcSlots });
+      saveTkbData(true);
+      renderTkbGrid();
+      renderTkbSchedule();
+      toast(`📋 Đã sao chép thành công toàn bộ TKB từ Tuần ${srcW} sang Tuần ${curW}!`);
+    };
+
+    if ($("adminBtnClearTkb")) {
+      $("adminBtnClearTkb").addEventListener("click", window.tkbClearAll);
+    }
+    if ($("adminBtnQuickClearAllTkb")) {
+      $("adminBtnQuickClearAllTkb").addEventListener("click", window.tkbClearAll);
+    }
+    if ($("adminBtnClearAllWeeks")) {
+      $("adminBtnClearAllWeeks").addEventListener("click", window.tkbClearAllWeeks);
+    }
+    if ($("adminBtnCopyTkb")) {
+      $("adminBtnCopyTkb").addEventListener("click", window.tkbCopyFromWeek);
+    }
+
     $("btnApplyDefaultTkb").addEventListener("click", () => {
+      if (!confirm("Thầy/cô có muốn nạp lại mẫu Thời khóa biểu mặc định của Thầy Trần Văn Trọng không?")) return;
       timetable = {
         teacher: "Trần Văn Trọng",
         schoolYear: "2026-2027",
         weeks: "Tuần 4, 5",
         applyDate: "2026-09-28",
+        cleared: false,
         slots: { ...DEFAULT_TKB_SLOTS }
       };
+      if ($("tkbTeacher")) $("tkbTeacher").value = timetable.teacher;
+      if ($("tkbYear")) $("tkbYear").value = timetable.schoolYear;
+      if ($("tkbWeeks")) $("tkbWeeks").value = timetable.weeks;
+      if ($("tkbApplyDate")) $("tkbApplyDate").value = timetable.applyDate;
+      updateAdminApplyDateNote();
       saveTkbData(true);
       renderTkbGrid();
       renderTkbSchedule();
@@ -4743,14 +5281,18 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
 
     // Click vào ô trên lưới TKB
     $("tkbGridTable").addEventListener("click", e => {
+      const curW = adminTkbActiveWeek || 5;
+      const curSlots = getWeekSlots(timetable, curW);
+
       const delBtn = e.target.closest("[data-del]");
       if (delBtn) {
         const key = delBtn.dataset.del;
-        delete timetable.slots[key];
+        delete curSlots[key];
+        setWeekSlots(timetable, curW, curSlots);
         saveTkbData(true);
         renderTkbGrid();
         renderTkbSchedule();
-        toast("Đã xóa tiết dạy.");
+        toast(`Đã xóa tiết dạy của Tuần ${curW}.`);
         return;
       }
 
@@ -4760,15 +5302,16 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
         tkbSelectedSlotKey = key;
         renderTkbGrid();
 
-        const cur = timetable.slots[key] || "";
-        const promptAns = prompt(`Nhập tên lớp cho tiết này (VD: 7A2, 7A4, 7A7, 9A4, 9A6)\nHoặc bấm nút "Chọn nhanh lớp" ở thanh trên cùng\n(Để trống nếu muốn xóa):`, cur);
+        const cur = curSlots[key] || "";
+        const promptAns = prompt(`Nhập tên lớp cho tiết này ở TUẦN ${curW} (VD: 7A2, 7A4, 7A7, 9A4, 9A6)\nHoặc bấm nút "Chọn nhanh lớp" ở thanh trên cùng\n(Để trống nếu muốn xóa):`, cur);
         if (promptAns !== null) {
           const cleanVal = promptAns.toUpperCase().trim();
           if (cleanVal) {
-            timetable.slots[key] = cleanVal;
+            curSlots[key] = cleanVal;
           } else {
-            delete timetable.slots[key];
+            delete curSlots[key];
           }
+          setWeekSlots(timetable, curW, curSlots);
           saveTkbData(true);
           renderTkbGrid();
           renderTkbSchedule();
@@ -4783,6 +5326,10 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
         const b = e.target.closest("[data-admin-week]");
         if (!b) return;
         adminTkbActiveWeek = +b.dataset.adminWeek;
+        try {
+          localStorage.setItem("app_tkb_active_week", String(adminTkbActiveWeek));
+        } catch (err) {}
+        renderTkbGrid();
         renderTkbSchedule();
       });
     }
@@ -4938,7 +5485,7 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
         if (cObj) $("classId").value = cObj.id;
       }
       const parts = urlPpct.split("-");
-      toast(`⚡ <b>Đã nạp bài soạn từ Kế hoạch Dạy học!</b><br>Khối ${parts[0]} - Tiết ${parts[1]}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày dạy: ${urlDate}` : ''}`, 5000);
+      toast(`⚡ <b>Đã nạp bài soạn từ Kế hoạch Dạy học!</b><br>Khối ${parts[0]} - Tiết ${parts[1]}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày dạy: ${formatDateVN(urlDate)}` : ''}`, 5000);
     } else if (urlGrade && urlTiet) {
       const gStr = String(urlGrade);
       const tNum = parseInt(urlTiet);
@@ -4970,7 +5517,7 @@ CHỈ TRẢ VỀ DUY NHẤT một khối JSON thuần túy (không bọc trong m
       updatePedagogyNotice();
       showTab("lesson");
       renderEditor();
-      toast(`⚡ <b>Đã nạp bài học từ Kế hoạch!</b><br>Khối ${gStr} - Tiết ${tNum}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày: ${urlDate}` : ''}`, 5000);
+      toast(`⚡ <b>Đã nạp bài học từ Kế hoạch!</b><br>Khối ${gStr} - Tiết ${tNum}${urlClass ? ` · Lớp ${urlClass}` : ''}${urlDate ? ` · Ngày dạy: ${formatDateVN(urlDate)}` : ''}`, 5000);
     }
 
     const urlLesson = new URLSearchParams(location.search).get("lesson");

@@ -56,6 +56,37 @@ export const DEFAULT_TIMETABLE = {
 export const ALLOWED_CLASS_NAMES = ["7A2", "7A4", "7A7", "9A4", "9A6"];
 
 /**
+ * Lấy các ô tiết dạy cho 1 tuần chỉ định:
+ * 1. Nếu timetable có weekSlots[targetWeekNum], lấy đúng weekSlots của tuần đó.
+ * 2. Nếu targetWeekNum là 4 hoặc 5 (tuần gốc ban đầu của mẫu) và timetable có slots, dùng slots mẫu.
+ * 3. Với các tuần khác chưa thiết lập, trả về {} (để không bị lỗi 'tuần 5 hiện diện trên tất cả các tuần khác').
+ */
+export function getWeekSlots(timetable, targetWeekNum) {
+  if (!timetable) return {};
+  const wNum = Number(targetWeekNum);
+  if (timetable.weekSlots && typeof timetable.weekSlots === "object") {
+    if (timetable.weekSlots[wNum] !== undefined) {
+      return timetable.weekSlots[wNum] || {};
+    }
+  }
+  // Nếu tuần là 4 hoặc 5 và timetable có slots ban đầu chưa bị xóa
+  if ((wNum === 4 || wNum === 5) && timetable.slots && Object.keys(timetable.slots).length > 0 && !timetable.cleared) {
+    return { ...timetable.slots };
+  }
+  return {};
+}
+
+export function setWeekSlots(timetable, targetWeekNum, newSlots) {
+  if (!timetable) return;
+  const wNum = Number(targetWeekNum);
+  if (!timetable.weekSlots || typeof timetable.weekSlots !== "object") {
+    timetable.weekSlots = {};
+  }
+  timetable.weekSlots[wNum] = { ...(newSlots || {}) };
+  timetable.slots = { ...(newSlots || {}) };
+}
+
+/**
  * Lấy dữ liệu Thời khóa biểu an toàn từ localStorage hoặc fallback mặc định
  */
 export function getStoredTimetable() {
@@ -68,38 +99,247 @@ export function getStoredTimetable() {
         Object.entries(parsed.slots).forEach(([k, v]) => {
           if (!v) return;
           const clsName = String(v).split(/[-–—]/)[0].trim().toUpperCase();
-          if (ALLOWED_CLASS_NAMES.includes(clsName)) {
+          if (clsName && clsName.length <= 15) {
             cleanedSlots[k] = v;
           }
         });
       }
+
+      const weekSlots = {};
+      if (parsed.weekSlots && typeof parsed.weekSlots === "object") {
+        Object.entries(parsed.weekSlots).forEach(([w, slots]) => {
+          if (slots && typeof slots === "object") {
+            const cleanWSlots = {};
+            Object.entries(slots).forEach(([k, v]) => {
+              if (v) cleanWSlots[k] = v;
+            });
+            weekSlots[w] = cleanWSlots;
+          }
+        });
+      }
+
+      const isExplicitlyCleared = parsed.cleared === true || (parsed.slots && Object.keys(parsed.slots).length === 0 && (parsed.cleared || parsed.manual));
 
       return {
         teacher: parsed.teacher || DEFAULT_TIMETABLE.teacher,
         schoolYear: parsed.schoolYear || DEFAULT_TIMETABLE.schoolYear,
         weeks: parsed.weeks || DEFAULT_TIMETABLE.weeks,
         applyDate: parsed.applyDate || DEFAULT_TIMETABLE.applyDate,
-        slots: Object.keys(cleanedSlots).length > 0
+        cleared: parsed.cleared || false,
+        activeWeek: parsed.activeWeek || null,
+        weekSlots,
+        slots: isExplicitlyCleared ? {} : (Object.keys(cleanedSlots).length > 0
           ? cleanedSlots
-          : { ...DEFAULT_TKB_SLOTS }
+          : { ...DEFAULT_TKB_SLOTS })
       };
     }
   } catch (e) {
     console.warn("Lỗi đọc app_timetable:", e);
   }
-  return { ...DEFAULT_TIMETABLE, slots: { ...DEFAULT_TKB_SLOTS } };
+  return { ...DEFAULT_TIMETABLE, weekSlots: { 4: { ...DEFAULT_TKB_SLOTS }, 5: { ...DEFAULT_TKB_SLOTS } }, slots: { ...DEFAULT_TKB_SLOTS } };
 }
 
 /**
- * Trích xuất danh sách số thứ tự tuần từ chuỗi (VD: "Tuần 4, 5" -> [4, 5])
+ * Trích xuất danh sách số thứ tự tuần từ chuỗi (VD: "Tuần 4, 5" -> [4, 5], "Tuần 1 - 35" -> [1..35])
  */
 export function getAvailableWeeks(timetable) {
   const tb = timetable || getStoredTimetable();
-  const m = (tb.weeks || "").match(/\d+/g);
-  if (m && m.length > 0) {
-    return m.map(Number);
+  const str = String(tb?.weeks || "Tuần 4, 5").trim();
+  const mRange = str.match(/(\d+)\s*(?:[-–—]|đến|\.\.)\s*(\d+)/i);
+  if (mRange) {
+    const start = parseInt(mRange[1], 10);
+    const end = parseInt(mRange[2], 10);
+    if (start <= end && end - start <= 52) {
+      const arr = [];
+      for (let i = start; i <= end; i++) arr.push(i);
+      return arr;
+    }
   }
-  return [4];
+  const m = str.match(/\d+/g);
+  if (m && m.length > 0) {
+    return Array.from(new Set(m.map(Number))).sort((a, b) => a - b);
+  }
+  return [4, 5];
+}
+
+export function parseFlexibleDate(str) {
+  if (!str) return new Date();
+  if (str instanceof Date) return str;
+  const s = String(str).trim();
+  // Khớp DD/MM/YYYY hoặc DD-MM-YYYY
+  const mDmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (mDmy) {
+    return new Date(+mDmy[3], +mDmy[2] - 1, +mDmy[1]);
+  }
+  // Khớp YYYY-MM-DD hoặc YYYY/MM/DD
+  const mYmd = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (mYmd) {
+    return new Date(+mYmd[1], +mYmd[2] - 1, +mYmd[3]);
+  }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+export function formatDateVN(dateInput) {
+  const d = parseFlexibleDate(dateInput);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export function formatFullDateVN(dateInput) {
+  const d = parseFlexibleDate(dateInput);
+  const days = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const dayName = days[d.getDay()];
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${dayName}, ngày ${day}/${month}/${year}`;
+}
+
+export function formatTimeVN(dateInput = new Date()) {
+  const d = parseFlexibleDate(dateInput);
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const s = String(d.getSeconds()).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+export function formatSystemDateTimeVN(dateInput = new Date()) {
+  const d = parseFlexibleDate(dateInput);
+  const days = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const dayName = days[d.getDay()];
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const time = formatTimeVN(d);
+  return `${dayName}, ngày ${day}/${month}/${year} · ${time}`;
+}
+
+export function toInputDateValue(dateInput) {
+  const d = parseFlexibleDate(dateInput);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Tính toán ngày Thứ Hai của tuần học bất kỳ theo Năm học chuẩn Việt Nam
+ * Năm học 2026-2027: Tuần 1 bắt đầu từ Thứ Hai, 07/09/2026.
+ * Tuần W bắt đầu từ: 07/09/2026 + (W - 1) * 7 ngày.
+ */
+export function getStandardSchoolWeekMonday(schoolYear = "2026-2027", weekNum = 1) {
+  const m = String(schoolYear || "").match(/^(\d{4})/);
+  const startYear = m ? parseInt(m[1], 10) : 2026;
+  const sep5 = new Date(startYear, 8, 5); // 05/09
+  const day = sep5.getDay(); // 0: CN, 1: T2, ..., 6: T7
+  const diff = (day === 1) ? 0 : (day === 0 ? 1 : 8 - day);
+  const week1Monday = new Date(startYear, 8, 5 + diff);
+  week1Monday.setHours(0, 0, 0, 0);
+
+  const targetMonday = new Date(week1Monday);
+  targetMonday.setDate(targetMonday.getDate() + (weekNum - 1) * 7);
+  return targetMonday;
+}
+
+/**
+ * Làm sạch và chuẩn hóa ngày Thứ Hai đầu tuần:
+ * 1. Phát hiện và tự động sửa lỗi đảo ngược Tháng/Ngày do input/locale en-US (VD: 2026-12-10 -> 2026-10-12)
+ * 2. Chuẩn hóa về đúng ngày Thứ Hai của tuần đó
+ */
+export function sanitizeApplyDate(dateInput, schoolYear = "2026-2027", targetWeekNum = 1) {
+  if (!dateInput) {
+    return getStandardSchoolWeekMonday(schoolYear, targetWeekNum || 1);
+  }
+
+  let d = parseFlexibleDate(dateInput);
+  if (isNaN(d.getTime())) {
+    return getStandardSchoolWeekMonday(schoolYear, targetWeekNum || 1);
+  }
+
+  // Phát hiện lỗi đảo ngược Tháng và Ngày (do browser định dạng MM/DD/YYYY)
+  if (typeof dateInput === "string") {
+    const m = dateInput.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (m) {
+      const year = +m[1];
+      const mon = +m[2];
+      const day = +m[3];
+      if (mon <= 12 && day <= 12 && mon !== day) {
+        const currDayOfWeek = d.getDay(); // 1: Thứ Hai
+        const swapped = new Date(year, day - 1, mon);
+        const swappedDayOfWeek = swapped.getDay();
+        if (currDayOfWeek !== 1 && swappedDayOfWeek === 1) {
+          d = swapped;
+        } else if (targetWeekNum) {
+          const expected = getStandardSchoolWeekMonday(schoolYear, targetWeekNum);
+          if (Math.abs(swapped - expected) < Math.abs(d - expected)) {
+            d = swapped;
+          }
+        }
+      }
+    }
+  }
+
+  // Chuẩn hóa về ngày Thứ Hai của tuần đó
+  const dow = d.getDay();
+  const diffToMon = (dow === 0 ? -6 : 1 - dow);
+  d.setDate(d.getDate() + diffToMon);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * Lấy chính xác ngày Thứ Hai của tuần chỉ định targetWeekNum
+ */
+export function getWeekMonday(timetable, targetWeekNum) {
+  const tb = timetable || getStoredTimetable();
+  const schoolYear = tb?.schoolYear || "2026-2027";
+  const allWeeks = getAvailableWeeks(tb);
+  const startWeek = allWeeks[0] || 1;
+
+  const cleanBaseMonday = sanitizeApplyDate(tb?.applyDate, schoolYear, startWeek);
+  const stdWeek1Monday = getStandardSchoolWeekMonday(schoolYear, 1);
+  const diffWeeks = Math.round((cleanBaseMonday - stdWeek1Monday) / (7 * 86400000));
+  const detectedWeek = 1 + diffWeeks;
+
+  if (detectedWeek >= 1 && detectedWeek <= 45) {
+    const monday = new Date(cleanBaseMonday);
+    monday.setDate(monday.getDate() + (targetWeekNum - detectedWeek) * 7);
+    return monday;
+  }
+  return getStandardSchoolWeekMonday(schoolYear, targetWeekNum);
+}
+
+/**
+ * Trả về danh sách 6 ngày trong tuần (Thứ 2 đến Thứ 7) cho tuần chỉ định theo chuẩn VN
+ */
+export function getWeekDates(applyDate, weekNum, startWeek = 4, timetable = null) {
+  const tb = timetable || (applyDate ? { applyDate, weeks: `Tuần ${weekNum}` } : null);
+  const monday = getWeekMonday(tb, weekNum);
+  const y = monday.getFullYear();
+  const m = monday.getMonth();
+  const d = monday.getDate();
+  const daysOfWeekNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const shortNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+  const curToday = todayStr();
+
+  return [0, 1, 2, 3, 4, 5].map((dIdx) => {
+    const dTeaching = new Date(y, m, d + dIdx);
+    const dateStr = toInputDateValue(dTeaching);
+    const dateVN = formatDateVN(dTeaching);
+    const isToday = (dateStr === curToday);
+    return {
+      dayNum: dIdx + 2,
+      dayName: daysOfWeekNames[dIdx],
+      shortName: shortNames[dIdx],
+      dateObj: dTeaching,
+      dateStr,
+      dateVN,
+      isToday
+    };
+  });
 }
 
 /**
@@ -108,25 +348,24 @@ export function getAvailableWeeks(timetable) {
  */
 export function getActiveWeek(timetable, curToday = todayStr()) {
   const tb = timetable || getStoredTimetable();
+  const schoolYear = tb?.schoolYear || "2026-2027";
   const allWeeks = getAvailableWeeks(tb);
-  const startWeek = allWeeks[0] || 4;
 
-  const applyDateStr = (tb.applyDate || "2026-09-28").trim();
-  const [y, m, d] = applyDateStr.split("-").map(Number);
-  const mondayStart = new Date(y, m - 1, d);
+  const todayDate = parseFlexibleDate(curToday);
+  todayDate.setHours(0, 0, 0, 0);
 
-  const [cy, cm, cd] = curToday.split("-").map(Number);
-  const todayDate = new Date(cy, cm - 1, cd);
+  const stdWeek1Monday = getStandardSchoolWeekMonday(schoolYear, 1);
+  stdWeek1Monday.setHours(0, 0, 0, 0);
 
-  const diffDays = Math.round((todayDate - mondayStart) / 86400000);
-  // +1 để ngày Chủ nhật (diffDays 6, 13...) tính vào chuẩn bị cho tuần tới
+  const diffDays = Math.round((todayDate - stdWeek1Monday) / 86400000);
+  // +1 để ngày Chủ nhật (diffDays 6, 13, 20...) tự động chuyển sang tuần kế tiếp để chuẩn bị bài cho Thứ 2
   const weekOffset = Math.floor((diffDays + 1) / 7);
-  const candidateWeek = startWeek + weekOffset;
+  const candidateWeek = 1 + weekOffset;
 
   if (allWeeks.includes(candidateWeek)) return candidateWeek;
   if (candidateWeek > Math.max(...allWeeks)) return Math.max(...allWeeks);
   if (candidateWeek < Math.min(...allWeeks)) return Math.min(...allWeeks);
-  return startWeek;
+  return allWeeks[0] || 1;
 }
 
 /**
@@ -141,20 +380,18 @@ export function computeTkbSchedule({
 } = {}) {
   const tb = timetable || getStoredTimetable();
   const allWeeks = getAvailableWeeks(tb);
-  const startWeek = allWeeks[0] || 4;
-
   const weekNum = targetWeekNum || getActiveWeek(tb, curToday);
-  const weekDelta = weekNum - startWeek;
 
-  const applyDateStr = (tb.applyDate || "2026-09-28").trim();
-  const [y, m, d] = applyDateStr.split("-").map(Number);
-  const baseMonday = new Date(y, m - 1, d + weekDelta * 7);
-  const baseMondayStr = baseMonday.toLocaleDateString("sv-SE");
+  const baseMonday = getWeekMonday(tb, weekNum);
+  const y = baseMonday.getFullYear();
+  const m = baseMonday.getMonth();
+  const d = baseMonday.getDate();
+  const baseMondayStr = toInputDateValue(baseMonday);
 
-  const [cy, cm, cd] = curToday.split("-").map(Number);
-  const todayDate = new Date(cy, cm - 1, cd);
-  const tomorrowDate = new Date(cy, cm - 1, cd + 1);
-  const tomorrowDateStr = tomorrowDate.toLocaleDateString("sv-SE");
+  const todayDate = parseFlexibleDate(curToday);
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowDateStr = toInputDateValue(tomorrowDate);
 
   const daysOfWeekNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
   const prepDayNames = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
@@ -162,20 +399,24 @@ export function computeTkbSchedule({
   const scheduleList = [];
   const classCounter = {};
 
+  const weekSlots = getWeekSlots(tb, weekNum);
+
   for (let dIdx = 0; dIdx < 6; dIdx++) {
     const dayNum = dIdx + 2; // 2..7
     const dayName = daysOfWeekNames[dIdx];
 
-    // Ngày dạy
-    const dTeaching = new Date(y, m - 1, d + weekDelta * 7 + dIdx);
-    const teachDateStr = dTeaching.toLocaleDateString("sv-SE");
-    const teachDateDisplay = `${dayName}, ${String(dTeaching.getDate()).padStart(2, "0")}/${String(dTeaching.getMonth() + 1).padStart(2, "0")}/${dTeaching.getFullYear()}`;
+    // Ngày dạy (chuẩn Việt Nam DD/MM/YYYY)
+    const dTeaching = new Date(y, m, d + dIdx);
+    const teachDateStr = toInputDateValue(dTeaching);
+    const teachDateVN = formatDateVN(dTeaching);
+    const teachDateDisplay = `${dayName}, ${teachDateVN}`;
 
-    // Hạn soạn bài trước 1 ngày (dTeaching - 1 ngày)
-    const dPrep = new Date(y, m - 1, d + weekDelta * 7 + dIdx - 1);
-    const prepDateStr = dPrep.toLocaleDateString("sv-SE");
+    // Hạn soạn bài trước 1 ngày (dTeaching - 1 ngày, chuẩn Việt Nam)
+    const dPrep = new Date(y, m, d + dIdx - 1);
+    const prepDateStr = toInputDateValue(dPrep);
     const prepDayName = prepDayNames[dPrep.getDay()];
-    const prepDateDisplay = `${prepDayName}, ${String(dPrep.getDate()).padStart(2, "0")}/${String(dPrep.getMonth() + 1).padStart(2, "0")}`;
+    const prepDateVN = formatDateVN(dPrep);
+    const prepDateDisplay = `${prepDayName}, ${prepDateVN}`;
 
     const isTeachingTomorrow = (teachDateStr === tomorrowDateStr);
     const isTeachingToday = (teachDateStr === curToday);
@@ -183,7 +424,7 @@ export function computeTkbSchedule({
     ["S", "C"].forEach((sess) => {
       for (let p = 1; p <= 5; p++) {
         const key = `${dayNum}_${sess}_${p}`;
-        const rawSlot = (tb.slots && tb.slots[key]) || "";
+        const rawSlot = weekSlots[key] || "";
         if (!rawSlot) continue;
 
         const parsedSlot = parseScheduleSlot(rawSlot, tb.subjectId || "toan");
@@ -245,8 +486,10 @@ export function computeTkbSchedule({
           title: ppctInfo ? ppctInfo.title : `${parsedSlot.subjectName} lớp ${grade} - Tiết ${tietPpct}`,
           chapter: ppctInfo ? ppctInfo.chapter : "",
           teachDateStr,
+          teachDateVN,
           teachDateDisplay,
           prepDateStr,
+          prepDateVN,
           prepDateDisplay,
           isTeachingTomorrow,
           isTeachingToday,
